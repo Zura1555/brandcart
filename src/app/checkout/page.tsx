@@ -375,7 +375,10 @@ const CheckoutPage = () => {
 
             <Card className="shadow-sm">
               <CardContent className="p-0 divide-y divide-border">
-                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
+                <div 
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50"
+                  onClick={() => router.push('/select-voucher')}
+                >
                   <div className="flex items-center">
                     <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                     <span className="text-sm text-foreground">Voucher của bạn</span>
@@ -468,3 +471,5 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
+    
