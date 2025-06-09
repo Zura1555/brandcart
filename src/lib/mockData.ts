@@ -30,7 +30,7 @@ export const mockShops: Shop[] = [
   },
   {
     name: 'PUMA',
-    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4d/Puma_SE_logo.svg',
+    logoUrl: 'https://file.hstatic.net/1000284478/collection/puma_125ef36b81284505982470da1add1363.jpg',
     logoDataAiHint: 'PUMA logo',
     products: [
       {
