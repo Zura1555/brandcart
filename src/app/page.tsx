@@ -160,10 +160,7 @@ const BrandCartPage = () => {
             Giỏ hàng ({totalCartProductTypesCount})
           </h1>
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="icon" className="text-foreground relative hover:bg-muted">
-              <MessageCircle className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full px-1.5 py-0.5 leading-none flex items-center justify-center">12</span>
-            </Button>
+            {/* Message icon button removed here */}
           </div>
         </div>
       </header>
