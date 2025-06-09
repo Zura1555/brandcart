@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ShoppingCart, ChevronLeft, MessageCircle, Gift, Ticket, Truck, Trash2, ChevronRight } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight } from 'lucide-react';
 import type { CartItem, Shop } from '@/interfaces';
 import { mockShops } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
@@ -160,7 +160,6 @@ const BrandCartPage = () => {
             Giỏ hàng ({totalCartProductTypesCount})
           </h1>
           <div className="flex items-center space-x-3">
-            {/* Message icon button removed here */}
           </div>
         </div>
       </header>
