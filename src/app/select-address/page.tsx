@@ -95,10 +95,10 @@ const SelectAddressPage = () => {
               <Button
                 variant="ghost"
                 size="lg"
-                className="w-auto text-accent hover:bg-accent/10 font-semibold flex items-center justify-center space-x-2 mx-auto"
+                className="w-auto text-foreground hover:bg-muted font-semibold flex items-center justify-center space-x-2 mx-auto"
                 onClick={handleAddNewAddress}
               >
-                <PlusCircle className="w-5 h-5 text-accent" />
+                <PlusCircle className="w-5 h-5 text-foreground" />
                 <span>Thêm Địa Chỉ Mới</span>
               </Button>
             </div>
