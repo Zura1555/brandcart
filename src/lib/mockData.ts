@@ -85,7 +85,7 @@ export const mockShops: Shop[] = [
         name: 'Giày sandals nữ đế bệt Flash Urban',
         price: 849000,
         brand: 'HAVAIANAS',
-        imageUrl: 'https://placehold.co/80x80.png',
+        imageUrl: 'https://product.hstatic.net/1000284478/product/3581_4000039_1_e7f19697d4084ee383384952deed5378_large.jpg',
         dataAiHint: 'sandals darkgrey',
         variant: 'Dark Grey (+7)',
       },
