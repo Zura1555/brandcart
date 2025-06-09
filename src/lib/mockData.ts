@@ -32,7 +32,7 @@ export const mockShops: Shop[] = [
   },
   {
     name: 'PUMA',
-    logoUrl: 'https://placehold.co/60x24.png', // Placeholder PUMA logo
+    logoUrl: 'https://file.hstatic.net/1000356698/file/pum.jpg', 
     logoDataAiHint: 'PUMA logo',
     products: [
       {
