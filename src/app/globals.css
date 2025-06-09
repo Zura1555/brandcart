@@ -8,10 +8,10 @@ body {
 
 @layer base {
   :root {
-    --background: 200 17% 94%; /* #ecf0f1 light blue-gray */
+    --background: 200 17% 94%; /* #ecf0f1 light blue-gray - Page background */
     --foreground: 210 10% 23%; /* Dark slate gray for general text */
 
-    --card: 0 0% 100%; /* White */
+    --card: 0 0% 100%; /* White - Card/Section background */
     --card-foreground: 210 10% 23%; /* Dark slate gray */
 
     --popover: 0 0% 100%; /* White */
@@ -26,7 +26,7 @@ body {
     --muted: 210 15% 90%; /* Lighter gray */
     --muted-foreground: 210 10% 45%; /* Medium gray for muted text */
 
-    --accent: 25 95% 53%; /* Warm orange #F2711C */
+    --accent: 0 75% 55%; /* Vibrant Red (e.g. #E04444) */
     --accent-foreground: 0 0% 100%; /* White text on accent */
 
     --destructive: 0 84.2% 60.2%;
@@ -34,7 +34,7 @@ body {
 
     --border: 210 10% 85%; /* Lighter border */
     --input: 210 10% 88%; /* Lighter input background */
-    --ring: 25 95% 53%; /* Warm orange for focus rings */
+    --ring: 0 75% 55%; /* Vibrant Red for focus rings, matching accent */
 
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -65,7 +65,7 @@ body {
     --popover: 210 10% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 25 95% 53%; /* Orange for primary in dark mode */
+    --primary: 0 75% 55%; /* Red for primary in dark mode */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 10% 25%;
@@ -82,7 +82,7 @@ body {
 
     --border: 210 10% 30%;
     --input: 210 10% 30%;
-    --ring: 25 95% 53%; /* Orange for rings */
+    --ring: 0 75% 55%; /* Red for rings */
     
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;

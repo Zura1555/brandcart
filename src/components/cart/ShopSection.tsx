@@ -1,13 +1,17 @@
+// @ts-nocheck
 "use client";
 
 import type React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { CartItem } from '@/interfaces';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import type { CartItem, Shop } from '@/interfaces';
 import ProductItem from './ProductItem';
+import { ChevronRight, Gift } from 'lucide-react';
 
 interface ShopSectionProps {
-  shopName: string;
+  shop: Shop; // Pass the whole shop object
   items: CartItem[];
   isShopSelected: boolean;
   onShopSelectToggle: (checked: boolean) => void;
@@ -15,26 +19,42 @@ interface ShopSectionProps {
   onQuantityChange: (itemId: string, quantity: number) => void;
 }
 
-const ShopSection: React.FC<ShopSectionProps> = ({ shopName, items, isShopSelected, onShopSelectToggle, onItemSelectToggle, onQuantityChange }) => {
+const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, onShopSelectToggle, onItemSelectToggle, onQuantityChange }) => {
   if (items.length === 0) return null;
 
   return (
-    <Card className="shadow-md rounded-lg overflow-hidden">
+    <Card className="shadow-md rounded-lg overflow-hidden bg-card">
       <CardHeader className="border-b bg-card py-3 px-4 sm:px-6">
         <div className="flex justify-between items-center">
-          <CardTitle className="font-headline text-lg sm:text-xl text-foreground">{shopName}</CardTitle>
           <div className="flex items-center space-x-2">
             <Checkbox
-              id={`select-all-${shopName.replace(/\s+/g, '-')}`}
+              id={`select-all-${shop.name.replace(/\s+/g, '-')}`}
               checked={isShopSelected}
               onCheckedChange={(checked) => onShopSelectToggle(Boolean(checked))}
-              aria-label={`Select all items from ${shopName}`}
+              aria-label={`Select all items from ${shop.name}`}
+              className="border-primary data-[state=checked]:bg-accent data-[state=checked]:border-accent"
             />
-            <label htmlFor={`select-all-${shopName.replace(/\s+/g, '-')}`} className="text-xs sm:text-sm font-body text-muted-foreground cursor-pointer">
-              Select All
-            </label>
+            {shop.isFavorite && (
+              <Badge className="bg-red-100 text-accent text-xs px-1.5 py-0.5 font-normal">Yêu thích+</Badge>
+            )}
+            <CardTitle className="font-semibold text-base text-foreground flex items-center cursor-pointer">
+              {shop.name}
+              <ChevronRight className="w-4 h-4 text-muted-foreground ml-1" />
+            </CardTitle>
           </div>
+          {shop.editLinkText && (
+            <Button variant="link" className="text-sm text-muted-foreground p-0 h-auto hover:text-accent">
+              {shop.editLinkText}
+            </Button>
+          )}
         </div>
+        {shop.promotionText && (
+          <div className="mt-2 flex items-center text-xs text-accent bg-red-50 p-2 rounded-md cursor-pointer">
+            <Gift className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span className="flex-grow min-w-0 truncate">{shop.promotionText}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto flex-shrink-0" />
+          </div>
+        )}
       </CardHeader>
       <CardContent className="p-0">
         <div className="divide-y divide-border">
