@@ -19,7 +19,7 @@ const HEADER_HEIGHT = 'h-14'; // approx 56px
 const FOOTER_HEIGHT = 'h-24'; // approx 96px
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
-const SHOPEE_COIN_VALUE = 200; 
+const SHOPEE_COIN_VALUE = 200;
 const SHOPEE_COIN_AMOUNT_TO_USE = 200;
 
 interface DisplayShop {
@@ -47,7 +47,7 @@ const staticProductPlaceholder = {
 const staticShippingMethod = {
   name: "Quốc tế Nhanh - Express International",
   originalCost: 17000,
-  currentCost: 0, 
+  currentCost: 0,
   deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6",
   inspectionAllowed: true,
 };
@@ -100,7 +100,7 @@ const CheckoutPage = () => {
               currentSavings += (item.originalPrice - item.price) * item.quantity;
             }
           });
-          
+
           if (staticShippingMethod.currentCost < staticShippingMethod.originalCost) {
             currentSavings += staticShippingMethod.originalCost - staticShippingMethod.currentCost;
           }
@@ -135,12 +135,12 @@ const CheckoutPage = () => {
   };
 
   const shippingMethod = staticShippingMethod;
-  
+
   const numberOfProductTypes = useMemo(() => {
     if (dynamicDisplayShops.length > 0) {
         return dynamicDisplayShops.reduce((sum, shop) => sum + shop.products.length, 0);
     }
-    return 1; 
+    return 1;
   }, [dynamicDisplayShops]);
 
   const displayTotalAmount = useMemo(() => {
@@ -148,10 +148,10 @@ const CheckoutPage = () => {
     if (useShopeeCoins) {
       currentTotal -= SHOPEE_COIN_VALUE;
     }
-    return Math.max(0, currentTotal); 
+    return Math.max(0, currentTotal);
   }, [initialTotalAmount, useShopeeCoins]);
 
-  const displaySavings = initialSavings; 
+  const displaySavings = initialSavings;
 
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
@@ -174,7 +174,7 @@ const CheckoutPage = () => {
     <div className="flex flex-col min-h-screen bg-muted/40">
       <header className={`fixed top-0 left-0 right-0 z-30 bg-card shadow-sm border-b ${HEADER_HEIGHT} flex items-center`}>
         <div className="container mx-auto px-4 flex items-center justify-between h-full">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-foreground hover:bg-muted hover:text-foreground">
+          <Button variant="ghost" size="icon" onClick={() => router.push('/')} className="text-foreground hover:bg-muted hover:text-foreground">
             <ChevronLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-lg font-semibold text-foreground">Thanh toán</h1>
@@ -447,7 +447,7 @@ const CheckoutPage = () => {
           <div>
             <p className="text-sm text-muted-foreground">Tổng cộng:</p>
             <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
-            {displaySavings > 0 && !useShopeeCoins && ( 
+            {displaySavings > 0 && !useShopeeCoins && (
               <p className="text-xs text-green-600">Tiết kiệm {formatCurrency(displaySavings)}</p>
             )}
              {useShopeeCoins && (
@@ -457,7 +457,7 @@ const CheckoutPage = () => {
           <Button
             size="lg"
             className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px]"
-            onClick={() => router.push('/payment')} 
+            onClick={() => router.push('/payment')}
           >
             Đặt hàng
           </Button>
@@ -468,3 +468,5 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
+    
