@@ -159,7 +159,7 @@ const CheckoutPage = () => {
     { id: 'payoo', name: 'Payoo', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
     { id: 'vnpay', name: 'VNPay', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR.png', iconAiHint: 'VNPay QR logo', details: null },
     { id: 'momo', name: 'Momo', iconUrl: 'https://placehold.co/34x34.png', iconAiHint: 'Momo logo', details: null },
-    { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://placehold.co/34x34.png', iconAiHint: 'Apple Pay logo', details: null },
+    { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg', iconAiHint: 'Apple Pay logo', details: null },
   ];
 
   if (!currentShippingAddress) {
@@ -468,5 +468,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-
-    
