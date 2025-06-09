@@ -14,7 +14,7 @@ export const mockShops: Shop[] = [
         brand: 'MLB',
         imageUrl: 'https://placehold.co/80x80.png',
         dataAiHint: 'tshirt lightblue',
-        variant: 'Light Blue',
+        variant: 'Light Blue (+2)',
         // originalPrice, stock, discountDescription not specified, so omitted
       },
       {
@@ -32,7 +32,7 @@ export const mockShops: Shop[] = [
   },
   {
     name: 'PUMA',
-    logoUrl: 'https://file.hstatic.net/1000356698/file/pum.jpg', 
+    logoUrl: 'https://file.hstatic.net/1000356698/file/pum.jpg',
     logoDataAiHint: 'PUMA logo',
     products: [
       {
@@ -65,10 +65,36 @@ export const mockShops: Shop[] = [
         brand: 'PUMA',
         imageUrl: 'https://placehold.co/80x80.png',
         dataAiHint: 'cap olivegreen',
-        variant: 'Olive Green',
+        variant: 'Olive Green (+14)',
         discountDescription: '-50%',
       },
     ],
     // isFavorite, promotionText, editLinkText not specified for PUMA
+  },
+  {
+    name: 'HAVAIANAS',
+    logoUrl: 'https://placehold.co/60x24.png', // Placeholder logo
+    logoDataAiHint: 'HAVAIANAS logo',
+    products: [
+      {
+        id: 'havaianas1',
+        name: 'Dép kẹp unisex Top Disney',
+        price: 599000,
+        brand: 'HAVAIANAS',
+        imageUrl: 'https://placehold.co/80x80.png',
+        dataAiHint: 'flipflops white red', // Combined for Mickey Mouse design context
+        variant: 'Disney print (+12)',
+      },
+      {
+        id: 'havaianas2',
+        name: 'Giày sandals nữ đế bệt Flash Urban',
+        price: 849000,
+        brand: 'HAVAIANAS',
+        imageUrl: 'https://placehold.co/80x80.png',
+        dataAiHint: 'sandals darkgrey',
+        variant: 'Dark Grey (+7)',
+      },
+    ],
   }
 ];
+
