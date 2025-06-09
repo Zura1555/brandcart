@@ -6,18 +6,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { Switch } from '@/components/ui/switch';
+import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText, Ticket, CircleDollarSign, Wallet, CreditCard, Clock, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType } from '@/interfaces';
 import { mockShops } from '@/lib/mockData';
 
 const HEADER_HEIGHT = 'h-14'; // approx 56px
 const FOOTER_HEIGHT = 'h-24'; // approx 96px
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
+const SHOPEE_COIN_VALUE = 200; // Monetary value of coins
+const SHOPEE_COIN_AMOUNT_TO_USE = 200; // Number of coins
 
 interface DisplayShop {
   name: string;
@@ -27,14 +30,13 @@ interface DisplayShop {
   products: CartItem[];
 }
 
-// Static placeholder data (will be used as fallback)
 const staticDeliveryAddress = {
   name: "Trần Thượng Tuấn",
   phone: "(+84) 523 762 477",
   address: "Sarina, Sala, A00.11, Đường B2, Phường An Lợi Đông, Thành Phố Thủ Đức, TP. Hồ Chí Minh",
 };
 
-const staticProduct = {
+const staticProductPlaceholder = { // Renamed to avoid conflict if no dynamic items
   seller: "Topick Global",
   isFavoriteSeller: true,
   logoUrl: "https://placehold.co/60x24.png",
@@ -58,15 +60,17 @@ const staticShippingMethod = {
 
 const staticTotals = {
   totalAmount: 20900,
-  savings: 23600, // (27500 - 20900) from product + 17000 from shipping
+  savings: 23600,
 };
 
 
 const CheckoutPage: NextPage = () => {
   const router = useRouter();
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
-  const [dynamicTotalAmount, setDynamicTotalAmount] = useState<number | null>(null);
-  const [dynamicSavings, setDynamicSavings] = useState<number | null>(null);
+  const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
+  const [initialSavings, setInitialSavings] = useState<number>(0);
+  const [useShopeeCoins, setUseShopeeCoins] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'shopeepay' | 'tpbank' | 'spaylater'>('tpbank');
 
   useEffect(() => {
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
@@ -101,18 +105,26 @@ const CheckoutPage: NextPage = () => {
               currentSavings += (item.originalPrice - item.price) * item.quantity;
             }
           });
-          // Add shipping savings if applicable (assuming static shipping for now)
+          // Add shipping savings if applicable
           if (staticShippingMethod.currentCost < staticShippingMethod.originalCost) {
             currentSavings += staticShippingMethod.originalCost - staticShippingMethod.currentCost;
           }
 
-          setDynamicTotalAmount(currentTotal);
-          setDynamicSavings(currentSavings);
+          setInitialTotalAmount(currentTotal);
+          setInitialSavings(currentSavings);
+        } else {
+          // Fallback to static if no items
+          setInitialTotalAmount(staticTotals.totalAmount);
+          setInitialSavings(staticTotals.savings);
         }
       } catch (error) {
         console.error("Error parsing checkout items from localStorage:", error);
-        // Fallback to static if parsing fails
+        setInitialTotalAmount(staticTotals.totalAmount);
+        setInitialSavings(staticTotals.savings);
       }
+    } else {
+        setInitialTotalAmount(staticTotals.totalAmount);
+        setInitialSavings(staticTotals.savings);
     }
   }, []);
 
@@ -123,10 +135,30 @@ const CheckoutPage: NextPage = () => {
   const deliveryAddress = staticDeliveryAddress;
   const shippingMethod = staticShippingMethod;
   
-  const displayTotalAmount = dynamicTotalAmount !== null ? dynamicTotalAmount : staticTotals.totalAmount;
-  const displaySavings = dynamicSavings !== null ? dynamicSavings : staticTotals.savings;
+  const numberOfProductTypes = useMemo(() => {
+    if (dynamicDisplayShops.length > 0) {
+        return dynamicDisplayShops.reduce((sum, shop) => sum + shop.products.length, 0);
+    }
+    return 1; // For static placeholder
+  }, [dynamicDisplayShops]);
+
+  const displayTotalAmount = useMemo(() => {
+    let currentTotal = initialTotalAmount;
+    if (useShopeeCoins) {
+      currentTotal -= SHOPEE_COIN_VALUE;
+    }
+    return Math.max(0, currentTotal); // Ensure total doesn't go below zero
+  }, [initialTotalAmount, useShopeeCoins]);
+
+  const displaySavings = initialSavings; // Shopee coins affect total, not savings in this model
 
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
+
+  const paymentMethods = [
+    { id: 'shopeepay', name: 'ShopeePay', icon: Wallet, details: null },
+    { id: 'tpbank', name: 'TPBank', icon: CreditCard, details: '*5701' },
+    { id: 'spaylater', name: 'SPayLater', icon: Clock, details: '(₫5.000.000)' },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
@@ -208,23 +240,22 @@ const CheckoutPage: NextPage = () => {
                 </CardContent>
               </Card>
             )) : (
-              // Fallback to original static placeholder
               <Card className="shadow-sm">
                 <CardHeader className="pb-3 pt-4 px-4">
                   <div className="flex items-center space-x-2">
                     <ShoppingCart className="w-4 h-4 text-foreground" />
-                    {staticProduct.logoUrl && (
+                    {staticProductPlaceholder.logoUrl && (
                         <Image
-                            src={staticProduct.logoUrl}
-                            alt={`${staticProduct.seller} logo`}
+                            src={staticProductPlaceholder.logoUrl}
+                            alt={`${staticProductPlaceholder.seller} logo`}
                             width={60}
                             height={24}
                             className="object-contain max-h-[24px] mr-1"
-                            data-ai-hint={staticProduct.logoAiHint}
+                            data-ai-hint={staticProductPlaceholder.logoAiHint}
                         />
                     )}
-                    <span className="text-sm font-medium text-foreground">{staticProduct.seller}</span>
-                    {staticProduct.isFavoriteSeller && (
+                    <span className="text-sm font-medium text-foreground">{staticProductPlaceholder.seller}</span>
+                    {staticProductPlaceholder.isFavoriteSeller && (
                       <Badge variant="outline" className="text-foreground border-foreground bg-transparent text-xs px-1.5 py-0.5">Yêu thích</Badge>
                     )}
                   </div>
@@ -232,27 +263,27 @@ const CheckoutPage: NextPage = () => {
                 <CardContent className="p-0">
                   <div className="p-4 flex items-start space-x-3">
                     <Image
-                      src={staticProduct.imageUrl}
-                      alt={staticProduct.name}
+                      src={staticProductPlaceholder.imageUrl}
+                      alt={staticProductPlaceholder.name}
                       width={60}
                       height={60}
                       className="rounded border object-cover"
-                      data-ai-hint={staticProduct.imageAiHint}
+                      data-ai-hint={staticProductPlaceholder.imageAiHint}
                     />
                     <div className="flex-grow">
-                      <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{staticProduct.name}</p>
-                      {staticProduct.variation && (
-                        <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm inline-block">{staticProduct.variation}</p>
+                      <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{staticProductPlaceholder.name}</p>
+                      {staticProductPlaceholder.variation && (
+                        <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm inline-block">{staticProductPlaceholder.variation}</p>
                       )}
                       <div className="mt-1">
-                        <span className="text-sm font-semibold text-foreground">{formatCurrency(staticProduct.price)}</span>
-                        {staticProduct.originalPrice && (
-                          <span className="text-xs text-muted-foreground line-through ml-1.5">{formatCurrency(staticProduct.originalPrice)}</span>
+                        <span className="text-sm font-semibold text-foreground">{formatCurrency(staticProductPlaceholder.price)}</span>
+                        {staticProductPlaceholder.originalPrice && (
+                          <span className="text-xs text-muted-foreground line-through ml-1.5">{formatCurrency(staticProductPlaceholder.originalPrice)}</span>
                         )}
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-muted-foreground">x{staticProduct.quantity}</p>
+                      <p className="text-sm text-muted-foreground">x{staticProductPlaceholder.quantity}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -271,9 +302,9 @@ const CheckoutPage: NextPage = () => {
                     <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
                   </div>
                 </div>
-                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
+                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
                   <div className="flex items-center">
-                     <FileText className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
+                     <FileText className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                     <span className="text-sm text-foreground">Hóa đơn điện tử</span>
                   </div>
                   <div className="flex items-center">
@@ -283,7 +314,7 @@ const CheckoutPage: NextPage = () => {
                 </div>
                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
                   <div className="flex items-center">
-                    <MessageCircle className="w-5 h-5 text-gray-500 mr-3 flex-shrink-0" />
+                    <MessageCircle className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                     <span className="text-sm text-foreground">Lời nhắn cho Shop</span>
                   </div>
                   <div className="flex items-center">
@@ -298,7 +329,7 @@ const CheckoutPage: NextPage = () => {
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium text-foreground">Phương thức vận chuyển</h3>
-                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-accent/80">Xem tất cả</Button>
+                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">Xem tất cả</Button>
                 </div>
                 <div className="border border-foreground/30 rounded-md p-3 bg-foreground/5">
                   <p className="text-sm font-medium text-foreground">{shippingMethod.name}</p>
@@ -320,6 +351,76 @@ const CheckoutPage: NextPage = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Order Subtotal Section */}
+            <Card className="shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-foreground">
+                    Tổng số tiền ({numberOfProductTypes} sản phẩm)
+                  </span>
+                  <span className="text-sm font-semibold text-foreground">{formatCurrency(initialTotalAmount)}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Platform Vouchers & Coins Section */}
+            <Card className="shadow-sm">
+              <CardContent className="p-0 divide-y divide-border">
+                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
+                  <div className="flex items-center">
+                    <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
+                    <span className="text-sm text-foreground">Shopee Voucher</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Badge variant="outline" className="text-green-600 border-green-600 bg-green-50 text-xs px-1.5 py-0.5 mr-2">Miễn Phí Vận Chuyển</Badge>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground ml-1 flex-shrink-0" />
+                  </div>
+                </div>
+                <div className="p-4 flex items-center justify-between">
+                  <div className="flex items-center">
+                    <CircleDollarSign className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
+                    <span className="text-sm text-foreground">Dùng {SHOPEE_COIN_AMOUNT_TO_USE} Shopee Xu</span>
+                  </div>
+                  <Switch
+                    checked={useShopeeCoins}
+                    onCheckedChange={setUseShopeeCoins}
+                    aria-label="Use Shopee Coins"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment Method Section */}
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3 pt-4 px-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-foreground">Phương thức thanh toán</h3>
+                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">Xem tất cả</Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0 divide-y divide-border">
+                {paymentMethods.map(method => {
+                  const IconComponent = method.icon;
+                  const isSelected = selectedPaymentMethod === method.id;
+                  return (
+                    <div
+                      key={method.id}
+                      className={`p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50 ${isSelected ? 'bg-muted/80' : ''}`}
+                      onClick={() => setSelectedPaymentMethod(method.id as any)}
+                    >
+                      <div className="flex items-center">
+                        <IconComponent className={`w-6 h-6 text-foreground mr-3 flex-shrink-0 ${method.id === 'shopeepay' ? 'text-orange-500' : method.id === 'tpbank' ? 'text-blue-600' : 'text-purple-500' }`} />
+                        <span className="text-sm text-foreground">{method.name}</span>
+                        {method.details && <span className="text-xs text-muted-foreground ml-1.5">{method.details}</span>}
+                      </div>
+                      {isSelected && <CheckCircle2 className="w-5 h-5 text-foreground ml-2 flex-shrink-0" />}
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+
           </div>
         </ScrollArea>
       </main>
@@ -329,14 +430,17 @@ const CheckoutPage: NextPage = () => {
           <div>
             <p className="text-sm text-muted-foreground">Tổng cộng:</p>
             <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
-            {displaySavings > 0 && (
+            {displaySavings > 0 && !useShopeeCoins && ( // Only show original savings if coins not applied, or adjust logic as needed
               <p className="text-xs text-green-600">Tiết kiệm {formatCurrency(displaySavings)}</p>
+            )}
+             {useShopeeCoins && (
+              <p className="text-xs text-green-600">Đã dùng {SHOPEE_COIN_AMOUNT_TO_USE} xu, tiết kiệm thêm {formatCurrency(SHOPEE_COIN_VALUE)}</p>
             )}
           </div>
           <Button
             size="lg"
             className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px]"
-            onClick={() => router.push('/payment')}
+            onClick={() => router.push('/payment')} // Assuming '/payment' is the next page
           >
             Đặt hàng
           </Button>
@@ -347,3 +451,5 @@ const CheckoutPage: NextPage = () => {
 };
 
 export default CheckoutPage;
+
+    
