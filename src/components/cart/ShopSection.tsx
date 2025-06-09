@@ -2,6 +2,7 @@
 "use client";
 
 import type React from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,19 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
               <Badge className="bg-red-100 text-accent text-xs px-1.5 py-0.5 font-normal">Yêu thích+</Badge>
             )}
             <CardTitle className="font-semibold text-base text-foreground flex items-center cursor-pointer">
+              {shop.logoUrl && (
+                <div className="mr-2 flex-shrink-0">
+                  <Image
+                    src={shop.logoUrl}
+                    alt={`${shop.name} logo`}
+                    width={60} 
+                    height={24} 
+                    className="object-contain max-h-[24px]" // Ensures image fits and respects max height
+                    data-ai-hint={shop.logoDataAiHint}
+                    priority={false} 
+                  />
+                </div>
+              )}
               {shop.name}
               <ChevronRight className="w-4 h-4 text-muted-foreground ml-1" />
             </CardTitle>
