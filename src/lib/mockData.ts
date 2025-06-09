@@ -5,7 +5,7 @@ export const mockShops: Shop[] = [
   {
     name: 'MLB',
     isFavorite: true, 
-    logoUrl: 'https://file.hstatic.net/1000356698/file/mlb_1a7168aa098e46afacfd2251bf3d2429.jpg',
+    logoUrl: 'https://bizweb.dktcdn.net/100/294/644/themes/737628/assets/logo.png?1727591678269',
     logoDataAiHint: 'MLB logo',
     products: [
       {
@@ -30,7 +30,7 @@ export const mockShops: Shop[] = [
   },
   {
     name: 'PUMA',
-    logoUrl: 'https://file.hstatic.net/1000356698/file/pum.jpg',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4d/Puma_SE_logo.svg',
     logoDataAiHint: 'PUMA logo',
     products: [
       {
@@ -68,7 +68,7 @@ export const mockShops: Shop[] = [
   },
   {
     name: 'HAVAIANAS',
-    logoUrl: 'https://file.hstatic.net/1000356698/file/hav.jpg',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Havaianas_brand_logo.png',
     logoDataAiHint: 'HAVAIANAS logo',
     products: [
       {
