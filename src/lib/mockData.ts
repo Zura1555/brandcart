@@ -48,7 +48,7 @@ export const mockShops: Shop[] = [
         price: 2029000,
         originalPrice: 2899000,
         brand: 'PUMA',
-        imageUrl: 'https://placehold.co/80x80.png',
+        imageUrl: 'https://product.hstatic.net/1000284478/product/01_380784_1_f2c2ec6dc2e54db1a6bf5c071f476ffc_large.jpg',
         dataAiHint: 'sneakers white',
         variant: 'White/Black',
         discountDescription: '-30%',
