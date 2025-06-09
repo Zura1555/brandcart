@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText, Ticket, CircleDollarSign, Wallet, CreditCard, Clock, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText, Ticket, CircleDollarSign, Wallet, CreditCard, Clock, CheckCircle2, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType } from '@/interfaces';
 import { mockShops } from '@/lib/mockData';
@@ -70,7 +70,7 @@ const CheckoutPage: NextPage = () => {
   const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
   const [initialSavings, setInitialSavings] = useState<number>(0);
   const [useShopeeCoins, setUseShopeeCoins] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'shopeepay' | 'tpbank' | 'spaylater'>('tpbank');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
 
   useEffect(() => {
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
@@ -155,9 +155,10 @@ const CheckoutPage: NextPage = () => {
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
   const paymentMethods = [
-    { id: 'shopeepay', name: 'ShopeePay', icon: Wallet, details: null },
-    { id: 'tpbank', name: 'TPBank', icon: CreditCard, details: '*5701' },
-    { id: 'spaylater', name: 'SPayLater', icon: Clock, details: '(₫5.000.000)' },
+    { id: 'payoo', name: 'Payoo', icon: CreditCard, details: null },
+    { id: 'vnpay', name: 'VNPay', icon: QrCode, details: null },
+    { id: 'momo', name: 'Momo', icon: Wallet, details: null },
+    { id: 'applepay', name: 'Apple Pay', icon: CreditCard, details: null },
   ];
 
   return (
@@ -410,7 +411,7 @@ const CheckoutPage: NextPage = () => {
                       onClick={() => setSelectedPaymentMethod(method.id as any)}
                     >
                       <div className="flex items-center">
-                        <IconComponent className={`w-6 h-6 text-foreground mr-3 flex-shrink-0 ${method.id === 'shopeepay' ? 'text-orange-500' : method.id === 'tpbank' ? 'text-blue-600' : 'text-purple-500' }`} />
+                        <IconComponent className="w-6 h-6 text-foreground mr-3 flex-shrink-0" />
                         <span className="text-sm text-foreground">{method.name}</span>
                         {method.details && <span className="text-xs text-muted-foreground ml-1.5">{method.details}</span>}
                       </div>
@@ -451,5 +452,7 @@ const CheckoutPage: NextPage = () => {
 };
 
 export default CheckoutPage;
+
+    
 
     
