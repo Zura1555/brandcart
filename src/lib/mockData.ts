@@ -3,7 +3,8 @@ import type { Shop } from '@/interfaces';
 
 export const mockShops: Shop[] = [
   {
-    name: 'MLB', // Using the brand name as the shop name
+    name: 'MLB',
+    isFavorite: true, // Added to test "Yêu thích" badge dynamically
     logoUrl: 'https://file.hstatic.net/1000356698/file/mlb_1a7168aa098e46afacfd2251bf3d2429.jpg',
     logoDataAiHint: 'MLB logo',
     products: [
@@ -15,7 +16,6 @@ export const mockShops: Shop[] = [
         imageUrl: 'https://placehold.co/80x80.png',
         dataAiHint: 'tshirt lightblue',
         variant: 'Light Blue (+2)',
-        // originalPrice, stock, discountDescription not specified, so omitted
       },
       {
         id: 'mlb2',
@@ -25,10 +25,8 @@ export const mockShops: Shop[] = [
         imageUrl: 'https://placehold.co/80x80.png',
         dataAiHint: 'shorts black',
         variant: 'Black',
-        // originalPrice, stock, discountDescription not specified, so omitted
       },
     ],
-    // isFavorite, promotionText, editLinkText not specified, so omitted
   },
   {
     name: 'PUMA',
@@ -43,7 +41,6 @@ export const mockShops: Shop[] = [
         imageUrl: 'https://placehold.co/80x80.png',
         dataAiHint: 'backpack darkgrey',
         discountDescription: '-30%',
-        // originalPrice not specified
       },
       {
         id: 'puma2',
@@ -68,11 +65,10 @@ export const mockShops: Shop[] = [
         discountDescription: '-50%',
       },
     ],
-    // isFavorite, promotionText, editLinkText not specified for PUMA
   },
   {
     name: 'HAVAIANAS',
-    logoUrl: 'https://file.hstatic.net/1000356698/file/hav.jpg', 
+    logoUrl: 'https://file.hstatic.net/1000356698/file/hav.jpg',
     logoDataAiHint: 'HAVAIANAS logo',
     products: [
       {
@@ -81,7 +77,7 @@ export const mockShops: Shop[] = [
         price: 599000,
         brand: 'HAVAIANAS',
         imageUrl: 'https://placehold.co/80x80.png',
-        dataAiHint: 'flipflops white red', // Combined for Mickey Mouse design context
+        dataAiHint: 'flipflops white red',
         variant: 'Disney print (+12)',
       },
       {
@@ -96,4 +92,3 @@ export const mockShops: Shop[] = [
     ],
   }
 ];
-

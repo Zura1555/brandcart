@@ -18,6 +18,8 @@ import ShopSection from '@/components/cart/ShopSection';
 import { useToast } from "@/hooks/use-toast";
 import React from 'react';
 
+const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
+
 const BrandCartPage: NextPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>(() =>
     mockShops.flatMap(shop =>
@@ -90,7 +92,9 @@ const BrandCartPage: NextPage = () => {
   const totalCartProductTypesCount = cartItems.length;
 
   const handleCheckout = () => {
-    if (isAnythingSelected) {
+    const selectedCartItems = cartItems.filter(item => item.selected);
+    if (selectedCartItems.length > 0) {
+      localStorage.setItem(CHECKOUT_ITEMS_STORAGE_KEY, JSON.stringify(selectedCartItems));
       router.push('/checkout');
     } else {
        toast({
@@ -113,7 +117,7 @@ const BrandCartPage: NextPage = () => {
   }, [cartItems]);
 
   const openCleanupDialog = () => {
-    setItemsSelectedForCleanup(new Set()); // Reset selections when opening
+    setItemsSelectedForCleanup(new Set()); 
     setIsCleanupDialogOpen(true);
   };
 
@@ -335,5 +339,3 @@ const BrandCartPage: NextPage = () => {
 };
 
 export default BrandCartPage;
-
-    

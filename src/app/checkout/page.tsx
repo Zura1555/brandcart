@@ -11,68 +11,138 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import type { CartItem, Shop as MockShopType } from '@/interfaces';
+import { mockShops } from '@/lib/mockData';
 
 const HEADER_HEIGHT = 'h-14'; // approx 56px
 const FOOTER_HEIGHT = 'h-24'; // approx 96px
+const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
+
+interface DisplayShop {
+  name: string;
+  isFavorite?: boolean;
+  logoUrl?: string;
+  logoDataAiHint?: string;
+  products: CartItem[];
+}
+
+// Static placeholder data (will be used as fallback)
+const staticDeliveryAddress = {
+  name: "Trần Thượng Tuấn",
+  phone: "(+84) 523 762 477",
+  address: "Sarina, Sala, A00.11, Đường B2, Phường An Lợi Đông, Thành Phố Thủ Đức, TP. Hồ Chí Minh",
+};
+
+const staticProduct = {
+  seller: "Topick Global",
+  isFavoriteSeller: true,
+  logoUrl: "https://placehold.co/60x24.png",
+  logoAiHint: "company logo",
+  imageUrl: "https://placehold.co/60x60.png",
+  imageAiHint: "beaded bracelet black white",
+  name: "Vòng tay quyền rũ mèo đá quý hợp thời trang ...",
+  variation: "Vòng tay Mèo đen",
+  price: 20900,
+  originalPrice: 27500,
+  quantity: 1,
+};
+
+const staticShippingMethod = {
+  name: "Quốc tế Nhanh - Express International",
+  originalCost: 17000,
+  currentCost: 0, // Free
+  deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6",
+  inspectionAllowed: true,
+};
+
+const staticTotals = {
+  totalAmount: 20900,
+  savings: 23600, // (27500 - 20900) from product + 17000 from shipping
+};
+
 
 const CheckoutPage: NextPage = () => {
   const router = useRouter();
+  const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
+  const [dynamicTotalAmount, setDynamicTotalAmount] = useState<number | null>(null);
+  const [dynamicSavings, setDynamicSavings] = useState<number | null>(null);
 
-  // Placeholder data based on the mockup
-  const deliveryAddress = {
-    name: "Trần Thượng Tuấn",
-    phone: "(+84) 523 762 477",
-    address: "Sarina, Sala, A00.11, Đường B2, Phường An Lợi Đông, Thành Phố Thủ Đức, TP. Hồ Chí Minh",
-  };
+  useEffect(() => {
+    const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
+    if (rawItems) {
+      try {
+        const items: CartItem[] = JSON.parse(rawItems);
+        if (items && items.length > 0) {
+          const grouped = items.reduce((acc, item) => {
+            const shopName = item.brand;
+            const shopDataFromMock = mockShops.find(s => s.name === shopName);
 
-  const product = {
-    seller: "Topick Global",
-    isFavoriteSeller: true,
-    imageUrl: "https://placehold.co/60x60.png",
-    imageAiHint: "beaded bracelet black white",
-    name: "Vòng tay quyền rũ mèo đá quý hợp thời trang ...",
-    variation: "Vòng tay Mèo đen",
-    price: 20900,
-    originalPrice: 27500,
-    quantity: 1,
-  };
+            if (!acc[shopName]) {
+              acc[shopName] = {
+                name: shopName,
+                isFavorite: shopDataFromMock?.isFavorite || false,
+                logoUrl: shopDataFromMock?.logoUrl,
+                logoDataAiHint: shopDataFromMock?.logoDataAiHint,
+                products: [],
+              };
+            }
+            acc[shopName].products.push(item);
+            return acc;
+          }, {} as Record<string, DisplayShop>);
 
-  const shippingMethod = {
-    name: "Quốc tế Nhanh - Express International",
-    originalCost: 17000,
-    currentCost: 0, // Free
-    deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6",
-    inspectionAllowed: true,
-  };
+          setDynamicDisplayShops(Object.values(grouped));
 
-  const totals = {
-    totalAmount: 20900,
-    savings: 23600,
-  };
+          let currentTotal = 0;
+          let currentSavings = 0;
+          items.forEach(item => {
+            currentTotal += item.price * item.quantity;
+            if (item.originalPrice) {
+              currentSavings += (item.originalPrice - item.price) * item.quantity;
+            }
+          });
+          // Add shipping savings if applicable (assuming static shipping for now)
+          if (staticShippingMethod.currentCost < staticShippingMethod.originalCost) {
+            currentSavings += staticShippingMethod.originalCost - staticShippingMethod.currentCost;
+          }
+
+          setDynamicTotalAmount(currentTotal);
+          setDynamicSavings(currentSavings);
+        }
+      } catch (error) {
+        console.error("Error parsing checkout items from localStorage:", error);
+        // Fallback to static if parsing fails
+      }
+    }
+  }, []);
 
   const formatCurrency = (amount: number) => {
     return `₫${amount.toLocaleString('vi-VN')}`;
   };
 
+  const deliveryAddress = staticDeliveryAddress;
+  const shippingMethod = staticShippingMethod;
+  
+  const displayTotalAmount = dynamicTotalAmount !== null ? dynamicTotalAmount : staticTotals.totalAmount;
+  const displaySavings = dynamicSavings !== null ? dynamicSavings : staticTotals.savings;
+
+  const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
+
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
-      {/* Header */}
       <header className={`fixed top-0 left-0 right-0 z-30 bg-card shadow-sm border-b ${HEADER_HEIGHT} flex items-center`}>
         <div className="container mx-auto px-4 flex items-center justify-between h-full">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-foreground">
             <ChevronLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-lg font-semibold text-foreground">Thanh toán</h1>
-          <div className="w-10"> {/* Spacer to balance the back button */}</div>
+          <div className="w-10"> {/* Spacer */}</div>
         </div>
       </header>
 
-      {/* Body */}
       <main className={`flex-grow overflow-y-auto pt-14 pb-24`}>
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3 space-y-3">
-            {/* Section 1: Delivery Address */}
             <Card className="shadow-sm">
               <CardContent className="p-4 cursor-pointer hover:bg-muted/50">
                 <div className="flex items-center">
@@ -86,47 +156,109 @@ const CheckoutPage: NextPage = () => {
               </CardContent>
             </Card>
 
-            {/* Section 2: Product Summary */}
-            <Card className="shadow-sm">
-              <CardHeader className="pb-3 pt-4 px-4">
-                <div className="flex items-center space-x-2">
-                  <ShoppingCart className="w-4 h-4 text-foreground" />
-                  <span className="text-sm font-medium text-foreground">{product.seller}</span>
-                  {product.isFavoriteSeller && (
-                    <Badge variant="outline" className="text-red-500 border-red-300 bg-red-50 text-xs px-1.5 py-0.5">Yêu thích</Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="p-4 flex items-start space-x-3">
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    width={60}
-                    height={60}
-                    className="rounded border object-cover"
-                    data-ai-hint={product.imageAiHint}
-                  />
-                  <div className="flex-grow">
-                    <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{product.name}</p>
-                    {product.variation && (
-                      <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm inline-block">{product.variation}</p>
+            {shopsToRender.length > 0 ? shopsToRender.map(shop => (
+              <Card key={shop.name} className="shadow-sm">
+                <CardHeader className="pb-3 pt-4 px-4">
+                  <div className="flex items-center space-x-2">
+                    <ShoppingCart className="w-4 h-4 text-foreground" />
+                     {shop.logoUrl && (
+                        <Image
+                            src={shop.logoUrl}
+                            alt={`${shop.name} logo`}
+                            width={60}
+                            height={24}
+                            className="object-contain max-h-[24px] mr-1"
+                            data-ai-hint={shop.logoDataAiHint || `${shop.name} logo`}
+                        />
                     )}
-                    <div className="mt-1">
-                      <span className="text-sm font-semibold text-foreground">{formatCurrency(product.price)}</span>
-                      {product.originalPrice && (
-                        <span className="text-xs text-muted-foreground line-through ml-1.5">{formatCurrency(product.originalPrice)}</span>
+                    <span className="text-sm font-medium text-foreground">{shop.name}</span>
+                    {shop.isFavorite && (
+                      <Badge variant="outline" className="text-red-500 border-red-300 bg-red-50 text-xs px-1.5 py-0.5">Yêu thích</Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {shop.products.map(p => (
+                    <div key={p.id} className="p-4 flex items-start space-x-3 border-b last:border-b-0">
+                      <Image
+                        src={p.imageUrl}
+                        alt={p.name}
+                        width={60}
+                        height={60}
+                        className="rounded border object-cover"
+                        data-ai-hint={p.dataAiHint}
+                      />
+                      <div className="flex-grow">
+                        <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{p.name}</p>
+                        {p.variant && (
+                          <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm inline-block">{p.variant}</p>
+                        )}
+                        <div className="mt-1">
+                          <span className="text-sm font-semibold text-foreground">{formatCurrency(p.price)}</span>
+                          {p.originalPrice && (
+                            <span className="text-xs text-muted-foreground line-through ml-1.5">{formatCurrency(p.originalPrice)}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">x{p.quantity}</p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )) : (
+              // Fallback to original static placeholder
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 pt-4 px-4">
+                  <div className="flex items-center space-x-2">
+                    <ShoppingCart className="w-4 h-4 text-foreground" />
+                    {staticProduct.logoUrl && (
+                        <Image
+                            src={staticProduct.logoUrl}
+                            alt={`${staticProduct.seller} logo`}
+                            width={60}
+                            height={24}
+                            className="object-contain max-h-[24px] mr-1"
+                            data-ai-hint={staticProduct.logoAiHint}
+                        />
+                    )}
+                    <span className="text-sm font-medium text-foreground">{staticProduct.seller}</span>
+                    {staticProduct.isFavoriteSeller && (
+                      <Badge variant="outline" className="text-red-500 border-red-300 bg-red-50 text-xs px-1.5 py-0.5">Yêu thích</Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="p-4 flex items-start space-x-3">
+                    <Image
+                      src={staticProduct.imageUrl}
+                      alt={staticProduct.name}
+                      width={60}
+                      height={60}
+                      className="rounded border object-cover"
+                      data-ai-hint={staticProduct.imageAiHint}
+                    />
+                    <div className="flex-grow">
+                      <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{staticProduct.name}</p>
+                      {staticProduct.variation && (
+                        <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm inline-block">{staticProduct.variation}</p>
                       )}
+                      <div className="mt-1">
+                        <span className="text-sm font-semibold text-foreground">{formatCurrency(staticProduct.price)}</span>
+                        {staticProduct.originalPrice && (
+                          <span className="text-xs text-muted-foreground line-through ml-1.5">{formatCurrency(staticProduct.originalPrice)}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">x{staticProduct.quantity}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground">x{product.quantity}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Section 3: Vouchers and Options */}
             <Card className="shadow-sm">
               <CardContent className="p-0 divide-y divide-border">
                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
@@ -162,7 +294,6 @@ const CheckoutPage: NextPage = () => {
               </CardContent>
             </Card>
 
-            {/* Section 4: Shipping Method */}
             <Card className="shadow-sm">
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
@@ -193,20 +324,19 @@ const CheckoutPage: NextPage = () => {
         </ScrollArea>
       </main>
 
-      {/* Footer */}
       <footer className={`fixed bottom-0 left-0 right-0 z-30 bg-card border-t ${FOOTER_HEIGHT}`}>
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Tổng cộng:</p>
-            <p className="text-xl font-bold text-accent">{formatCurrency(totals.totalAmount)}</p>
-            {totals.savings > 0 && (
-              <p className="text-xs text-green-600">Tiết kiệm {formatCurrency(totals.savings)}</p>
+            <p className="text-xl font-bold text-accent">{formatCurrency(displayTotalAmount)}</p>
+            {displaySavings > 0 && (
+              <p className="text-xs text-green-600">Tiết kiệm {formatCurrency(displaySavings)}</p>
             )}
           </div>
           <Button
             size="lg"
             className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold min-w-[140px]"
-            onClick={() => router.push('/payment')} // Navigate to payment page
+            onClick={() => router.push('/payment')}
           >
             Đặt hàng
           </Button>
@@ -217,5 +347,3 @@ const CheckoutPage: NextPage = () => {
 };
 
 export default CheckoutPage;
-
-    
