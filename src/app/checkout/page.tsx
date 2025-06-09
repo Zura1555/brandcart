@@ -10,16 +10,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText, Ticket, CircleDollarSign, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText, Ticket, CircleDollarSign, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
-import type { CartItem, Shop as MockShopType } from '@/interfaces';
-import { mockShops } from '@/lib/mockData';
+import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
+import { mockShops, mockShippingAddresses } from '@/lib/mockData';
 
 const HEADER_HEIGHT = 'h-14'; // approx 56px
 const FOOTER_HEIGHT = 'h-24'; // approx 96px
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
-const SHOPEE_COIN_VALUE = 200; // Monetary value of coins/points
-const SHOPEE_COIN_AMOUNT_TO_USE = 200; // Number of coins/points
+const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
+const SHOPEE_COIN_VALUE = 200; 
+const SHOPEE_COIN_AMOUNT_TO_USE = 200;
 
 interface DisplayShop {
   name: string;
@@ -28,12 +29,6 @@ interface DisplayShop {
   logoDataAiHint?: string;
   products: CartItem[];
 }
-
-const staticDeliveryAddress = {
-  name: "Trần Thượng Tuấn",
-  phone: "(+84) 523 762 477",
-  address: "Sarina, Sala, A00.11, Đường B2, Phường An Lợi Đông, Thành Phố Thủ Đức, TP. Hồ Chí Minh",
-};
 
 const staticProductPlaceholder = {
   seller: "Topick Global",
@@ -52,7 +47,7 @@ const staticProductPlaceholder = {
 const staticShippingMethod = {
   name: "Quốc tế Nhanh - Express International",
   originalCost: 17000,
-  currentCost: 0, // Free
+  currentCost: 0, 
   deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6",
   inspectionAllowed: true,
 };
@@ -70,6 +65,7 @@ const CheckoutPage = () => {
   const [initialSavings, setInitialSavings] = useState<number>(0);
   const [useShopeeCoins, setUseShopeeCoins] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
+  const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
 
   useEffect(() => {
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
@@ -104,7 +100,7 @@ const CheckoutPage = () => {
               currentSavings += (item.originalPrice - item.price) * item.quantity;
             }
           });
-          // Add shipping savings if applicable
+          
           if (staticShippingMethod.currentCost < staticShippingMethod.originalCost) {
             currentSavings += staticShippingMethod.originalCost - staticShippingMethod.currentCost;
           }
@@ -112,7 +108,6 @@ const CheckoutPage = () => {
           setInitialTotalAmount(currentTotal);
           setInitialSavings(currentSavings);
         } else {
-          // Fallback to static if no items
           setInitialTotalAmount(staticTotals.totalAmount);
           setInitialSavings(staticTotals.savings);
         }
@@ -125,20 +120,27 @@ const CheckoutPage = () => {
         setInitialTotalAmount(staticTotals.totalAmount);
         setInitialSavings(staticTotals.savings);
     }
+
+    const selectedAddressId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
+    if (selectedAddressId) {
+      const foundAddress = mockShippingAddresses.find(addr => addr.id === selectedAddressId);
+      setCurrentShippingAddress(foundAddress || mockShippingAddresses.find(addr => addr.isDefault) || mockShippingAddresses[0]);
+    } else {
+      setCurrentShippingAddress(mockShippingAddresses.find(addr => addr.isDefault) || mockShippingAddresses[0]);
+    }
   }, []);
 
   const formatCurrency = (amount: number) => {
     return `₫${amount.toLocaleString('vi-VN')}`;
   };
 
-  const deliveryAddress = staticDeliveryAddress;
   const shippingMethod = staticShippingMethod;
   
   const numberOfProductTypes = useMemo(() => {
     if (dynamicDisplayShops.length > 0) {
         return dynamicDisplayShops.reduce((sum, shop) => sum + shop.products.length, 0);
     }
-    return 1; // For static placeholder
+    return 1; 
   }, [dynamicDisplayShops]);
 
   const displayTotalAmount = useMemo(() => {
@@ -146,10 +148,10 @@ const CheckoutPage = () => {
     if (useShopeeCoins) {
       currentTotal -= SHOPEE_COIN_VALUE;
     }
-    return Math.max(0, currentTotal); // Ensure total doesn't go below zero
+    return Math.max(0, currentTotal); 
   }, [initialTotalAmount, useShopeeCoins]);
 
-  const displaySavings = initialSavings; // Shopee coins affect total, not savings in this model
+  const displaySavings = initialSavings; 
 
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
@@ -160,6 +162,14 @@ const CheckoutPage = () => {
     { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://placehold.co/34x34.png', iconAiHint: 'Apple Pay logo', details: null },
   ];
 
+  if (!currentShippingAddress) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading address...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
       <header className={`fixed top-0 left-0 right-0 z-30 bg-card shadow-sm border-b ${HEADER_HEIGHT} flex items-center`}>
@@ -168,7 +178,7 @@ const CheckoutPage = () => {
             <ChevronLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-lg font-semibold text-foreground">Thanh toán</h1>
-          <div className="w-10"> {/* Spacer */}</div>
+          <div className="w-10"> </div>
         </div>
       </header>
 
@@ -176,12 +186,12 @@ const CheckoutPage = () => {
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3 space-y-3">
             <Card className="shadow-sm">
-              <CardContent className="p-4 cursor-pointer hover:bg-muted/50">
+              <CardContent className="p-4 cursor-pointer hover:bg-muted/50" onClick={() => router.push('/select-address')}>
                 <div className="flex items-center">
                   <MapPin className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                   <div className="flex-grow">
-                    <p className="text-sm font-medium text-foreground">{deliveryAddress.name} | {deliveryAddress.phone}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{deliveryAddress.address}</p>
+                    <p className="text-sm font-medium text-foreground">{currentShippingAddress.name} | {currentShippingAddress.phone}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{currentShippingAddress.address}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
                 </div>
@@ -352,7 +362,6 @@ const CheckoutPage = () => {
               </CardContent>
             </Card>
 
-            {/* Order Subtotal Section */}
             <Card className="shadow-sm">
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
@@ -364,7 +373,6 @@ const CheckoutPage = () => {
               </CardContent>
             </Card>
 
-            {/* Platform Vouchers & Coins Section */}
             <Card className="shadow-sm">
               <CardContent className="p-0 divide-y divide-border">
                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
@@ -391,7 +399,6 @@ const CheckoutPage = () => {
               </CardContent>
             </Card>
 
-            {/* Payment Method Section */}
             <Card className="shadow-sm">
               <CardHeader className="pb-3 pt-4 px-4">
                 <div className="flex items-center justify-between">
@@ -409,14 +416,18 @@ const CheckoutPage = () => {
                       onClick={() => setSelectedPaymentMethod(method.id as any)}
                     >
                       <div className="flex items-center">
-                        <Image
-                          src={method.iconUrl}
-                          alt={`${method.name} logo`}
-                          width={34}
-                          height={34}
-                          className="mr-3 flex-shrink-0 object-contain"
-                          data-ai-hint={method.iconAiHint}
-                        />
+                        {method.iconUrl ? (
+                          <Image
+                            src={method.iconUrl}
+                            alt={`${method.name} logo`}
+                            width={34}
+                            height={34}
+                            className="mr-3 flex-shrink-0 object-contain"
+                            data-ai-hint={method.iconAiHint}
+                          />
+                        ) : (
+                          <CreditCard className="w-8 h-8 text-muted-foreground mr-3 flex-shrink-0" />
+                        )}
                         <span className="text-sm text-foreground">{method.name}</span>
                         {method.details && <span className="text-xs text-muted-foreground ml-1.5">{method.details}</span>}
                       </div>
@@ -457,5 +468,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-
-    

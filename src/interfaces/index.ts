@@ -14,6 +14,8 @@ export interface Product {
 export interface Shop {
   name: string;
   isFavorite?: boolean;
+  logoUrl?: string;
+  logoDataAiHint?: string;
   promotionText?: string;
   editLinkText?: string; // e.g., "Sửa"
   products: Product[];
@@ -22,4 +24,12 @@ export interface Shop {
 export interface CartItem extends Product {
   quantity: number;
   selected: boolean;
+}
+
+export interface ShippingAddress {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  isDefault?: boolean;
 }

@@ -1,10 +1,10 @@
 
-import type { Shop } from '@/interfaces';
+import type { Shop, ShippingAddress } from '@/interfaces';
 
 export const mockShops: Shop[] = [
   {
     name: 'MLB',
-    isFavorite: true, // Added to test "Yêu thích" badge dynamically
+    isFavorite: true, 
     logoUrl: 'https://file.hstatic.net/1000356698/file/mlb_1a7168aa098e46afacfd2251bf3d2429.jpg',
     logoDataAiHint: 'MLB logo',
     products: [
@@ -91,4 +91,26 @@ export const mockShops: Shop[] = [
       },
     ],
   }
+];
+
+export const mockShippingAddresses: ShippingAddress[] = [
+  {
+    id: 'addr1',
+    name: "Trần Thượng Tuấn",
+    phone: "(+84) 523 762 477",
+    address: "Sarina, Sala, A00.11, Đường B2, Phường An Lợi Đông, Thành Phố Thủ Đức, TP. Hồ Chí Minh",
+    isDefault: true,
+  },
+  {
+    id: 'addr2',
+    name: "Trần Thượng Tuấn",
+    phone: "(+84) 523 762 477",
+    address: "Số 539, Huỳnh Văn Bánh, Phường 13, Quận Phú Nhuận, TP. Hồ Chí Minh",
+  },
+  {
+    id: 'addr3',
+    name: "Nguyễn Văn An",
+    phone: "(+84) 123 456 789",
+    address: "123 Đường ABC, Phường XYZ, Quận 1, TP. Hồ Chí Minh",
+  },
 ];
