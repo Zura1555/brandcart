@@ -59,7 +59,7 @@ export const mockShops: Shop[] = [
         price: 299000,
         originalPrice: 599000,
         brand: 'PUMA',
-        imageUrl: 'https://placehold.co/80x80.png',
+        imageUrl: 'https://product.hstatic.net/1000284478/product/11_021269_1_096b4a3c4511424abd1f10b5bcf1c550_large.jpg',
         dataAiHint: 'cap olivegreen',
         variant: 'Olive Green (+14)',
         discountDescription: '-50%',
@@ -114,3 +114,4 @@ export const mockShippingAddresses: ShippingAddress[] = [
     address: "123 Đường ABC, Phường XYZ, Quận 1, TP. Hồ Chí Minh",
   },
 ];
+
