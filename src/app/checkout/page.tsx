@@ -18,8 +18,8 @@ import { mockShops } from '@/lib/mockData';
 const HEADER_HEIGHT = 'h-14'; // approx 56px
 const FOOTER_HEIGHT = 'h-24'; // approx 96px
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
-const SHOPEE_COIN_VALUE = 200; // Monetary value of coins
-const SHOPEE_COIN_AMOUNT_TO_USE = 200; // Number of coins
+const SHOPEE_COIN_VALUE = 200; // Monetary value of coins/points
+const SHOPEE_COIN_AMOUNT_TO_USE = 200; // Number of coins/points
 
 interface DisplayShop {
   name: string;
@@ -35,7 +35,7 @@ const staticDeliveryAddress = {
   address: "Sarina, Sala, A00.11, Đường B2, Phường An Lợi Đông, Thành Phố Thủ Đức, TP. Hồ Chí Minh",
 };
 
-const staticProductPlaceholder = { // Renamed to avoid conflict if no dynamic items
+const staticProductPlaceholder = {
   seller: "Topick Global",
   isFavoriteSeller: true,
   logoUrl: "https://placehold.co/60x24.png",
@@ -370,7 +370,7 @@ const CheckoutPage = () => {
                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
                   <div className="flex items-center">
                     <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">Shopee Voucher</span>
+                    <span className="text-sm text-foreground">Voucher của bạn</span>
                   </div>
                   <div className="flex items-center">
                     <Badge variant="outline" className="text-green-600 border-green-600 bg-green-50 text-xs px-1.5 py-0.5 mr-2">Miễn Phí Vận Chuyển</Badge>
@@ -380,7 +380,7 @@ const CheckoutPage = () => {
                 <div className="p-4 flex items-center justify-between">
                   <div className="flex items-center">
                     <CircleDollarSign className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">Dùng {SHOPEE_COIN_AMOUNT_TO_USE} Shopee Xu</span>
+                    <span className="text-sm text-foreground">Đổi điểm thưởng: {SHOPEE_COIN_AMOUNT_TO_USE} Points</span>
                   </div>
                   <Switch
                     checked={useShopeeCoins}
@@ -436,17 +436,17 @@ const CheckoutPage = () => {
           <div>
             <p className="text-sm text-muted-foreground">Tổng cộng:</p>
             <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
-            {displaySavings > 0 && !useShopeeCoins && ( // Only show original savings if coins not applied, or adjust logic as needed
+            {displaySavings > 0 && !useShopeeCoins && ( 
               <p className="text-xs text-green-600">Tiết kiệm {formatCurrency(displaySavings)}</p>
             )}
              {useShopeeCoins && (
-              <p className="text-xs text-green-600">Đã dùng {SHOPEE_COIN_AMOUNT_TO_USE} xu, tiết kiệm thêm {formatCurrency(SHOPEE_COIN_VALUE)}</p>
+              <p className="text-xs text-green-600">Đã dùng {SHOPEE_COIN_AMOUNT_TO_USE} điểm, tiết kiệm {formatCurrency(SHOPEE_COIN_VALUE)}</p>
             )}
           </div>
           <Button
             size="lg"
             className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px]"
-            onClick={() => router.push('/payment')} // Assuming '/payment' is the next page
+            onClick={() => router.push('/payment')} 
           >
             Đặt hàng
           </Button>
