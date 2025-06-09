@@ -155,10 +155,10 @@ const CheckoutPage: NextPage = () => {
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
   const paymentMethods = [
-    { id: 'payoo', name: 'Payoo', icon: CreditCard, details: null },
-    { id: 'vnpay', name: 'VNPay', icon: QrCode, details: null },
-    { id: 'momo', name: 'Momo', icon: Wallet, details: null },
-    { id: 'applepay', name: 'Apple Pay', icon: CreditCard, details: null },
+    { id: 'payoo', name: 'Payoo', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'payment logo', details: null },
+    { id: 'vnpay', name: 'VNPay', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'payment logo', details: null },
+    { id: 'momo', name: 'Momo', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'payment logo', details: null },
+    { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'payment logo', details: null },
   ];
 
   return (
@@ -402,7 +402,6 @@ const CheckoutPage: NextPage = () => {
               </CardHeader>
               <CardContent className="p-0 divide-y divide-border">
                 {paymentMethods.map(method => {
-                  const IconComponent = method.icon;
                   const isSelected = selectedPaymentMethod === method.id;
                   return (
                     <div
@@ -411,7 +410,14 @@ const CheckoutPage: NextPage = () => {
                       onClick={() => setSelectedPaymentMethod(method.id as any)}
                     >
                       <div className="flex items-center">
-                        <IconComponent className="w-6 h-6 text-foreground mr-3 flex-shrink-0" />
+                        <Image
+                          src={method.iconUrl}
+                          alt={`${method.name} logo`}
+                          width={24}
+                          height={24}
+                          className="mr-3 flex-shrink-0 object-contain"
+                          data-ai-hint={method.iconAiHint}
+                        />
                         <span className="text-sm text-foreground">{method.name}</span>
                         {method.details && <span className="text-xs text-muted-foreground ml-1.5">{method.details}</span>}
                       </div>
@@ -452,7 +458,3 @@ const CheckoutPage: NextPage = () => {
 };
 
 export default CheckoutPage;
-
-    
-
-    
