@@ -1,12 +1,16 @@
+
 // @ts-nocheck
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
 import type { NextPage } from 'next';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ShoppingCart, ChevronLeft, MessageCircle, Gift, Ticket, Truck, Trash2, ChevronRight } from 'lucide-react';
 import type { CartItem, Shop } from '@/interfaces';
 import { mockShops } from '@/lib/mockData';
@@ -22,6 +26,9 @@ const BrandCartPage: NextPage = () => {
   );
   const router = useRouter();
   const { toast } = useToast();
+
+  const [isCleanupDialogOpen, setIsCleanupDialogOpen] = useState(false);
+  const [itemsSelectedForCleanup, setItemsSelectedForCleanup] = useState<Set<string>>(new Set());
 
   const handleToggleSelectAll = (checked: boolean) => {
     setCartItems(prevItems => prevItems.map(item => ({ ...item, selected: checked })));
@@ -82,7 +89,6 @@ const BrandCartPage: NextPage = () => {
 
   const totalCartProductTypesCount = cartItems.length;
 
-
   const handleCheckout = () => {
     if (isAnythingSelected) {
       router.push('/checkout');
@@ -103,9 +109,42 @@ const BrandCartPage: NextPage = () => {
         products: productsInShop,
         isShopSelected: productsInShop.length > 0 && productsInShop.every(item => item.selected),
       };
-    }).filter(shopGroup => shopGroup.products.length > 0); // Ensure shops with no items in cart are not processed
+    }).filter(shopGroup => shopGroup.products.length > 0); 
   }, [cartItems]);
 
+  const openCleanupDialog = () => {
+    setItemsSelectedForCleanup(new Set()); // Reset selections when opening
+    setIsCleanupDialogOpen(true);
+  };
+
+  const closeCleanupDialog = () => {
+    setIsCleanupDialogOpen(false);
+    setItemsSelectedForCleanup(new Set());
+  };
+
+  const toggleItemForCleanup = (itemId: string) => {
+    setItemsSelectedForCleanup(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+
+  const confirmCleanup = () => {
+    const itemsToRemoveCount = itemsSelectedForCleanup.size;
+    setCartItems(prevItems => prevItems.filter(item => !itemsSelectedForCleanup.has(item.id)));
+    closeCleanupDialog();
+    if (itemsToRemoveCount > 0) {
+      toast({
+        title: "Items Removed",
+        description: `${itemsToRemoveCount} item(s) have been removed from your cart.`,
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -149,14 +188,20 @@ const BrandCartPage: NextPage = () => {
                 />
               )}
 
-              {itemsByShop.length > 0 && (
+              {cartItems.length > 0 && (
                 <Card className="bg-card p-4 rounded-lg shadow">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Trash2 className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" />
                       <span className="text-sm text-foreground">Các sản phẩm bạn có thể chưa cần</span>
                     </div>
-                    <Button variant="outline" size="sm" className="text-orange-500 border-orange-500 hover:bg-orange-50 hover:text-orange-600">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-orange-500 border-orange-500 hover:bg-orange-50 hover:text-orange-600"
+                      onClick={openCleanupDialog}
+                      disabled={cartItems.length === 0}
+                    >
                       Xóa bớt
                     </Button>
                   </div>
@@ -195,8 +240,6 @@ const BrandCartPage: NextPage = () => {
               </div>
             </Card>
           )}
-          
-          {/* Original Cleanup Section is now removed from here */}
         </div>
       </main>
 
@@ -232,8 +275,65 @@ const BrandCartPage: NextPage = () => {
           </div>
         </div>
       </footer>
+
+      <Dialog open={isCleanupDialogOpen} onOpenChange={setIsCleanupDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Remove Unneeded Items</DialogTitle>
+            <DialogDescription>
+              Select the items you want to remove from your cart. Click "Remove Selected" when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] pr-1">
+            <div className="space-y-3 py-4">
+              {cartItems.length > 0 ? cartItems.map(item => (
+                <div key={`cleanup-${item.id}`} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50 border border-transparent has-[:checked]:border-destructive/50 has-[:checked]:bg-destructive/5">
+                  <Checkbox
+                    id={`cleanup-cb-${item.id}`}
+                    checked={itemsSelectedForCleanup.has(item.id)}
+                    onCheckedChange={() => toggleItemForCleanup(item.id)}
+                    className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
+                  />
+                  <label htmlFor={`cleanup-cb-${item.id}`} className="flex-grow flex items-center space-x-3 cursor-pointer">
+                    <Image 
+                      src={item.imageUrl} 
+                      alt={item.name} 
+                      width={48} 
+                      height={48} 
+                      className="rounded-md object-cover w-12 h-12 shrink-0 border"
+                      data-ai-hint={item.dataAiHint}
+                    />
+                    <div className="flex-grow min-w-0">
+                      <p className="text-sm font-medium leading-none truncate" title={item.name}>
+                        {item.name}
+                      </p>
+                      {item.variant && <p className="text-xs text-muted-foreground mt-0.5">{item.variant}</p>}
+                       <p className="text-sm font-semibold text-accent mt-0.5">₫{item.price.toLocaleString('de-DE')}</p>
+                    </div>
+                  </label>
+                </div>
+              )) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Your cart is currently empty.</p>
+              )}
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeCleanupDialog}>Cancel</Button>
+            <Button 
+              onClick={confirmCleanup} 
+              disabled={itemsSelectedForCleanup.size === 0 || cartItems.length === 0}
+              variant="destructive"
+            >
+              Remove Selected ({itemsSelectedForCleanup.size})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };
 
 export default BrandCartPage;
+
+    
