@@ -2,7 +2,6 @@
 // @ts-nocheck
 "use client";
 
-import type { NextPage } from 'next';
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -20,7 +19,7 @@ import React from 'react';
 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 
-const BrandCartPage: NextPage = () => {
+const BrandCartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>(() =>
     mockShops.flatMap(shop =>
       shop.products.map(p => ({ ...p, quantity: 1, selected: false }))

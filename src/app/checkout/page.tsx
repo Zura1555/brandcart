@@ -1,7 +1,6 @@
 
 "use client";
 
-import type { NextPage } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -64,7 +63,7 @@ const staticTotals = {
 };
 
 
-const CheckoutPage: NextPage = () => {
+const CheckoutPage = () => {
   const router = useRouter();
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
   const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
