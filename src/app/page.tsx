@@ -12,6 +12,7 @@ import type { CartItem, Shop } from '@/interfaces';
 import { mockShops } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
 import { useToast } from "@/hooks/use-toast";
+import React from 'react';
 
 const BrandCartPage: NextPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>(() =>
@@ -98,12 +99,12 @@ const BrandCartPage: NextPage = () => {
     return mockShops.map(shopData => {
       const productsInShop = cartItems.filter(item => item.brand === shopData.name);
       return {
-        ...shopData, // Pass full shop data including new fields
+        ...shopData,
         products: productsInShop,
         isShopSelected: productsInShop.length > 0 && productsInShop.every(item => item.selected),
       };
-    });
-  }, [cartItems, mockShops]);
+    }).filter(shopGroup => shopGroup.products.length > 0); // Ensure shops with no items in cart are not processed
+  }, [cartItems]);
 
 
   return (
@@ -126,7 +127,7 @@ const BrandCartPage: NextPage = () => {
         </div>
       </header>
 
-      <main className="flex-grow pt-14 pb-20"> {/* Adjusted padding for fixed header/footer */}
+      <main className="flex-grow pt-14 pb-20">
         <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
           {cartItems.length === 0 ? (
              <div className="text-center py-10">
@@ -135,49 +136,67 @@ const BrandCartPage: NextPage = () => {
                 <p className="font-body text-muted-foreground">Add some products to get started!</p>
             </div>
           ) : (
-            itemsByShop.map(shopGroup => (
-              <ShopSection
-                key={shopGroup.name}
-                shop={shopGroup} // Pass the whole shop object
-                items={shopGroup.products}
-                isShopSelected={shopGroup.isShopSelected}
-                onShopSelectToggle={(checked) => handleToggleShopSelect(shopGroup.name, checked)}
-                onItemSelectToggle={handleToggleItemSelect}
-                onQuantityChange={handleQuantityChange}
-              />
-            ))
+            <>
+              {itemsByShop.length > 0 && itemsByShop[0] && (
+                <ShopSection
+                  key={itemsByShop[0].name}
+                  shop={itemsByShop[0]}
+                  items={itemsByShop[0].products}
+                  isShopSelected={itemsByShop[0].isShopSelected}
+                  onShopSelectToggle={(checked) => handleToggleShopSelect(itemsByShop[0].name, checked)}
+                  onItemSelectToggle={handleToggleItemSelect}
+                  onQuantityChange={handleQuantityChange}
+                />
+              )}
+
+              {itemsByShop.length > 0 && (
+                <Card className="bg-card p-4 rounded-lg shadow">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Trash2 className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" />
+                      <span className="text-sm text-foreground">Các sản phẩm bạn có thể chưa cần</span>
+                    </div>
+                    <Button variant="outline" size="sm" className="text-orange-500 border-orange-500 hover:bg-orange-50 hover:text-orange-600">
+                      Xóa bớt
+                    </Button>
+                  </div>
+                </Card>
+              )}
+
+              {itemsByShop.slice(1).map(shopGroup => (
+                <ShopSection
+                  key={shopGroup.name}
+                  shop={shopGroup}
+                  items={shopGroup.products}
+                  isShopSelected={shopGroup.isShopSelected}
+                  onShopSelectToggle={(checked) => handleToggleShopSelect(shopGroup.name, checked)}
+                  onItemSelectToggle={handleToggleItemSelect}
+                  onQuantityChange={handleQuantityChange}
+                />
+              ))}
+            </>
           )}
 
-          {/* Voucher Section */}
-          <Card className="bg-card p-4 rounded-lg shadow">
-            <div className="flex items-center justify-between py-2 border-b cursor-pointer hover:bg-muted/50 -mx-4 px-4">
-              <div className="flex items-center">
-                <Ticket className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" />
-                <span className="text-sm text-foreground">Voucher giảm đến ₫5k</span>
+          {cartItems.length > 0 && (
+            <Card className="bg-card p-4 rounded-lg shadow">
+              <div className="flex items-center justify-between py-2 border-b cursor-pointer hover:bg-muted/50 -mx-4 px-4">
+                <div className="flex items-center">
+                  <Ticket className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" />
+                  <span className="text-sm text-foreground">Voucher giảm đến ₫5k</span>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
-              <div className="flex items-center">
-                <Truck className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                <span className="text-sm text-foreground truncate">Giảm ₫700.000 phí vận chuyển đơn tối thiểu...</span>
+              <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
+                <div className="flex items-center">
+                  <Truck className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
+                  <span className="text-sm text-foreground truncate">Giảm ₫700.000 phí vận chuyển đơn tối thiểu...</span>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </div>
-          </Card>
-
-          {/* Cleanup Section */}
-          <Card className="bg-card p-4 rounded-lg shadow">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Trash2 className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" />
-                <span className="text-sm text-foreground">Các sản phẩm bạn có thể chưa cần</span>
-              </div>
-              <Button variant="outline" size="sm" className="text-orange-500 border-orange-500 hover:bg-orange-50 hover:text-orange-600">
-                Xóa bớt
-              </Button>
-            </div>
-          </Card>
+            </Card>
+          )}
+          
+          {/* Original Cleanup Section is now removed from here */}
         </div>
       </main>
 
