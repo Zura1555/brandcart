@@ -298,9 +298,9 @@ const CheckoutPage: NextPage = () => {
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium text-foreground">Phương thức vận chuyển</h3>
-                  <Button variant="link" className="text-xs text-accent p-0 h-auto">Xem tất cả</Button>
+                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-accent/80">Xem tất cả</Button>
                 </div>
-                <div className="border border-accent/50 rounded-md p-3 bg-accent/5">
+                <div className="border border-foreground/30 rounded-md p-3 bg-foreground/5">
                   <p className="text-sm font-medium text-foreground">{shippingMethod.name}</p>
                   <div className="flex items-baseline mt-0.5">
                     <span className="text-sm text-green-600 font-semibold">
@@ -335,7 +335,7 @@ const CheckoutPage: NextPage = () => {
           </div>
           <Button
             size="lg"
-            className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold min-w-[140px]"
+            className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px]"
             onClick={() => router.push('/payment')}
           >
             Đặt hàng

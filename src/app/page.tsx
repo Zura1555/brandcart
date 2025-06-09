@@ -2,8 +2,8 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
 import type { NextPage } from 'next';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -271,7 +271,7 @@ const BrandCartPage: NextPage = () => {
               onClick={handleCheckout}
               disabled={!isAnythingSelected}
               size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-4 py-2 text-sm min-w-[120px]"
+              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold px-4 py-2 text-sm min-w-[120px]"
             >
               Mua hàng ({selectedItemsCount})
             </Button>
