@@ -164,7 +164,7 @@ const CheckoutPage: NextPage = () => {
     <div className="flex flex-col min-h-screen bg-muted/40">
       <header className={`fixed top-0 left-0 right-0 z-30 bg-card shadow-sm border-b ${HEADER_HEIGHT} flex items-center`}>
         <div className="container mx-auto px-4 flex items-center justify-between h-full">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-foreground">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-foreground hover:bg-muted hover:text-foreground">
             <ChevronLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-lg font-semibold text-foreground">Thanh toán</h1>
