@@ -146,7 +146,7 @@ const CheckoutPage: NextPage = () => {
             <Card className="shadow-sm">
               <CardContent className="p-4 cursor-pointer hover:bg-muted/50">
                 <div className="flex items-center">
-                  <MapPin className="w-5 h-5 text-accent mr-3 flex-shrink-0" />
+                  <MapPin className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                   <div className="flex-grow">
                     <p className="text-sm font-medium text-foreground">{deliveryAddress.name} | {deliveryAddress.phone}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{deliveryAddress.address}</p>
@@ -173,7 +173,7 @@ const CheckoutPage: NextPage = () => {
                     )}
                     <span className="text-sm font-medium text-foreground">{shop.name}</span>
                     {shop.isFavorite && (
-                      <Badge variant="outline" className="text-red-500 border-red-300 bg-red-50 text-xs px-1.5 py-0.5">Yêu thích</Badge>
+                      <Badge variant="outline" className="text-foreground border-foreground bg-transparent text-xs px-1.5 py-0.5">Yêu thích</Badge>
                     )}
                   </div>
                 </CardHeader>
@@ -225,7 +225,7 @@ const CheckoutPage: NextPage = () => {
                     )}
                     <span className="text-sm font-medium text-foreground">{staticProduct.seller}</span>
                     {staticProduct.isFavoriteSeller && (
-                      <Badge variant="outline" className="text-red-500 border-red-300 bg-red-50 text-xs px-1.5 py-0.5">Yêu thích</Badge>
+                      <Badge variant="outline" className="text-foreground border-foreground bg-transparent text-xs px-1.5 py-0.5">Yêu thích</Badge>
                     )}
                   </div>
                 </CardHeader>
@@ -263,7 +263,7 @@ const CheckoutPage: NextPage = () => {
               <CardContent className="p-0 divide-y divide-border">
                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
                   <div className="flex items-center">
-                    <Tag className="w-5 h-5 text-accent mr-3 flex-shrink-0" />
+                    <Tag className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                     <span className="text-sm text-foreground">Voucher của Shop</span>
                   </div>
                   <div className="flex items-center">
@@ -301,7 +301,7 @@ const CheckoutPage: NextPage = () => {
                   <Button variant="link" className="text-xs text-accent p-0 h-auto">Xem tất cả</Button>
                 </div>
                 <div className="border border-accent/50 rounded-md p-3 bg-accent/5">
-                  <p className="text-sm font-medium text-accent">{shippingMethod.name}</p>
+                  <p className="text-sm font-medium text-foreground">{shippingMethod.name}</p>
                   <div className="flex items-baseline mt-0.5">
                     <span className="text-sm text-green-600 font-semibold">
                       {shippingMethod.currentCost === 0 ? "Miễn Phí" : formatCurrency(shippingMethod.currentCost)}
@@ -328,7 +328,7 @@ const CheckoutPage: NextPage = () => {
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Tổng cộng:</p>
-            <p className="text-xl font-bold text-accent">{formatCurrency(displayTotalAmount)}</p>
+            <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
             {displaySavings > 0 && (
               <p className="text-xs text-green-600">Tiết kiệm {formatCurrency(displaySavings)}</p>
             )}

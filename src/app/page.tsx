@@ -196,13 +196,13 @@ const BrandCartPage: NextPage = () => {
                 <Card className="bg-card p-4 rounded-lg shadow">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <Trash2 className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" />
+                      <Trash2 className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                       <span className="text-sm text-foreground">Các sản phẩm bạn có thể chưa cần</span>
                     </div>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="text-orange-500 border-orange-500 hover:bg-orange-50 hover:text-orange-600"
+                      className="text-foreground border-foreground hover:bg-muted hover:text-foreground"
                       onClick={openCleanupDialog}
                       disabled={cartItems.length === 0}
                     >
@@ -230,7 +230,7 @@ const BrandCartPage: NextPage = () => {
             <Card className="bg-card p-4 rounded-lg shadow">
               <div className="flex items-center justify-between py-2 border-b cursor-pointer hover:bg-muted/50 -mx-4 px-4">
                 <div className="flex items-center">
-                  <Ticket className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" />
+                  <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                   <span className="text-sm text-foreground">Voucher giảm đến ₫5k</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -255,7 +255,6 @@ const BrandCartPage: NextPage = () => {
               checked={areAllItemsEffectivelySelected}
               onCheckedChange={(checked) => handleToggleSelectAll(Boolean(checked))}
               aria-label="Select all items"
-              className="border-primary data-[state=checked]:bg-accent data-[state=checked]:border-accent"
             />
             <label htmlFor="select-all-footer" className="text-sm text-foreground cursor-pointer">
               Tất cả

@@ -1,3 +1,4 @@
+
 // @ts-nocheck
 "use client";
 
@@ -33,10 +34,9 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
               checked={isShopSelected}
               onCheckedChange={(checked) => onShopSelectToggle(Boolean(checked))}
               aria-label={`Select all items from ${shop.name}`}
-              className="border-primary data-[state=checked]:bg-accent data-[state=checked]:border-accent"
             />
             {shop.isFavorite && (
-              <Badge className="bg-red-100 text-accent text-xs px-1.5 py-0.5 font-normal">Yêu thích+</Badge>
+              <Badge variant="outline" className="text-foreground border-foreground bg-transparent text-xs px-1.5 py-0.5 font-normal">Yêu thích+</Badge>
             )}
             <CardTitle className="font-semibold text-base text-foreground flex items-center cursor-pointer">
               {shop.logoUrl && (
@@ -63,7 +63,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
           )}
         </div>
         {shop.promotionText && (
-          <div className="mt-2 flex items-center text-xs text-accent bg-red-50 p-2 rounded-md cursor-pointer">
+          <div className="mt-2 flex items-center text-xs text-foreground bg-muted/50 p-2 rounded-md cursor-pointer"> {/* Changed text-accent to text-foreground and bg-red-50 to bg-muted/50 */}
             <Gift className="w-4 h-4 mr-2 flex-shrink-0" />
             <span className="flex-grow min-w-0 truncate">{shop.promotionText}</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto flex-shrink-0" />

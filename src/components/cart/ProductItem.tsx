@@ -1,3 +1,4 @@
+
 // @ts-nocheck
 "use client";
 
@@ -22,7 +23,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
         id={`item-${item.id}`}
         checked={item.selected}
         onCheckedChange={(checked) => onSelectToggle(item.id, Boolean(checked))}
-        className="shrink-0 mt-1 border-primary data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+        className="shrink-0 mt-1"
         aria-label={`Select item ${item.name}`}
       />
       <Image
@@ -40,10 +41,10 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           <Badge variant="outline" className="text-xs text-muted-foreground border-gray-300 mt-1 px-1.5 py-0.5">{item.variant}</Badge>
         )}
         {item.stock !== undefined && item.stock > 0 && item.stock <= 5 && (
-          <p className="text-xs text-orange-500 mt-1">Chỉ còn {item.stock}</p>
+          <p className="text-xs text-foreground mt-1">Chỉ còn {item.stock}</p> 
         )}
         <div className="flex items-baseline space-x-2 mt-1">
-          <p className="text-sm font-bold text-accent">₫{item.price.toLocaleString('de-DE')}</p>
+          <p className="text-sm font-bold text-foreground">₫{item.price.toLocaleString('de-DE')}</p>
           {item.originalPrice && (
             <p className="text-xs text-muted-foreground line-through">₫{item.originalPrice.toLocaleString('de-DE')}</p>
           )}
