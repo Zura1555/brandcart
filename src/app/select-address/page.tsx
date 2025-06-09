@@ -67,7 +67,7 @@ const SelectAddressPage = () => {
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3">
             <div className="py-2 px-0 sm:px-2 text-sm text-muted-foreground">Địa chỉ</div>
-            <RadioGroup value={selectedAddressId} onValueChange={handleSelectAddress} className="space-y-0">
+            <RadioGroup value={selectedAddressId} onValueChange={handleSelectAddress} className="space-y-0 bg-card rounded-md shadow-sm">
               {mockShippingAddresses.map((address) => (
                 <Card key={address.id} className={`shadow-none border-b rounded-none last:border-b-0 hover:bg-muted/20 ${selectedAddressId === address.id ? 'bg-muted/10' : ''}`}>
                   <Label htmlFor={address.id} className="block cursor-pointer w-full">
@@ -82,7 +82,7 @@ const SelectAddressPage = () => {
                       </div>
                       <button
                         onClick={(e) => handleEditAddress(address.id, e)}
-                        className="text-sm text-muted-foreground hover:text-accent cursor-pointer ml-auto shrink-0 p-0 h-auto"
+                        className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-auto shrink-0 p-0 h-auto"
                       >
                         Sửa
                       </button>
@@ -93,12 +93,11 @@ const SelectAddressPage = () => {
             </RadioGroup>
             <div className="pt-4 text-center">
               <Button
-                variant="ghost"
                 size="lg"
-                className="w-auto text-foreground hover:bg-muted font-semibold flex items-center justify-center space-x-2 mx-auto"
+                className="w-auto bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold flex items-center justify-center space-x-2 mx-auto"
                 onClick={handleAddNewAddress}
               >
-                <PlusCircle className="w-5 h-5 text-foreground" />
+                <PlusCircle className="w-5 h-5 text-accent-foreground" />
                 <span>Thêm Địa Chỉ Mới</span>
               </Button>
             </div>
