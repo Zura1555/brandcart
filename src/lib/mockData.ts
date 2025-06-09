@@ -13,7 +13,7 @@ export const mockShops: Shop[] = [
         name: 'Áo thun unisex tay ngắn Summer Monotive',
         price: 1890000,
         brand: 'MLB',
-        imageUrl: 'https://placehold.co/80x80.png',
+        imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_large.jpg',
         dataAiHint: 'tshirt lightblue',
         variant: 'Light Blue (+2)',
       },
