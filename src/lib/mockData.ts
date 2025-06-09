@@ -22,7 +22,7 @@ export const mockShops: Shop[] = [
         name: 'Quần short ngắn nữ lưng thun Basic Dolphin',
         price: 1690000,
         brand: 'MLB',
-        imageUrl: 'https://placehold.co/80x80.png',
+        imageUrl: 'https://product.hstatic.net/200000642007/product/50bks_3fspb0553_8_bcdbcdccae8a4f5ba6fc7c09d4b56140_a8ee276c518c4c198e002da20ad42b5e_master.jpg',
         dataAiHint: 'shorts black',
         variant: 'Black',
       },
