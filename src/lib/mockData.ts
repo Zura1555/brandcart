@@ -76,7 +76,7 @@ export const mockShops: Shop[] = [
         name: 'Dép kẹp unisex Top Disney',
         price: 599000,
         brand: 'HAVAIANAS',
-        imageUrl: 'https://placehold.co/80x80.png',
+        imageUrl: 'https://product.hstatic.net/1000284478/product/1056_4139412_1_ca507b2857b441dd90324dd1f97bc876_large.jpg',
         dataAiHint: 'flipflops white red',
         variant: 'Disney print (+12)',
       },
