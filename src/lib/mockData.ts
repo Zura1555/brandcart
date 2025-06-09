@@ -38,7 +38,7 @@ export const mockShops: Shop[] = [
         name: 'Balo unisex phom chữ nhật hiện đại',
         price: 769000,
         brand: 'PUMA',
-        imageUrl: 'https://placehold.co/80x80.png',
+        imageUrl: 'https://product.hstatic.net/1000284478/product/000_6325874132_1_1794446cd3d64b4dbc8b7f7cc1fd2c4e_large.jpg',
         dataAiHint: 'backpack darkgrey',
         discountDescription: '-30%',
       },
@@ -114,4 +114,3 @@ export const mockShippingAddresses: ShippingAddress[] = [
     address: "123 Đường ABC, Phường XYZ, Quận 1, TP. Hồ Chí Minh",
   },
 ];
-
