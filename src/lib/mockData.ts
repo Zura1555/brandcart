@@ -68,7 +68,7 @@ export const mockShops: Shop[] = [
   },
   {
     name: 'HAVAIANAS',
-    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Havaianas_brand_logo.png',
+    logoUrl: 'https://file.hstatic.net/1000284478/collection/havaianas_c0dd7b3e45914a7daaea88a00c61de01.jpg',
     logoDataAiHint: 'HAVAIANAS logo',
     products: [
       {
@@ -114,3 +114,4 @@ export const mockShippingAddresses: ShippingAddress[] = [
     address: "123 Đường ABC, Phường XYZ, Quận 1, TP. Hồ Chí Minh",
   },
 ];
+
