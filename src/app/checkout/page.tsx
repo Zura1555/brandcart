@@ -1,9 +1,8 @@
-import type { NextPage } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 
-const CheckoutPage: NextPage = () => {
+const CheckoutPage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-md shadow-xl">
