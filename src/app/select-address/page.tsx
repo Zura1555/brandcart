@@ -77,7 +77,7 @@ const SelectAddressPage = () => {
                         <p className="text-sm font-medium text-foreground">{address.name} | {address.phone}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{address.address}</p>
                         {address.isDefault && (
-                          <span className="mt-1.5 inline-block text-xs text-accent border border-accent rounded px-1.5 py-0.5">Mặc định</span>
+                          <span className="mt-1.5 inline-block text-xs text-green-600 border border-green-600 rounded px-1.5 py-0.5">Mặc định</span>
                         )}
                       </div>
                       <button
@@ -110,3 +110,4 @@ const SelectAddressPage = () => {
 };
 
 export default SelectAddressPage;
+
