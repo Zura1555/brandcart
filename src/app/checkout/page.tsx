@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText, Ticket, CircleDollarSign, Wallet, CreditCard, Clock, CheckCircle2, QrCode } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText, Ticket, CircleDollarSign, CheckCircle2 } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType } from '@/interfaces';
 import { mockShops } from '@/lib/mockData';
@@ -155,10 +155,10 @@ const CheckoutPage: NextPage = () => {
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
   const paymentMethods = [
-    { id: 'payoo', name: 'Payoo', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'payment logo', details: null },
-    { id: 'vnpay', name: 'VNPay', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'payment logo', details: null },
-    { id: 'momo', name: 'Momo', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'payment logo', details: null },
-    { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'payment logo', details: null },
+    { id: 'payoo', name: 'Payoo', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
+    { id: 'vnpay', name: 'VNPay', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'VNPay logo', details: null },
+    { id: 'momo', name: 'Momo', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'Momo logo', details: null },
+    { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'Apple Pay logo', details: null },
   ];
 
   return (
