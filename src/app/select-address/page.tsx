@@ -14,7 +14,7 @@ import type { ShippingAddress } from '@/interfaces';
 import { mockShippingAddresses } from '@/lib/mockData';
 
 const HEADER_HEIGHT = 'h-14'; // approx 56px
-const FOOTER_BUTTON_HEIGHT = 'h-20'; // approx 80px
+// const FOOTER_BUTTON_HEIGHT = 'h-20'; // No longer needed for fixed footer calculation
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 
 const SelectAddressPage = () => {
@@ -67,7 +67,7 @@ const SelectAddressPage = () => {
         </div>
       </header>
 
-      <main className={`flex-grow overflow-y-auto pt-14 pb-${parseInt(FOOTER_BUTTON_HEIGHT.substring(2)) + 4 /* Add some padding from button */ }`}>
+      <main className={`flex-grow overflow-y-auto pt-14 pb-4`}>
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3 space-y-3">
             <RadioGroup value={selectedAddressId} onValueChange={handleSelectAddress}>
@@ -102,20 +102,19 @@ const SelectAddressPage = () => {
                 </Card>
               ))}
             </RadioGroup>
+            <div className="pt-4"> {/* Container for the button with top padding */}
+              <Button 
+                size="lg" 
+                className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold"
+                onClick={handleAddNewAddress}
+              >
+                <PlusCircle className="w-5 h-5 mr-2" />
+                Add New Address
+              </Button>
+            </div>
           </div>
         </ScrollArea>
       </main>
-
-      <div className={`fixed bottom-0 left-0 right-0 z-30 bg-card border-t p-4 ${FOOTER_BUTTON_HEIGHT} flex items-center justify-center`}>
-        <Button 
-          size="lg" 
-          className="w-full max-w-md bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold"
-          onClick={handleAddNewAddress}
-        >
-          <PlusCircle className="w-5 h-5 mr-2" />
-          Add New Address
-        </Button>
-      </div>
     </div>
   );
 };
