@@ -46,8 +46,7 @@ const SelectAddressPage = () => {
   };
 
   const handleAddNewAddress = () => {
-    console.log("Simulating navigation to add new address form.");
-    alert("Simulating navigation to add new address page. This feature is not fully implemented.");
+    router.push('/add-address');
   };
 
 
