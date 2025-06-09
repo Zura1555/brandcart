@@ -18,12 +18,12 @@ interface ProductItemProps {
 
 const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuantityChange }) => {
   return (
-    <div className={`flex items-start p-3 sm:p-4 space-x-3 sm:space-x-4 bg-card transition-colors duration-200 ease-in-out ${item.selected ? 'bg-accent/5' : ''}`}>
+    <div className={`flex items-center p-3 sm:p-4 space-x-3 sm:space-x-4 bg-card transition-colors duration-200 ease-in-out ${item.selected ? 'bg-accent/5' : ''}`}>
       <Checkbox
         id={`item-${item.id}`}
         checked={item.selected}
         onCheckedChange={(checked) => onSelectToggle(item.id, Boolean(checked))}
-        className="shrink-0 mt-1"
+        className="shrink-0"
         aria-label={`Select item ${item.name}`}
       />
       <Image
@@ -33,7 +33,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
         height={80}
         className="rounded-md object-cover w-20 h-20 shrink-0 border"
         data-ai-hint={item.dataAiHint}
-        priority={false} 
+        priority={false}
       />
       <div className="flex-grow min-w-0">
         <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
@@ -41,7 +41,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           <Badge variant="outline" className="text-xs text-muted-foreground border-gray-300 mt-1 px-1.5 py-0.5">{item.variant}</Badge>
         )}
         {item.stock !== undefined && item.stock > 0 && item.stock <= 5 && (
-          <p className="text-xs text-foreground mt-1">Chỉ còn {item.stock}</p> 
+          <p className="text-xs text-foreground mt-1">Chỉ còn {item.stock}</p>
         )}
         <div className="flex items-baseline space-x-2 mt-1">
           <p className="text-sm font-bold text-foreground">₫{item.price.toLocaleString('de-DE')}</p>
