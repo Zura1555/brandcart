@@ -17,6 +17,8 @@ interface ProductItemProps {
 }
 
 const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuantityChange }) => {
+  const displayVariant = item.variant ? item.variant.replace(/\s*\(\+\d+\)\s*$/, '') : '';
+
   return (
     <div className={`flex items-center p-3 sm:p-4 space-x-3 sm:space-x-4 bg-card transition-colors duration-200 ease-in-out ${item.selected ? 'bg-accent/5' : ''}`}>
       <Checkbox
@@ -37,8 +39,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       />
       <div className="flex-grow min-w-0">
         <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
-        {item.variant && (
-          <Badge variant="outline" className="text-xs text-muted-foreground border-gray-300 mt-1 px-1.5 py-0.5">{item.variant}</Badge>
+        {displayVariant && (
+          <Badge variant="outline" className="text-xs text-muted-foreground border-gray-300 mt-1 px-1.5 py-0.5">{displayVariant}</Badge>
         )}
         {item.stock !== undefined && item.stock > 0 && item.stock <= 5 && (
           <p className="text-xs text-foreground mt-1">Chỉ còn {item.stock}</p>
