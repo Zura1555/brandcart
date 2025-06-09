@@ -4,6 +4,8 @@ import type { Shop } from '@/interfaces';
 export const mockShops: Shop[] = [
   {
     name: 'MLB', // Using the brand name as the shop name
+    logoUrl: 'https://file.hstatic.net/1000356698/file/mlb_1a7168aa098e46afacfd2251bf3d2429.jpg',
+    logoDataAiHint: 'MLB logo',
     products: [
       {
         id: 'mlb1',
@@ -30,6 +32,8 @@ export const mockShops: Shop[] = [
   },
   {
     name: 'PUMA',
+    logoUrl: 'https://placehold.co/60x24.png', // Placeholder PUMA logo
+    logoDataAiHint: 'PUMA logo',
     products: [
       {
         id: 'puma1',
