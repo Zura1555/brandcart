@@ -42,7 +42,6 @@ export const mockShops: Shop[] = [
         brand: 'PUMA',
         imageUrl: 'https://placehold.co/80x80.png',
         dataAiHint: 'backpack darkgrey',
-        variant: 'Dark Grey',
         discountDescription: '-30%',
         // originalPrice not specified
       },
@@ -73,7 +72,7 @@ export const mockShops: Shop[] = [
   },
   {
     name: 'HAVAIANAS',
-    logoUrl: 'https://placehold.co/60x24.png', // Placeholder logo
+    logoUrl: 'https://file.hstatic.net/1000356698/file/hav.jpg', 
     logoDataAiHint: 'HAVAIANAS logo',
     products: [
       {
