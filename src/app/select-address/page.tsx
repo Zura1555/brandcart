@@ -8,13 +8,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, PlusCircle, Edit2 } from 'lucide-react';
+import { ChevronLeft, PlusCircle } from 'lucide-react';
 import type { ShippingAddress } from '@/interfaces';
 import { mockShippingAddresses } from '@/lib/mockData';
 
-const HEADER_HEIGHT = 'h-14'; // approx 56px
-// const FOOTER_BUTTON_HEIGHT = 'h-20'; // No longer needed for fixed footer calculation
+const HEADER_HEIGHT = 'h-14';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 
 const SelectAddressPage = () => {
@@ -42,15 +40,13 @@ const SelectAddressPage = () => {
   };
 
   const handleEditAddress = (addressId: string, event: React.MouseEvent) => {
-    event.stopPropagation(); 
+    event.stopPropagation();
     console.log("Simulating navigation to edit address:", addressId);
-    // router.push(`/edit-address/${addressId}`); // Placeholder for actual navigation
     alert(`Simulating edit for address ID: ${addressId}. Navigation to edit page not implemented.`);
   };
 
   const handleAddNewAddress = () => {
     console.log("Simulating navigation to add new address form.");
-    // router.push('/add-address'); // Placeholder for actual navigation
     alert("Simulating navigation to add new address page. This feature is not fully implemented.");
   };
 
@@ -62,54 +58,48 @@ const SelectAddressPage = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/checkout')} className="text-foreground hover:bg-muted hover:text-foreground">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground">Select Shipping Address</h1>
+          <h1 className="text-lg font-semibold text-foreground">Chọn địa chỉ nhận hàng</h1>
           <div className="w-10"> {/* Spacer */}</div>
         </div>
       </header>
 
       <main className={`flex-grow overflow-y-auto pt-14 pb-4`}>
         <ScrollArea className="h-full">
-          <div className="container mx-auto px-2 sm:px-4 py-3 space-y-3">
-            <RadioGroup value={selectedAddressId} onValueChange={handleSelectAddress}>
+          <div className="container mx-auto px-2 sm:px-4 py-3">
+            <div className="py-2 px-0 sm:px-2 text-sm text-muted-foreground">Địa chỉ</div>
+            <RadioGroup value={selectedAddressId} onValueChange={handleSelectAddress} className="space-y-0">
               {mockShippingAddresses.map((address) => (
-                <Card key={address.id} className={`shadow-sm hover:bg-muted/20 ${selectedAddressId === address.id ? 'border-foreground' : ''}`}>
-                  <Label htmlFor={address.id} className="block cursor-pointer">
-                    <CardContent className="p-4 flex items-start">
-                      <RadioGroupItem value={address.id} id={address.id} className="mr-4 mt-1 flex-shrink-0" />
-                      <div className="flex-grow">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{address.name} | {address.phone}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{address.address}</p>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-foreground hover:text-accent p-1 h-auto -mr-2"
-                            onClick={(e) => handleEditAddress(address.id, e)}
-                          >
-                            <Edit2 className="w-4 h-4 mr-1" /> Edit
-                          </Button>
-                        </div>
+                <Card key={address.id} className={`shadow-none border-b rounded-none last:border-b-0 hover:bg-muted/20 ${selectedAddressId === address.id ? 'bg-muted/10' : ''}`}>
+                  <Label htmlFor={address.id} className="block cursor-pointer w-full">
+                    <CardContent className="p-4 flex items-start space-x-3">
+                      <RadioGroupItem value={address.id} id={address.id} className="mt-1 flex-shrink-0" />
+                      <div className="flex-grow min-w-0">
+                        <p className="text-sm font-medium text-foreground">{address.name} | {address.phone}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{address.address}</p>
                         {address.isDefault && (
-                          <Badge variant="outline" className="mt-2 text-xs px-1.5 py-0.5 border-green-600 text-green-600 bg-green-50">
-                            Default
-                          </Badge>
+                          <span className="mt-1.5 inline-block text-xs text-accent border border-accent rounded px-1.5 py-0.5">Mặc định</span>
                         )}
                       </div>
+                      <button
+                        onClick={(e) => handleEditAddress(address.id, e)}
+                        className="text-sm text-muted-foreground hover:text-accent cursor-pointer ml-auto shrink-0 p-0 h-auto"
+                      >
+                        Sửa
+                      </button>
                     </CardContent>
                   </Label>
                 </Card>
               ))}
             </RadioGroup>
-            <div className="pt-4"> {/* Container for the button with top padding */}
-              <Button 
-                size="lg" 
-                className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold"
+            <div className="pt-4 text-center">
+              <Button
+                variant="ghost"
+                size="lg"
+                className="w-auto text-accent hover:bg-accent/10 font-semibold flex items-center justify-center space-x-2 mx-auto"
                 onClick={handleAddNewAddress}
               >
-                <PlusCircle className="w-5 h-5 mr-2" />
-                Add New Address
+                <PlusCircle className="w-5 h-5 text-accent" />
+                <span>Thêm Địa Chỉ Mới</span>
               </Button>
             </div>
           </div>
