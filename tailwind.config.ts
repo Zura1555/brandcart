@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['PT Sans', 'sans-serif'],
-        headline: ['Poppins', 'sans-serif'],
+        body: ['Segoe UI', 'sans-serif'],
+        headline: ['Segoe UI', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
