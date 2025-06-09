@@ -156,8 +156,8 @@ const CheckoutPage = () => {
   const paymentMethods = [
     { id: 'payoo', name: 'Payoo', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
     { id: 'vnpay', name: 'VNPay', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR.png', iconAiHint: 'VNPay QR logo', details: null },
-    { id: 'momo', name: 'Momo', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'Momo logo', details: null },
-    { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://placehold.co/24x24.png', iconAiHint: 'Apple Pay logo', details: null },
+    { id: 'momo', name: 'Momo', iconUrl: 'https://placehold.co/34x34.png', iconAiHint: 'Momo logo', details: null },
+    { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://placehold.co/34x34.png', iconAiHint: 'Apple Pay logo', details: null },
   ];
 
   return (
@@ -412,8 +412,8 @@ const CheckoutPage = () => {
                         <Image
                           src={method.iconUrl}
                           alt={`${method.name} logo`}
-                          width={24}
-                          height={24}
+                          width={34}
+                          height={34}
                           className="mr-3 flex-shrink-0 object-contain"
                           data-ai-hint={method.iconAiHint}
                         />
@@ -457,3 +457,5 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
+    
