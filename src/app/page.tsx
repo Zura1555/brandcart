@@ -263,7 +263,7 @@ const BrandCartPage: NextPage = () => {
           <div className="flex items-center space-x-3">
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Tổng cộng:</p>
-              <p className="text-lg font-bold text-accent">
+              <p className="text-lg font-bold text-foreground">
                 ₫{totalAmount.toLocaleString('de-DE')}
               </p>
             </div>
@@ -311,7 +311,7 @@ const BrandCartPage: NextPage = () => {
                         {item.name}
                       </p>
                       {item.variant && <p className="text-xs text-muted-foreground mt-0.5">{item.variant}</p>}
-                       <p className="text-sm font-semibold text-accent mt-0.5">₫{item.price.toLocaleString('de-DE')}</p>
+                       <p className="text-sm font-semibold text-foreground mt-0.5">₫{item.price.toLocaleString('de-DE')}</p>
                     </div>
                   </label>
                 </div>
