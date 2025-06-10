@@ -219,7 +219,6 @@ const CheckoutPage = () => {
   };
 
   const handleSaveEInvoice = () => {
-    // Basic validation
     if (eInvoiceType === 'personal' && (!eInvoiceDetails.fullName || !eInvoiceDetails.idCard || !eInvoiceDetails.email || !eInvoiceDetails.address)) {
       toast({ title: t('toast.eInvoice.validationError.title'), description: t('toast.eInvoice.validationError.personal'), variant: "destructive"});
       return;
@@ -236,8 +235,6 @@ const CheckoutPage = () => {
   const handleCancelEInvoice = () => {
     setEInvoiceDetails({ fullName: '', companyName: '', idCard: '', taxCode: '', email: '', address: '' });
     setEInvoiceSummary(null);
-    // Optionally reset eInvoiceType to 'personal' if desired
-    // setEInvoiceType('personal');
     toast({ title: t('toast.eInvoice.cancelled.title') });
   };
 
@@ -423,7 +420,7 @@ const CheckoutPage = () => {
                       </div>
                       <div className="flex items-center">
                         <span className="text-sm text-muted-foreground mr-1">
-                          {eInvoiceSummary || t('checkout.eInvoice.status.requestNow')}
+                          {eInvoiceSummary}
                         </span>
                         {/* Chevron is part of AccordionTrigger */}
                       </div>
@@ -619,3 +616,4 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
