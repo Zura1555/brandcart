@@ -73,9 +73,9 @@ const enTranslations = {
     eInvoice: {
       title: "E-Invoice",
       status: {
-        requestNow: "Request", // Changed from notRequested and pending
+        requestNow: "Request",
       },
-      vatInvoiceLabel: "VAT Invoice", // Retained but not directly used with a checkbox now
+      vatInvoiceLabel: "VAT Invoice", 
       vatNote: "Note: Red invoice will be issued including total order value (Products + Shipping fee)",
       invoiceTypeLabel: "INVOICE TYPE",
       typePersonal: "Personal",
@@ -173,6 +173,37 @@ const enTranslations = {
         typeFreeShipping: "FREE SHIPPING",
         unavailableReasonMinOrder: "Minimum order value not met.",
     },
+  },
+  paymentSuccess: {
+    mainTitle: "Thank You For Your Purchase!",
+    subTitle: "Your payment was successful and your order has been processed.",
+    orderSummary: {
+      title: "Order Summary",
+      orderNumberLabel: "Order Number",
+      dateLabel: "Date",
+      itemHeader: "Item",
+      priceHeader: "Price",
+      subtotalLabel: "Subtotal",
+      shippingLabel: "Shipping",
+      totalLabel: "Total",
+    },
+    feedback: {
+      title: "How easy was it to checkout?",
+      veryDifficult: "Very difficult",
+      veryEasy: "Very easy",
+    },
+    continueShoppingButton: "Continue Shopping",
+    loadingOrder: "Loading order details...",
+    toast: {
+        errorProcessingOrder: {
+            title: "Error",
+            description: "Could not process order details. Please try again or contact support."
+        },
+        feedbackReceived: {
+            title: "Feedback Received",
+            description: "Thanks for your feedback! You rated {rating} out of 5."
+        }
+    }
   },
   general: {
     back: "Back"

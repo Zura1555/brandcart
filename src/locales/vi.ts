@@ -73,9 +73,9 @@ const viTranslations = {
     eInvoice: {
       title: "Hóa đơn điện tử",
       status: {
-        requestNow: "Yêu cầu", // Changed from notRequested and pending
+        requestNow: "Yêu cầu",
       },
-      vatInvoiceLabel: "Hóa đơn VAT", // Retained but not directly used with a checkbox now
+      vatInvoiceLabel: "Hóa đơn VAT",
       vatNote: "Lưu ý: Hoá đơn đỏ sẽ được xuất bao gồm tổng giá trị đơn hàng (Sản phẩm + Phí vận chuyển)",
       invoiceTypeLabel: "LOẠI HOÁ ĐƠN",
       typePersonal: "Cá nhân",
@@ -173,6 +173,37 @@ const viTranslations = {
         typeFreeShipping: "MIỄN PHÍ VẬN CHUYỂN",
         unavailableReasonMinOrder: "Chưa đạt GTĐH tối thiểu.",
     },
+  },
+  paymentSuccess: {
+    mainTitle: "Cảm Ơn Bạn Đã Mua Hàng!",
+    subTitle: "Thanh toán của bạn đã thành công và đơn hàng đã được xử lý.",
+    orderSummary: {
+      title: "Tóm Tắt Đơn Hàng",
+      orderNumberLabel: "Mã Đơn Hàng",
+      dateLabel: "Ngày",
+      itemHeader: "Sản phẩm",
+      priceHeader: "Giá",
+      subtotalLabel: "Tổng phụ",
+      shippingLabel: "Vận chuyển",
+      totalLabel: "Tổng cộng",
+    },
+    feedback: {
+      title: "Trải nghiệm thanh toán của bạn thế nào?",
+      veryDifficult: "Rất khó",
+      veryEasy: "Rất dễ",
+    },
+    continueShoppingButton: "Tiếp tục mua sắm",
+    loadingOrder: "Đang tải chi tiết đơn hàng...",
+    toast: {
+        errorProcessingOrder: {
+            title: "Lỗi",
+            description: "Không thể xử lý chi tiết đơn hàng. Vui lòng thử lại hoặc liên hệ hỗ trợ."
+        },
+        feedbackReceived: {
+            title: "Đã nhận phản hồi",
+            description: "Cảm ơn phản hồi của bạn! Bạn đã đánh giá {rating} trên 5."
+        }
+    }
   },
   general: {
     back: "Trở lại"
