@@ -16,9 +16,13 @@ import { Card, CardContent }
 from '@/components/ui/card';
 import { ChevronLeft, ClipboardPaste } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import type { ShippingAddress } from '@/interfaces';
+import { useToast } from "@/hooks/use-toast";
 
 const HEADER_HEIGHT = 'h-14'; // approx 56px
 const FOOTER_HEIGHT = 'h-20'; // approx 80px
+const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
+const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 
 const addressFormSchema = z.object({
   fullName: z.string().min(1, { message: "Vui lòng nhập họ tên." }),
@@ -42,6 +46,7 @@ type AddressTypeOption = 'home' | 'office';
 
 const AddAddressPage = () => {
   const router = useRouter();
+  const { toast } = useToast();
   const [selectedAddressType, setSelectedAddressType] = useState<AddressTypeOption>('home');
 
   const form = useForm<AddressFormValues>({
@@ -59,9 +64,53 @@ const AddAddressPage = () => {
   });
 
   const onSubmit = (data: AddressFormValues) => {
-    console.log("New Address Data:", data);
-    alert('Địa chỉ đã được lưu (kiểm tra console)!');
-    router.push('/select-address');
+    const provinceLabel = provinces.find(p => p.value === data.province)?.label || data.province;
+    const districtLabel = districts.find(d => d.value === data.district)?.label || data.district;
+    const wardLabel = wards.find(w => w.value === data.ward)?.label || data.ward;
+    const fullAddressString = `${data.streetAddress}, ${wardLabel}, ${districtLabel}, ${provinceLabel}`;
+
+    const newAddress: ShippingAddress = {
+      id: `addr-${Date.now().toString()}-${Math.random().toString(36).substring(2, 7)}`,
+      name: data.fullName,
+      phone: data.phone,
+      address: fullAddressString,
+      isDefault: data.isDefault, // Initial value from form
+    };
+
+    try {
+      const existingAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
+      let addresses: ShippingAddress[] = existingAddressesRaw ? JSON.parse(existingAddressesRaw) : [];
+
+      if (newAddress.isDefault) {
+        // If new one is explicitly set as default, unset all others
+        addresses = addresses.map(addr => ({ ...addr, isDefault: false }));
+        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
+      } else {
+        // If new one is NOT set as default by user
+        if (addresses.length === 0) {
+          // And it's the very first address being added (empty list before this)
+          newAddress.isDefault = true; // Make it default
+          localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
+        }
+        // Otherwise, if other addresses exist and have a default, or user didn't mark this as default, it remains non-default.
+      }
+      
+      addresses.push(newAddress);
+      localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addresses));
+
+      toast({
+        title: 'Địa chỉ đã được lưu',
+        description: 'Địa chỉ mới của bạn đã được thêm thành công.',
+      });
+      router.push('/select-address');
+    } catch (error) {
+      console.error("Error saving address to localStorage:", error);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể lưu địa chỉ. Vui lòng thử lại.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleAddressTypeChange = (type: AddressTypeOption) => {
@@ -222,7 +271,7 @@ const AddAddressPage = () => {
                   <FormField
                     control={form.control}
                     name="addressType"
-                    render={({ field }) => ( // field is kept for react-hook-form registration
+                    render={({ field }) => ( 
                       <FormItem className="flex flex-row items-center justify-between p-4">
                         <FormLabel className="text-sm text-foreground">Loại địa chỉ:</FormLabel>
                         <div className="flex space-x-2">
@@ -245,8 +294,6 @@ const AddAddressPage = () => {
                             Nhà Riêng
                           </Button>
                         </div>
-                         {/* Hidden input to satisfy react-hook-form if needed, or rely on setValue */}
-                         {/* <input type="hidden" {...form.register("addressType")} /> */}
                       </FormItem>
                     )}
                   />
@@ -256,7 +303,7 @@ const AddAddressPage = () => {
                 </CardContent>
               </Card>
               
-              <div className="pb-4"> {/* Padding to ensure space above fixed footer */}
+              <div className="pb-4">
               </div>
             </form>
           </Form>
@@ -267,10 +314,9 @@ const AddAddressPage = () => {
         <div className="container mx-auto px-4 h-full flex items-center justify-center">
           <Button 
             type="submit" 
-            form="addressForm" 
             size="lg" 
             className="w-full max-w-md bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold" 
-            onClick={form.handleSubmit(onSubmit)}
+            onClick={form.handleSubmit(onSubmit)} // No need for separate form="addressForm" if button is inside form or form.handleSubmit is used
           >
             HOÀN THÀNH
           </Button>
@@ -281,5 +327,4 @@ const AddAddressPage = () => {
 };
 
 export default AddAddressPage;
-
     

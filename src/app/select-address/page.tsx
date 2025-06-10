@@ -13,22 +13,52 @@ import type { ShippingAddress } from '@/interfaces';
 import { mockShippingAddresses } from '@/lib/mockData';
 
 const HEADER_HEIGHT = 'h-14';
+const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 
 const SelectAddressPage = () => {
   const router = useRouter();
+  const [shippingAddresses, setShippingAddresses] = useState<ShippingAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const storedAddressId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
-    if (storedAddressId) {
-      setSelectedAddressId(storedAddressId);
+    let addressesToUse: ShippingAddress[] = [];
+    const storedAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
+
+    if (storedAddressesRaw) {
+      try {
+        const parsedAddresses = JSON.parse(storedAddressesRaw);
+        if (Array.isArray(parsedAddresses) && parsedAddresses.length > 0) {
+          addressesToUse = parsedAddresses;
+        } else {
+          addressesToUse = [...mockShippingAddresses];
+          localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesToUse));
+        }
+      } catch (e) {
+        console.error("Failed to parse addresses from localStorage, using mock data.", e);
+        addressesToUse = [...mockShippingAddresses];
+        localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesToUse));
+      }
     } else {
-      const defaultAddress = mockShippingAddresses.find(addr => addr.isDefault);
+      addressesToUse = [...mockShippingAddresses];
+      localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesToUse));
+    }
+    setShippingAddresses(addressesToUse);
+
+    const storedSelectedId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
+    if (storedSelectedId && addressesToUse.find(addr => addr.id === storedSelectedId)) {
+      setSelectedAddressId(storedSelectedId);
+    } else {
+      const defaultAddress = addressesToUse.find(addr => addr.isDefault);
       if (defaultAddress) {
         setSelectedAddressId(defaultAddress.id);
-      } else if (mockShippingAddresses.length > 0) {
-        setSelectedAddressId(mockShippingAddresses[0].id);
+        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, defaultAddress.id);
+      } else if (addressesToUse.length > 0) {
+        // If no default, select the first one and mark it as selected in storage
+        setSelectedAddressId(addressesToUse[0].id);
+        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, addressesToUse[0].id);
+      } else {
+        setSelectedAddressId(undefined); // No addresses, no selection
       }
     }
   }, []);
@@ -41,8 +71,8 @@ const SelectAddressPage = () => {
 
   const handleEditAddress = (addressId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    console.log("Simulating navigation to edit address:", addressId);
-    alert(`Simulating edit for address ID: ${addressId}. Navigation to edit page not implemented.`);
+    // Future implementation: router.push(`/edit-address/${addressId}`);
+    alert(`Chức năng sửa địa chỉ (ID: ${addressId}) chưa được cài đặt.`);
   };
 
   const handleAddNewAddress = () => {
@@ -66,30 +96,39 @@ const SelectAddressPage = () => {
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3">
             <div className="py-2 px-0 sm:px-2 text-sm text-muted-foreground">Địa chỉ</div>
-            <RadioGroup value={selectedAddressId} onValueChange={handleSelectAddress} className="space-y-0 bg-card rounded-md shadow-sm">
-              {mockShippingAddresses.map((address) => (
-                <Card key={address.id} className={`shadow-none border-b rounded-none last:border-b-0 hover:bg-muted/20 ${selectedAddressId === address.id ? 'bg-muted/10' : ''}`}>
-                  <Label htmlFor={address.id} className="block cursor-pointer w-full">
-                    <CardContent className="p-4 flex items-start space-x-3">
-                      <RadioGroupItem value={address.id} id={address.id} className="mt-1 flex-shrink-0" />
-                      <div className="flex-grow min-w-0">
-                        <p className="text-sm font-medium text-foreground">{address.name} | {address.phone}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{address.address}</p>
-                        {address.isDefault && (
-                          <span className="mt-1.5 inline-block text-xs text-green-600 border border-green-600 rounded px-1.5 py-0.5">Mặc định</span>
-                        )}
-                      </div>
-                      <button
-                        onClick={(e) => handleEditAddress(address.id, e)}
-                        className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-auto shrink-0 p-0 h-auto"
-                      >
-                        Sửa
-                      </button>
-                    </CardContent>
-                  </Label>
-                </Card>
-              ))}
-            </RadioGroup>
+            {shippingAddresses.length > 0 ? (
+              <RadioGroup value={selectedAddressId} onValueChange={handleSelectAddress} className="space-y-0 bg-card rounded-md shadow-sm">
+                {shippingAddresses.map((address) => (
+                  <Card key={address.id} className={`shadow-none border-b rounded-none last:border-b-0 hover:bg-muted/20 ${selectedAddressId === address.id ? 'bg-muted/10' : ''}`}>
+                    <Label htmlFor={address.id} className="block cursor-pointer w-full">
+                      <CardContent className="p-4 flex items-start space-x-3">
+                        <RadioGroupItem value={address.id} id={address.id} className="mt-1 flex-shrink-0" />
+                        <div className="flex-grow min-w-0">
+                          <p className="text-sm font-medium text-foreground">{address.name} | {address.phone}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{address.address}</p>
+                          {address.isDefault && (
+                            <span className="mt-1.5 inline-block text-xs text-green-600 border border-green-600 rounded px-1.5 py-0.5">Mặc định</span>
+                          )}
+                        </div>
+                        <button
+                          onClick={(e) => handleEditAddress(address.id, e)}
+                          className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-auto shrink-0 p-0 h-auto"
+                        >
+                          Sửa
+                        </button>
+                      </CardContent>
+                    </Label>
+                  </Card>
+                ))}
+              </RadioGroup>
+            ) : (
+              <Card className="bg-card rounded-md shadow-sm">
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  <p>Không tìm thấy địa chỉ nào.</p>
+                  <p>Vui lòng thêm địa chỉ mới.</p>
+                </CardContent>
+              </Card>
+            )}
             <div className="pt-4 text-center">
               <Button
                 size="lg"
@@ -108,4 +147,3 @@ const SelectAddressPage = () => {
 };
 
 export default SelectAddressPage;
-
