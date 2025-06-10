@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CircleDollarSign, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
@@ -23,8 +24,8 @@ const FOOTER_HEIGHT = 'h-24';
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
-const SHOPEE_COIN_VALUE = 200;
-const SHOPEE_COIN_AMOUNT_TO_USE = 200;
+const LOYALTY_POINTS_DISCOUNT_VALUE = 200;
+const LOYALTY_POINTS_TO_REDEEM = 200;
 
 interface DisplayShop {
   name: string;
@@ -49,16 +50,14 @@ const staticProductPlaceholder = {
 };
 
 const staticShippingMethod = {
-  name: "Quốc tế Nhanh - Express International",
-  originalCost: 17000,
-  currentCost: 0,
-  deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6",
-  inspectionAllowed: true,
+  mainLabelKey: 'checkout.shippingMethod.standardDeliveryLabel',
+  price: 19000,
+  subLabelKey: 'checkout.shippingMethod.estimatedDeliveryTimeLabel',
 };
 
 const staticTotals = {
-  totalAmount: 20900,
-  savings: 23600,
+  totalAmount: 20900 + staticShippingMethod.price, // Add shipping cost to default
+  savings: 23600, // Original product savings
 };
 
 
@@ -68,13 +67,16 @@ const CheckoutPage = () => {
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
   const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
   const [initialSavings, setInitialSavings] = useState<number>(0);
-  const [useShopeeCoins, setUseShopeeCoins] = useState(false);
+  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
 
   useEffect(() => {
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
+    let itemsTotal = 0;
+    let itemsSavings = 0;
+
     if (rawItems) {
       try {
         const items: CartItem[] = JSON.parse(rawItems);
@@ -98,34 +100,38 @@ const CheckoutPage = () => {
 
           setDynamicDisplayShops(Object.values(grouped));
 
-          let currentTotal = 0;
-          let currentSavings = 0;
           items.forEach(item => {
-            currentTotal += item.price * item.quantity;
+            itemsTotal += item.price * item.quantity;
             if (item.originalPrice) {
-              currentSavings += (item.originalPrice - item.price) * item.quantity;
+              itemsSavings += (item.originalPrice - item.price) * item.quantity;
             }
           });
-
-          if (staticShippingMethod.currentCost < staticShippingMethod.originalCost) {
-            currentSavings += staticShippingMethod.originalCost - staticShippingMethod.currentCost;
-          }
-
-          setInitialTotalAmount(currentTotal);
-          setInitialSavings(currentSavings);
         } else {
-          setInitialTotalAmount(staticTotals.totalAmount);
-          setInitialSavings(staticTotals.savings);
+          // Use static product placeholder if no items in local storage
+          itemsTotal = staticProductPlaceholder.price * staticProductPlaceholder.quantity;
+          if (staticProductPlaceholder.originalPrice) {
+            itemsSavings = (staticProductPlaceholder.originalPrice - staticProductPlaceholder.price) * staticProductPlaceholder.quantity;
+          }
         }
       } catch (error) {
         console.error("Error parsing checkout items from localStorage:", error);
-        setInitialTotalAmount(staticTotals.totalAmount);
-        setInitialSavings(staticTotals.savings);
+        // Use static product placeholder on error
+        itemsTotal = staticProductPlaceholder.price * staticProductPlaceholder.quantity;
+        if (staticProductPlaceholder.originalPrice) {
+            itemsSavings = (staticProductPlaceholder.originalPrice - staticProductPlaceholder.price) * staticProductPlaceholder.quantity;
+        }
       }
     } else {
-        setInitialTotalAmount(staticTotals.totalAmount);
-        setInitialSavings(staticTotals.savings);
+        // Use static product placeholder if no items key in local storage
+        itemsTotal = staticProductPlaceholder.price * staticProductPlaceholder.quantity;
+        if (staticProductPlaceholder.originalPrice) {
+            itemsSavings = (staticProductPlaceholder.originalPrice - staticProductPlaceholder.price) * staticProductPlaceholder.quantity;
+        }
     }
+    
+    setInitialTotalAmount(itemsTotal + staticShippingMethod.price);
+    setInitialSavings(itemsSavings);
+
 
     const selectedAddressId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
     const userAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
@@ -155,8 +161,10 @@ const CheckoutPage = () => {
   };
 
   const shippingMethod = useMemo(() => ({
-      ...staticShippingMethod,
-  }), [t, locale]);
+    mainLabel: t(staticShippingMethod.mainLabelKey),
+    price: staticShippingMethod.price,
+    subLabel: t(staticShippingMethod.subLabelKey),
+  }), [t]);
 
 
   const numberOfProductTypes = useMemo(() => {
@@ -168,11 +176,11 @@ const CheckoutPage = () => {
 
   const displayTotalAmount = useMemo(() => {
     let currentTotal = initialTotalAmount;
-    if (useShopeeCoins) {
-      currentTotal -= SHOPEE_COIN_VALUE;
+    if (useLoyaltyPoints) {
+      currentTotal -= LOYALTY_POINTS_DISCOUNT_VALUE;
     }
     return Math.max(0, currentTotal);
-  }, [initialTotalAmount, useShopeeCoins]);
+  }, [initialTotalAmount, useLoyaltyPoints]);
 
   const displaySavings = initialSavings;
 
@@ -186,6 +194,15 @@ const CheckoutPage = () => {
   ];
 
   const currentAddressNamePhone = currentShippingAddress ? t('checkout.address.namePhone', { name: currentShippingAddress.name, phone: currentShippingAddress.phone }) : '';
+
+  const merchandiseSubtotal = useMemo(() => {
+    if (dynamicDisplayShops.length > 0) {
+        return dynamicDisplayShops.reduce((shopSum, shop) => 
+            shopSum + shop.products.reduce((productSum, p) => productSum + p.price * p.quantity, 0), 
+        0);
+    }
+    return staticProductPlaceholder.price * staticProductPlaceholder.quantity;
+  }, [dynamicDisplayShops]);
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
@@ -237,7 +254,19 @@ const CheckoutPage = () => {
             ) : (
                 <Card className="shadow-sm">
                     <CardContent className="p-4">
-                        <p>{t('checkout.address.loading')}</p>
+                        <div className="animate-pulse flex space-x-4">
+                            <div className="rounded-full bg-muted h-5 w-5"></div>
+                            <div className="flex-1 space-y-3 py-1">
+                                <div className="h-2 bg-muted rounded"></div>
+                                <div className="space-y-1">
+                                <div className="grid grid-cols-3 gap-2">
+                                    <div className="h-2 bg-muted rounded col-span-2"></div>
+                                    <div className="h-2 bg-muted rounded col-span-1"></div>
+                                </div>
+                                <div className="h-2 bg-muted rounded"></div>
+                                </div>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             )}
@@ -371,28 +400,21 @@ const CheckoutPage = () => {
             </Card>
 
             <Card className="shadow-sm">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-foreground">{t('checkout.shippingMethod')}</h3>
-                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">{t('checkout.viewAll')}</Button>
-                </div>
-                <div className="border border-foreground/30 rounded-md p-3 bg-foreground/5">
-                  <p className="text-sm font-medium text-foreground">{shippingMethod.name}</p>
-                  <div className="flex items-baseline mt-0.5">
-                    <span className="text-sm text-green-600 font-semibold">
-                      {shippingMethod.currentCost === 0 ? t('checkout.shippingMethodFree') : formatCurrency(shippingMethod.currentCost)}
-                    </span>
-                    {shippingMethod.originalCost > 0 && shippingMethod.currentCost < shippingMethod.originalCost && (
-                       <span className="text-xs text-muted-foreground line-through ml-1.5">{formatCurrency(shippingMethod.originalCost)}</span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">{shippingMethod.deliveryEstimate}</p>
-                  {shippingMethod.inspectionAllowed && (
-                    <div className="flex items-center text-xs text-blue-600 mt-1">
-                      <ShieldCheck className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-                      <span>{t('checkout.shippingMethodInspectionAllowed')}</span>
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-sm font-medium text-foreground">{t('checkout.shippingMethod')}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-2">
+                <div className="border border-foreground rounded-md p-3 flex items-center justify-between cursor-pointer hover:bg-muted/50">
+                  <div>
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium text-foreground mr-2">{shippingMethod.mainLabel}</span>
+                      <Badge variant="secondary" className="text-foreground bg-muted px-2 py-0.5 text-sm">{formatCurrency(shippingMethod.price)}</Badge>
                     </div>
-                  )}
+                    <p className="text-xs text-muted-foreground mt-1">{shippingMethod.subLabel}</p>
+                  </div>
+                  <RadioGroup defaultValue="selected-shipping-method" className="ml-4 flex-shrink-0">
+                    <RadioGroupItem value="selected-shipping-method" id="selected-shipping-method-radio" />
+                  </RadioGroup>
                 </div>
               </CardContent>
             </Card>
@@ -403,7 +425,7 @@ const CheckoutPage = () => {
                   <span className="text-sm text-foreground">
                     {t('checkout.totalAmountLabelWithCount', { count: numberOfProductTypes })}
                   </span>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(initialTotalAmount)}</span>
+                  <span className="text-sm font-semibold text-foreground">{formatCurrency(merchandiseSubtotal)}</span>
                 </div>
               </CardContent>
             </Card>
@@ -426,12 +448,12 @@ const CheckoutPage = () => {
                 <div className="p-4 flex items-center justify-between">
                   <div className="flex items-center">
                     <CircleDollarSign className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">{t('checkout.shopeeCoinLabel', { count: SHOPEE_COIN_AMOUNT_TO_USE })}</span>
+                    <span className="text-sm text-foreground">{t('checkout.loyaltyPointsLabel', { count: LOYALTY_POINTS_TO_REDEEM })}</span>
                   </div>
                   <Switch
-                    checked={useShopeeCoins}
-                    onCheckedChange={setUseShopeeCoins}
-                    aria-label="Use Shopee Coins"
+                    checked={useLoyaltyPoints}
+                    onCheckedChange={setUseLoyaltyPoints}
+                    aria-label={t('checkout.loyaltyPointsAriaLabel')}
                   />
                 </div>
               </CardContent>
@@ -441,7 +463,7 @@ const CheckoutPage = () => {
               <CardHeader className="pb-3 pt-4 px-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium text-foreground">{t('checkout.paymentMethod')}</h3>
-                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">{t('checkout.viewAll')}</Button>
+                  {/* <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">{t('checkout.viewAll')}</Button> */}
                 </div>
               </CardHeader>
               <CardContent className="p-0 divide-y divide-border">
@@ -488,8 +510,8 @@ const CheckoutPage = () => {
             {displaySavings > 0 && (
               <p className="text-xs text-green-600">{t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}</p>
             )}
-             {useShopeeCoins && (
-              <p className="text-xs text-green-600">{t('checkout.footer.usedPointsSavings', { points: SHOPEE_COIN_AMOUNT_TO_USE, amount: formatCurrency(SHOPEE_COIN_VALUE) })}</p>
+             {useLoyaltyPoints && (
+              <p className="text-xs text-green-600">{t('checkout.footer.usedLoyaltyPointsSavings', { points: LOYALTY_POINTS_TO_REDEEM, amount: formatCurrency(LOYALTY_POINTS_DISCOUNT_VALUE) })}</p>
             )}
           </div>
           <Button
@@ -507,3 +529,4 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
