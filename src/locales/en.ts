@@ -25,8 +25,15 @@ const enTranslations = {
       selectColor: "Color",
       selectSize: "Select Size",
       updateButton: "UPDATE",
-      noVariantsAvailable: "No other variants available for this item.",
-      currentSelection: "Current selection:", // Kept for potential future use
+      noVariantsAvailable: "No other variants available for this item.", // Used when structured variants like color/size are not present
+      complexVariants: "This product has other options. Please select one.", // For future when variants are just a list
+      noOtherVariants: "This is the only version of this product available.", // If only one variant and no color/size attributes
+      currentSelection: "Current selection:",
+      stock: {
+        inStock: "In stock",
+        remaining: "Remaining stock: {count}",
+        outOfStock: "Out of stock"
+      }
     }
   },
   toast: {
@@ -81,10 +88,9 @@ const enTranslations = {
     eInvoice: {
       title: "E-Invoice",
       status: {
-        requestNow: "Request",
+        requestNow: "Enter Details", 
         detailsSaved: "{summary}"
       },
-      vatInvoiceLabel: "VAT Invoice", 
       vatNote: "Note: Red invoice will be issued including total order value (Products + Shipping fee)",
       invoiceTypeLabel: "INVOICE TYPE",
       typePersonal: "Personal",
@@ -231,4 +237,3 @@ const enTranslations = {
 };
 
 export default enTranslations;
-
