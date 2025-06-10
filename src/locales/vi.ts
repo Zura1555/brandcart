@@ -55,8 +55,6 @@ const viTranslations = {
       noAddressSelectedTitle: "Chưa có địa chỉ giao hàng",
       noAddressSelectedMessage: "Vui lòng thêm hoặc chọn địa chỉ giao hàng để tiếp tục.",
     },
-    shopVoucher: "Voucher của Shop",
-    shopVoucherPlaceholder: "Chọn hoặc nhập mã",
     eInvoice: "Hóa đơn điện tử",
     eInvoicePlaceholder: "Yêu cầu",
     messageToShop: "Lời nhắn cho Shop",

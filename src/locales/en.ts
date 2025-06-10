@@ -55,8 +55,6 @@ const enTranslations = {
       noAddressSelectedTitle: "No Shipping Address",
       noAddressSelectedMessage: "Please add or select a shipping address to proceed.",
     },
-    shopVoucher: "Shop Voucher",
-    shopVoucherPlaceholder: "Select or enter code",
     eInvoice: "E-Invoice",
     eInvoicePlaceholder: "Request",
     messageToShop: "Message to Shop",

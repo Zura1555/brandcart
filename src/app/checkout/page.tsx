@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText, Ticket, CircleDollarSign, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CircleDollarSign, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
 import { mockShops } from '@/lib/mockData'; // mockShippingAddresses is not used here anymore for fallback
@@ -51,7 +51,7 @@ const staticShippingMethod = {
   name: "Quốc tế Nhanh - Express International",
   originalCost: 17000,
   currentCost: 0,
-  deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6", 
+  deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6",
   inspectionAllowed: true,
 };
 
@@ -135,7 +135,7 @@ const CheckoutPage = () => {
             if (Array.isArray(parsed) && parsed.length > 0) {
                  userAddresses = parsed;
             }
-        } catch (e) { 
+        } catch (e) {
             console.error("Error parsing user addresses from localStorage:", e);
             // userAddresses remains empty
         }
@@ -163,7 +163,7 @@ const CheckoutPage = () => {
     if (dynamicDisplayShops.length > 0) {
         return dynamicDisplayShops.reduce((sum, shop) => sum + shop.products.length, 0);
     }
-    return 1; 
+    return 1;
   }, [dynamicDisplayShops]);
 
   const displayTotalAmount = useMemo(() => {
@@ -184,7 +184,7 @@ const CheckoutPage = () => {
     { id: 'momo', name: 'Momo', iconUrl: 'https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png', iconAiHint: 'Momo logo', details: null },
     { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg', iconAiHint: 'Apple Pay logo', details: null },
   ];
-  
+
   const currentAddressNamePhone = currentShippingAddress ? t('checkout.address.namePhone', { name: currentShippingAddress.name, phone: currentShippingAddress.phone }) : '';
 
   return (
@@ -345,16 +345,6 @@ const CheckoutPage = () => {
 
             <Card className="shadow-sm">
               <CardContent className="p-0 divide-y divide-border">
-                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
-                  <div className="flex items-center">
-                    <Tag className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">{t('checkout.shopVoucher')}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-sm text-muted-foreground">{t('checkout.shopVoucherPlaceholder')}</span>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
-                  </div>
-                </div>
                  <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
                   <div className="flex items-center">
                      <FileText className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
@@ -418,7 +408,7 @@ const CheckoutPage = () => {
 
             <Card className="shadow-sm">
               <CardContent className="p-0 divide-y divide-border">
-                <div 
+                <div
                   className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50"
                   onClick={() => router.push('/select-voucher')}
                 >
@@ -504,7 +494,7 @@ const CheckoutPage = () => {
             size="lg"
             className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px]"
             onClick={() => router.push('/payment')}
-            disabled={!currentShippingAddress} 
+            disabled={!currentShippingAddress}
           >
             {t('checkout.footer.orderButton')}
           </Button>
