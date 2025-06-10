@@ -104,6 +104,9 @@ const enTranslations = {
       saveButton: "Save",
       doNotIssueButton: "Don't issue invoice",
     },
+    item: {
+      quantityLabel: "Quantity: {count}"
+    },
     messageToShop: "Message to Shop",
     messageToShopPlaceholder: "Leave a message",
     shippingMethod: "Shipping Method",
@@ -237,3 +240,5 @@ const enTranslations = {
 };
 
 export default enTranslations;
+
+    

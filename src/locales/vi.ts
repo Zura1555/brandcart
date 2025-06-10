@@ -104,6 +104,9 @@ const viTranslations = {
       saveButton: "Lưu",
       doNotIssueButton: "Không xuất hoá đơn",
     },
+    item: {
+      quantityLabel: "Số lượng: {count}"
+    },
     messageToShop: "Lời nhắn cho Shop",
     messageToShopPlaceholder: "Để lại lời nhắn",
     shippingMethod: "Phương thức vận chuyển",
@@ -237,3 +240,5 @@ const viTranslations = {
 };
 
 export default viTranslations;
+
+    

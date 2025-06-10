@@ -346,7 +346,7 @@ const CheckoutPage = () => {
                             {p.variant.replace(/\s*\(\+\d+\)\s*$/, '')}
                           </Badge>
                         )}
-                        <p className="text-sm font-semibold text-foreground mt-1">x{p.quantity}</p>
+                        <p className="text-sm font-semibold text-foreground mt-1">{t('checkout.item.quantityLabel', { count: p.quantity })}</p>
                       </div>
                       <div className="text-right">
                         <span className="text-sm font-semibold text-foreground">{formatCurrency(p.price)}</span>
@@ -396,7 +396,7 @@ const CheckoutPage = () => {
                           {staticProductPlaceholder.variation}
                         </Badge>
                       )}
-                      <p className="text-sm font-semibold text-foreground mt-1">x{staticProductPlaceholder.quantity}</p>
+                      <p className="text-sm font-semibold text-foreground mt-1">{t('checkout.item.quantityLabel', { count: staticProductPlaceholder.quantity })}</p>
                     </div>
                     <div className="text-right">
                       <span className="text-sm font-semibold text-foreground">{formatCurrency(staticProductPlaceholder.price)}</span>
@@ -617,5 +617,7 @@ const CheckoutPage = () => {
 
 export default CheckoutPage;
 
+
+    
 
     
