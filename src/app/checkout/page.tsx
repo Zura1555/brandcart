@@ -14,6 +14,8 @@ import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, Shopping
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
 import { mockShops, mockShippingAddresses } from '@/lib/mockData';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const HEADER_HEIGHT = 'h-14'; // approx 56px
 const FOOTER_HEIGHT = 'h-24'; // approx 96px
@@ -48,7 +50,7 @@ const staticShippingMethod = {
   name: "Quốc tế Nhanh - Express International",
   originalCost: 17000,
   currentCost: 0,
-  deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6",
+  deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6", // This date might need localization or dynamic generation
   inspectionAllowed: true,
 };
 
@@ -60,6 +62,7 @@ const staticTotals = {
 
 const CheckoutPage = () => {
   const router = useRouter();
+  const { t, locale } = useLanguage();
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
   const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
   const [initialSavings, setInitialSavings] = useState<number>(0);
@@ -122,25 +125,43 @@ const CheckoutPage = () => {
     }
 
     const selectedAddressId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
+    const userAddressesRaw = localStorage.getItem('userShippingAddresses');
+    let userAddresses: ShippingAddress[] = mockShippingAddresses; // Fallback
+    if (userAddressesRaw) {
+        try {
+            const parsed = JSON.parse(userAddressesRaw);
+            if (Array.isArray(parsed)) userAddresses = parsed;
+        } catch (e) { /* ignore, use fallback */ }
+    }
+
+
     if (selectedAddressId) {
-      const foundAddress = mockShippingAddresses.find(addr => addr.id === selectedAddressId);
-      setCurrentShippingAddress(foundAddress || mockShippingAddresses.find(addr => addr.isDefault) || mockShippingAddresses[0]);
+      const foundAddress = userAddresses.find(addr => addr.id === selectedAddressId);
+      setCurrentShippingAddress(foundAddress || userAddresses.find(addr => addr.isDefault) || (userAddresses.length > 0 ? userAddresses[0] : null));
     } else {
-      setCurrentShippingAddress(mockShippingAddresses.find(addr => addr.isDefault) || mockShippingAddresses[0]);
+      setCurrentShippingAddress(userAddresses.find(addr => addr.isDefault) || (userAddresses.length > 0 ? userAddresses[0] : null));
     }
   }, []);
 
   const formatCurrency = (amount: number) => {
+    // Using 'vi-VN' for consistency as the '₫' symbol is Vietnamese.
+    // For EN, if a different symbol or formatting is needed, this could be adjusted.
     return `${amount.toLocaleString('vi-VN')}₫`;
   };
 
-  const shippingMethod = staticShippingMethod;
+  const shippingMethod = useMemo(() => ({
+      ...staticShippingMethod,
+      // Potentially translate name or deliveryEstimate here if needed
+      // name: t(`shippingMethods.${staticShippingMethod.id}.name`, staticShippingMethod.name)
+      // deliveryEstimate: t(`shippingMethods.${staticShippingMethod.id}.estimate`, staticShippingMethod.deliveryEstimate)
+  }), [t, locale]);
+
 
   const numberOfProductTypes = useMemo(() => {
     if (dynamicDisplayShops.length > 0) {
         return dynamicDisplayShops.reduce((sum, shop) => sum + shop.products.length, 0);
     }
-    return 1;
+    return 1; // For static placeholder
   }, [dynamicDisplayShops]);
 
   const displayTotalAmount = useMemo(() => {
@@ -156,6 +177,7 @@ const CheckoutPage = () => {
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
   const paymentMethods = [
+    // Names could be translated if they differ significantly per region
     { id: 'payoo', name: 'Payoo', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
     { id: 'vnpay', name: 'VNPay', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR.png', iconAiHint: 'VNPay QR logo', details: null },
     { id: 'momo', name: 'Momo', iconUrl: 'https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png', iconAiHint: 'Momo logo', details: null },
@@ -165,10 +187,13 @@ const CheckoutPage = () => {
   if (!currentShippingAddress) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p>Loading address...</p>
+        <p>{t('checkout.address.loading')}</p>
       </div>
     );
   }
+  
+  const currentAddressNamePhone = currentShippingAddress ? t('checkout.address.namePhone', { name: currentShippingAddress.name, phone: currentShippingAddress.phone }) : '';
+
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
@@ -177,8 +202,10 @@ const CheckoutPage = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/')} className="text-foreground hover:bg-muted hover:text-foreground">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground">Thanh toán</h1>
-          <div className="w-10"> </div>
+          <h1 className="text-lg font-semibold text-foreground">{t('checkout.title')}</h1>
+          <div className="flex items-center">
+            <LanguageSwitcher />
+          </div>
         </div>
       </header>
 
@@ -190,7 +217,7 @@ const CheckoutPage = () => {
                 <div className="flex items-center">
                   <MapPin className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                   <div className="flex-grow">
-                    <p className="text-sm font-medium text-foreground">{currentShippingAddress.name} | {currentShippingAddress.phone}</p>
+                    <p className="text-sm font-medium text-foreground">{currentAddressNamePhone}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{currentShippingAddress.address}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
@@ -305,30 +332,30 @@ const CheckoutPage = () => {
                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
                   <div className="flex items-center">
                     <Tag className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">Voucher của Shop</span>
+                    <span className="text-sm text-foreground">{t('checkout.shopVoucher')}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-sm text-muted-foreground">Chọn hoặc nhập mã</span>
+                    <span className="text-sm text-muted-foreground">{t('checkout.shopVoucherPlaceholder')}</span>
                     <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
                   </div>
                 </div>
                  <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
                   <div className="flex items-center">
                      <FileText className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">Hóa đơn điện tử</span>
+                    <span className="text-sm text-foreground">{t('checkout.eInvoice')}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-sm text-muted-foreground">Yêu cầu</span>
+                    <span className="text-sm text-muted-foreground">{t('checkout.eInvoicePlaceholder')}</span>
                     <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
                   </div>
                 </div>
                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
                   <div className="flex items-center">
                     <MessageCircle className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">Lời nhắn cho Shop</span>
+                    <span className="text-sm text-foreground">{t('checkout.messageToShop')}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-sm text-muted-foreground">Để lại lời nhắn</span>
+                    <span className="text-sm text-muted-foreground">{t('checkout.messageToShopPlaceholder')}</span>
                     <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
                   </div>
                 </div>
@@ -338,14 +365,14 @@ const CheckoutPage = () => {
             <Card className="shadow-sm">
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-foreground">Phương thức vận chuyển</h3>
-                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">Xem tất cả</Button>
+                  <h3 className="text-sm font-medium text-foreground">{t('checkout.shippingMethod')}</h3>
+                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">{t('checkout.viewAll')}</Button>
                 </div>
                 <div className="border border-foreground/30 rounded-md p-3 bg-foreground/5">
                   <p className="text-sm font-medium text-foreground">{shippingMethod.name}</p>
                   <div className="flex items-baseline mt-0.5">
                     <span className="text-sm text-green-600 font-semibold">
-                      {shippingMethod.currentCost === 0 ? "Miễn Phí" : formatCurrency(shippingMethod.currentCost)}
+                      {shippingMethod.currentCost === 0 ? t('checkout.shippingMethodFree') : formatCurrency(shippingMethod.currentCost)}
                     </span>
                     {shippingMethod.originalCost > 0 && shippingMethod.currentCost < shippingMethod.originalCost && (
                        <span className="text-xs text-muted-foreground line-through ml-1.5">{formatCurrency(shippingMethod.originalCost)}</span>
@@ -355,7 +382,7 @@ const CheckoutPage = () => {
                   {shippingMethod.inspectionAllowed && (
                     <div className="flex items-center text-xs text-blue-600 mt-1">
                       <ShieldCheck className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-                      <span>Được đồng kiểm</span>
+                      <span>{t('checkout.shippingMethodInspectionAllowed')}</span>
                     </div>
                   )}
                 </div>
@@ -366,7 +393,7 @@ const CheckoutPage = () => {
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-foreground">
-                    Tổng số tiền ({numberOfProductTypes} sản phẩm)
+                    {t('checkout.totalAmountLabelWithCount', { count: numberOfProductTypes })}
                   </span>
                   <span className="text-sm font-semibold text-foreground">{formatCurrency(initialTotalAmount)}</span>
                 </div>
@@ -381,17 +408,17 @@ const CheckoutPage = () => {
                 >
                   <div className="flex items-center">
                     <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">Voucher của bạn</span>
+                    <span className="text-sm text-foreground">{t('checkout.yourVoucher')}</span>
                   </div>
                   <div className="flex items-center">
-                    <Badge variant="outline" className="text-green-600 border-green-600 bg-green-50 text-xs px-1.5 py-0.5 mr-2">Miễn Phí Vận Chuyển</Badge>
+                    <Badge variant="outline" className="text-green-600 border-green-600 bg-green-50 text-xs px-1.5 py-0.5 mr-2">{t('checkout.freeShippingBadge')}</Badge>
                     <ChevronRight className="w-5 h-5 text-muted-foreground ml-1 flex-shrink-0" />
                   </div>
                 </div>
                 <div className="p-4 flex items-center justify-between">
                   <div className="flex items-center">
                     <CircleDollarSign className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">Đổi điểm thưởng: {SHOPEE_COIN_AMOUNT_TO_USE} Points</span>
+                    <span className="text-sm text-foreground">{t('checkout.shopeeCoinLabel', { count: SHOPEE_COIN_AMOUNT_TO_USE })}</span>
                   </div>
                   <Switch
                     checked={useShopeeCoins}
@@ -405,8 +432,8 @@ const CheckoutPage = () => {
             <Card className="shadow-sm">
               <CardHeader className="pb-3 pt-4 px-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-foreground">Phương thức thanh toán</h3>
-                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">Xem tất cả</Button>
+                  <h3 className="text-sm font-medium text-foreground">{t('checkout.paymentMethod')}</h3>
+                  <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">{t('checkout.viewAll')}</Button>
                 </div>
               </CardHeader>
               <CardContent className="p-0 divide-y divide-border">
@@ -448,13 +475,13 @@ const CheckoutPage = () => {
       <footer className={`fixed bottom-0 left-0 right-0 z-30 bg-card border-t ${FOOTER_HEIGHT}`}>
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Tổng cộng:</p>
+            <p className="text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
             <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
             {displaySavings > 0 && !useShopeeCoins && (
-              <p className="text-xs text-green-600">Tiết kiệm {formatCurrency(displaySavings)}</p>
+              <p className="text-xs text-green-600">{t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}</p>
             )}
              {useShopeeCoins && (
-              <p className="text-xs text-green-600">Đã dùng {SHOPEE_COIN_AMOUNT_TO_USE} điểm, tiết kiệm {formatCurrency(SHOPEE_COIN_VALUE)}</p>
+              <p className="text-xs text-green-600">{t('checkout.footer.usedPointsSavings', { points: SHOPEE_COIN_AMOUNT_TO_USE, amount: formatCurrency(SHOPEE_COIN_VALUE) })}</p>
             )}
           </div>
           <Button
@@ -462,7 +489,7 @@ const CheckoutPage = () => {
             className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px]"
             onClick={() => router.push('/payment')}
           >
-            Đặt hàng
+            {t('checkout.footer.orderButton')}
           </Button>
         </div>
       </footer>

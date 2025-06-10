@@ -16,6 +16,8 @@ import { mockShops } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
 import { useToast } from "@/hooks/use-toast";
 import React from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 
@@ -27,6 +29,7 @@ const BrandCartPage = () => {
   );
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [isCleanupDialogOpen, setIsCleanupDialogOpen] = useState(false);
   const [itemsSelectedForCleanup, setItemsSelectedForCleanup] = useState<Set<string>>(new Set());
@@ -55,8 +58,8 @@ const BrandCartPage = () => {
     if (newQuantity < 1) return;
     if (newQuantity > 99) {
       toast({
-        title: "Limit Reached",
-        description: "Maximum quantity per item is 99.",
+        title: t('toast.limitReachedTitle'),
+        description: t('toast.limitReachedDescription'),
         variant: "destructive",
       })
       return;
@@ -97,8 +100,8 @@ const BrandCartPage = () => {
       router.push('/checkout');
     } else {
        toast({
-        title: "No items selected",
-        description: "Please select at least one item to proceed to checkout.",
+        title: t('toast.noItemsSelectedTitle'),
+        description: t('toast.noItemsSelectedDescription'),
         variant: "destructive",
       });
     }
@@ -143,10 +146,14 @@ const BrandCartPage = () => {
     closeCleanupDialog();
     if (itemsToRemoveCount > 0) {
       toast({
-        title: "Items Removed",
-        description: `${itemsToRemoveCount} item(s) have been removed from your cart.`,
+        title: t('toast.itemsRemovedTitle'),
+        description: t('toast.itemsRemovedDescription', { count: itemsToRemoveCount }),
       });
     }
+  };
+  
+  const formatCurrency = (amount: number) => {
+    return `${amount.toLocaleString('vi-VN')}₫`;
   };
 
   return (
@@ -157,9 +164,10 @@ const BrandCartPage = () => {
             <ChevronLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-lg font-semibold text-foreground">
-            Giỏ hàng ({totalCartProductTypesCount})
+            {t('cart.title')} {totalCartProductTypesCount > 0 ? t('cart.totalItems', { count: totalCartProductTypesCount }) : ''}
           </h1>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center">
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
@@ -169,8 +177,8 @@ const BrandCartPage = () => {
           {cartItems.length === 0 ? (
              <div className="text-center py-10">
                 <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-xl font-headline text-muted-foreground">Your cart is empty.</p>
-                <p className="font-body text-muted-foreground">Add some products to get started!</p>
+                <p className="text-xl font-headline text-muted-foreground">{t('cart.emptyCartTitle')}</p>
+                <p className="font-body text-muted-foreground">{t('cart.emptyCartMessage')}</p>
             </div>
           ) : (
             <>
@@ -191,7 +199,7 @@ const BrandCartPage = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Trash2 className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                      <span className="text-sm text-foreground">Các sản phẩm bạn có thể chưa cần</span>
+                      <span className="text-sm text-foreground">{t('cart.unneededItemsTitle')}</span>
                     </div>
                     <Button 
                       variant="outline" 
@@ -200,7 +208,7 @@ const BrandCartPage = () => {
                       onClick={openCleanupDialog}
                       disabled={cartItems.length === 0}
                     >
-                      Xóa bớt
+                      {t('cart.removeButton')}
                     </Button>
                   </div>
                 </Card>
@@ -225,14 +233,14 @@ const BrandCartPage = () => {
               <div className="flex items-center justify-between py-2 border-b cursor-pointer hover:bg-muted/50 -mx-4 px-4">
                 <div className="flex items-center">
                   <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                  <span className="text-sm text-foreground">Voucher giảm đến 5k₫</span>
+                  <span className="text-sm text-foreground">{t('cart.vouchersAndShipping.voucherLabel', { amount: "5k" })}</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
                 <div className="flex items-center">
                   <Truck className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span className="text-sm text-foreground truncate">Giảm 700.000₫ phí vận chuyển đơn tối thiểu...</span>
+                  <span className="text-sm text-foreground truncate">{t('cart.vouchersAndShipping.shippingDiscountLabel', { amount: "700.000" })}</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </div>
@@ -251,14 +259,14 @@ const BrandCartPage = () => {
               aria-label="Select all items"
             />
             <label htmlFor="select-all-footer" className="text-sm text-foreground cursor-pointer">
-              Tất cả
+              {t('cart.selectAll')}
             </label>
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Tổng cộng:</p>
+              <p className="text-sm text-muted-foreground">{t('cart.totalAmountLabel')}</p>
               <p className="text-lg font-bold text-foreground">
-                {totalAmount.toLocaleString('de-DE')}₫
+                {formatCurrency(totalAmount)}
               </p>
             </div>
             <Button
@@ -267,7 +275,7 @@ const BrandCartPage = () => {
               size="lg"
               className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold px-4 py-2 text-sm min-w-[120px]"
             >
-              Mua hàng ({selectedItemsCount})
+              {t('cart.checkoutButton', { count: selectedItemsCount })}
             </Button>
           </div>
         </div>
@@ -276,9 +284,9 @@ const BrandCartPage = () => {
       <Dialog open={isCleanupDialogOpen} onOpenChange={setIsCleanupDialogOpen}>
         <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Remove Unneeded Items</DialogTitle>
+            <DialogTitle>{t('cart.dialog.removeUnneededTitle')}</DialogTitle>
             <DialogDescription>
-              Select the items you want to remove from your cart. Click "Remove Selected" when you're done.
+              {t('cart.dialog.removeUnneededDescription')}
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh] pr-1">
@@ -297,7 +305,7 @@ const BrandCartPage = () => {
                       alt={item.name} 
                       width={64} 
                       height={64} 
-                      className="rounded-md object-cover w-16 h-16 shrink-0 border" // Increased size
+                      className="rounded-md object-cover w-16 h-16 shrink-0 border"
                       data-ai-hint={item.dataAiHint}
                     />
                     <div className="text-center w-full">
@@ -305,23 +313,23 @@ const BrandCartPage = () => {
                         {item.name}
                       </p>
                       {item.variant && <p className="text-xxs text-muted-foreground mt-0.5 truncate">{item.variant.replace(/\s*\(\+\d+\)\s*$/, '')}</p>}
-                       <p className="text-xs font-semibold text-foreground mt-0.5">{item.price.toLocaleString('de-DE')}₫</p>
+                       <p className="text-xs font-semibold text-foreground mt-0.5">{formatCurrency(item.price)}</p>
                     </div>
                   </label>
                 </div>
               )) : (
-                <p className="text-sm text-muted-foreground text-center py-4">Your cart is currently empty.</p>
+                <p className="text-sm text-muted-foreground text-center py-4">{t('cart.emptyCartTitle')}</p>
               )}
             </div>
           </ScrollArea>
           <DialogFooter>
-            <Button variant="outline" onClick={closeCleanupDialog}>Cancel</Button>
+            <Button variant="outline" onClick={closeCleanupDialog}>{t('cart.dialog.cancelButton')}</Button>
             <Button 
               onClick={confirmCleanup} 
               disabled={itemsSelectedForCleanup.size === 0 || cartItems.length === 0}
               variant="destructive"
             >
-              Remove Selected ({itemsSelectedForCleanup.size})
+              {t('cart.dialog.removeSelectedButton', { count: itemsSelectedForCleanup.size })}
             </Button>
           </DialogFooter>
         </DialogContent>

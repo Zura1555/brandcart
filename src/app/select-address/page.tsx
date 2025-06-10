@@ -10,7 +10,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, PlusCircle } from 'lucide-react';
 import type { ShippingAddress } from '@/interfaces';
-import { mockShippingAddresses } from '@/lib/mockData';
+// mockShippingAddresses is now an empty array by default after previous change.
+import { mockShippingAddresses } from '@/lib/mockData'; 
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useToast } from "@/hooks/use-toast";
+
 
 const HEADER_HEIGHT = 'h-14';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
@@ -18,6 +23,8 @@ const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 
 const SelectAddressPage = () => {
   const router = useRouter();
+  const { t } = useLanguage();
+  const { toast } = useToast();
   const [shippingAddresses, setShippingAddresses] = useState<ShippingAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | undefined>(undefined);
 
@@ -28,23 +35,25 @@ const SelectAddressPage = () => {
     if (storedAddressesRaw) {
       try {
         const parsedAddresses = JSON.parse(storedAddressesRaw);
-        if (Array.isArray(parsedAddresses) && parsedAddresses.length > 0) {
+        // Ensure it's an array and not empty, otherwise treat as if no valid addresses stored
+        if (Array.isArray(parsedAddresses) && parsedAddresses.every(addr => typeof addr === 'object' && addr.id)) {
           addressesFromStorage = parsedAddresses;
         } else {
-          addressesFromStorage = [...mockShippingAddresses];
-          localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
+          // Malformed data or not an array of addresses, initialize as empty
+          addressesFromStorage = [];
+          localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify([]));
         }
       } catch (e) {
-        console.error("Failed to parse addresses from localStorage, using mock data.", e);
-        addressesFromStorage = [...mockShippingAddresses];
-        localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
+        console.error("Failed to parse addresses from localStorage, initializing as empty.", e);
+        addressesFromStorage = [];
+        localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify([]));
       }
     } else {
-      addressesFromStorage = [...mockShippingAddresses];
-      localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
+      // No addresses in localStorage, initialize as empty
+      addressesFromStorage = [];
+      localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify([]));
     }
 
-    // Sort addresses: default first, then by original order (which is preserved by filter + unshift)
     const defaultAddress = addressesFromStorage.find(addr => addr.isDefault);
     let sortedAddresses = [...addressesFromStorage];
     if (defaultAddress) {
@@ -53,7 +62,6 @@ const SelectAddressPage = () => {
     }
     setShippingAddresses(sortedAddresses);
 
-    // Determine selected address ID
     const storedSelectedId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
     const currentSelectedIsValid = storedSelectedId && sortedAddresses.find(addr => addr.id === storedSelectedId);
 
@@ -65,7 +73,10 @@ const SelectAddressPage = () => {
         setSelectedAddressId(currentDefaultAddress.id);
         localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, currentDefaultAddress.id);
       } else if (sortedAddresses.length > 0) {
-        setSelectedAddressId(sortedAddresses[0].id);
+        setSelectedAddressId(sortedAddresses[0].id); // Select first if no default
+        // Optionally make the first one default if none is set
+        // sortedAddresses[0].isDefault = true;
+        // localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(sortedAddresses));
         localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, sortedAddresses[0].id);
       } else {
         setSelectedAddressId(undefined);
@@ -82,8 +93,7 @@ const SelectAddressPage = () => {
 
   const handleEditAddress = (addressId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    // Future implementation: router.push(`/edit-address/${addressId}`);
-    alert(`Chức năng sửa địa chỉ (ID: ${addressId}) chưa được cài đặt.`);
+    router.push(`/add-address?editId=${addressId}`);
   };
 
   const handleAddNewAddress = () => {
@@ -98,15 +108,17 @@ const SelectAddressPage = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/checkout')} className="text-foreground hover:bg-muted hover:text-foreground">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground">Chọn địa chỉ nhận hàng</h1>
-          <div className="w-10"> {/* Spacer */}</div>
+          <h1 className="text-lg font-semibold text-foreground">{t('selectAddress.title')}</h1>
+          <div className="flex items-center">
+             <LanguageSwitcher />
+          </div>
         </div>
       </header>
 
       <main className={`flex-grow overflow-y-auto pt-14 pb-4`}>
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3">
-            <div className="py-2 px-0 sm:px-2 text-sm text-muted-foreground">Địa chỉ</div>
+            <div className="py-2 px-0 sm:px-2 text-sm text-muted-foreground">{t('selectAddress.addressesLabel')}</div>
             {shippingAddresses.length > 0 ? (
               <RadioGroup value={selectedAddressId} onValueChange={handleSelectAddress} className="space-y-0 bg-card rounded-md shadow-sm">
                 {shippingAddresses.map((address) => (
@@ -118,14 +130,14 @@ const SelectAddressPage = () => {
                           <p className="text-sm font-medium text-foreground">{address.name} | {address.phone}</p>
                           <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{address.address}</p>
                           {address.isDefault && (
-                            <span className="mt-1.5 inline-block text-xs text-green-600 border border-green-600 rounded px-1.5 py-0.5">Mặc định</span>
+                            <span className="mt-1.5 inline-block text-xs text-green-600 border border-green-600 rounded px-1.5 py-0.5">{t('selectAddress.defaultBadge')}</span>
                           )}
                         </div>
                         <button
                           onClick={(e) => handleEditAddress(address.id, e)}
                           className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-auto shrink-0 p-0 h-auto"
                         >
-                          Sửa
+                          {t('selectAddress.editButton')}
                         </button>
                       </CardContent>
                     </Label>
@@ -135,8 +147,8 @@ const SelectAddressPage = () => {
             ) : (
               <Card className="bg-card rounded-md shadow-sm">
                 <CardContent className="p-6 text-center text-muted-foreground">
-                  <p>Không tìm thấy địa chỉ nào.</p>
-                  <p>Vui lòng thêm địa chỉ mới.</p>
+                  <p>{t('selectAddress.noAddressesFound.line1')}</p>
+                  <p>{t('selectAddress.noAddressesFound.line2')}</p>
                 </CardContent>
               </Card>
             )}
@@ -147,7 +159,7 @@ const SelectAddressPage = () => {
                 onClick={handleAddNewAddress}
               >
                 <PlusCircle className="w-5 h-5 text-accent-foreground" />
-                <span>Thêm Địa Chỉ Mới</span>
+                <span>{t('selectAddress.addNewButton')}</span>
               </Button>
             </div>
           </div>

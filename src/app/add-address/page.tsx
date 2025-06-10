@@ -1,8 +1,8 @@
 
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,32 +12,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent }
-from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ClipboardPaste } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ShippingAddress } from '@/interfaces';
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const HEADER_HEIGHT = 'h-14'; // approx 56px
 const FOOTER_HEIGHT = 'h-20'; // approx 80px
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 
-const addressFormSchema = z.object({
-  fullName: z.string().min(1, { message: "Vui lòng nhập họ tên." }),
-  phone: z.string().regex(/^(\+84|0)\d{9,10}$/, { message: "Số điện thoại không hợp lệ." }),
-  province: z.string().min(1, { message: "Vui lòng chọn Tỉnh/Thành phố." }),
-  district: z.string().min(1, { message: "Vui lòng chọn Quận/Huyện." }),
-  ward: z.string().min(1, { message: "Vui lòng chọn Phường/Xã." }),
-  streetAddress: z.string().min(1, { message: "Vui lòng nhập địa chỉ cụ thể." }),
+const getAddressFormSchema = (t: (key: string, params?: Record<string, string | number>) => string) => z.object({
+  id: z.string().optional(), // For edit mode
+  fullName: z.string().min(1, { message: t("addAddress.validation.fullNameRequired") }),
+  phone: z.string().regex(/^(\+84|0)\d{9,10}$/, { message: t("addAddress.validation.phoneInvalid") }),
+  province: z.string().min(1, { message: t("addAddress.validation.provinceRequired") }),
+  district: z.string().min(1, { message: t("addAddress.validation.districtRequired") }),
+  ward: z.string().min(1, { message: t("addAddress.validation.wardRequired") }),
+  streetAddress: z.string().min(1, { message: t("addAddress.validation.streetAddressRequired") }),
   isDefault: z.boolean().default(false),
-  addressType: z.enum(['home', 'office'], { required_error: "Vui lòng chọn loại địa chỉ." }),
+  addressType: z.enum(['home', 'office'], { required_error: t("addAddress.validation.addressTypeRequired") }),
 });
 
-type AddressFormValues = z.infer<typeof addressFormSchema>;
+type AddressFormValues = z.infer<ReturnType<typeof getAddressFormSchema>>;
 
-// Placeholder data for dropdowns
+// Placeholder data for dropdowns - these should ideally be fetched or localized
 const provinces = [{ value: 'hcm', label: 'TP. Hồ Chí Minh' }, { value: 'hn', label: 'Hà Nội' }];
 const districts = [{ value: 'q1', label: 'Quận 1' }, { value: 'qtb', label: 'Quận Tân Bình' }];
 const wards = [{ value: 'pdk', label: 'Phường Đa Kao' }, { value: 'p2', label: 'Phường 2' }];
@@ -46,12 +48,22 @@ type AddressTypeOption = 'home' | 'office';
 
 const AddAddressPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { t } = useLanguage();
+
+  const editId = searchParams.get('editId');
+  const isEditMode = Boolean(editId);
+
   const [selectedAddressType, setSelectedAddressType] = useState<AddressTypeOption>('home');
+  const [pageTitle, setPageTitle] = useState(t('addAddress.title.new'));
+
+  const addressFormSchema = useMemo(() => getAddressFormSchema(t), [t]);
 
   const form = useForm<AddressFormValues>({
     resolver: zodResolver(addressFormSchema),
     defaultValues: {
+      id: undefined,
       fullName: '',
       phone: '',
       province: '',
@@ -63,51 +75,129 @@ const AddAddressPage = () => {
     },
   });
 
+  useEffect(() => {
+    setPageTitle(isEditMode ? t('addAddress.title.edit') : t('addAddress.title.new'));
+    if (isEditMode && editId) {
+      const existingAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
+      if (existingAddressesRaw) {
+        const addresses: ShippingAddress[] = JSON.parse(existingAddressesRaw);
+        const addressToEdit = addresses.find(addr => addr.id === editId);
+        if (addressToEdit) {
+          form.reset({
+            id: addressToEdit.id,
+            fullName: addressToEdit.name,
+            phone: addressToEdit.phone,
+            province: addressToEdit.province || '',
+            district: addressToEdit.district || '',
+            ward: addressToEdit.ward || '',
+            streetAddress: addressToEdit.streetAddress || '',
+            isDefault: addressToEdit.isDefault || false,
+            addressType: addressToEdit.addressType || 'home',
+          });
+          setSelectedAddressType(addressToEdit.addressType || 'home');
+        } else {
+          router.push('/select-address'); // Address not found, redirect
+        }
+      }
+    }
+  }, [isEditMode, editId, form, router, t]);
+
+
   const onSubmit = (data: AddressFormValues) => {
     const provinceLabel = provinces.find(p => p.value === data.province)?.label || data.province;
     const districtLabel = districts.find(d => d.value === data.district)?.label || data.district;
     const wardLabel = wards.find(w => w.value === data.ward)?.label || data.ward;
     const fullAddressString = `${data.streetAddress}, ${wardLabel}, ${districtLabel}, ${provinceLabel}`;
 
-    const newAddress: ShippingAddress = {
-      id: `addr-${Date.now().toString()}-${Math.random().toString(36).substring(2, 7)}`,
+    const addressData: Omit<ShippingAddress, 'id'> & { id?: string } = {
+      id: isEditMode ? data.id : `addr-${Date.now().toString()}-${Math.random().toString(36).substring(2, 7)}`,
       name: data.fullName,
       phone: data.phone,
       address: fullAddressString,
-      isDefault: data.isDefault, // Initial value from form
+      isDefault: data.isDefault,
+      province: data.province,
+      district: data.district,
+      ward: data.ward,
+      streetAddress: data.streetAddress,
+      addressType: data.addressType,
     };
 
     try {
       const existingAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
       let addresses: ShippingAddress[] = existingAddressesRaw ? JSON.parse(existingAddressesRaw) : [];
+      const selectedAddressIdRaw = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
 
-      if (newAddress.isDefault) {
-        // If new one is explicitly set as default, unset all others
-        addresses = addresses.map(addr => ({ ...addr, isDefault: false }));
-        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
-      } else {
-        // If new one is NOT set as default by user
-        if (addresses.length === 0) {
-          // And it's the very first address being added (empty list before this)
-          newAddress.isDefault = true; // Make it default
-          localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
+      if (isEditMode && addressData.id) { // Editing existing address
+        let oldDefaultId: string | null = null;
+        addresses = addresses.map(addr => {
+            if (addr.isDefault && addr.id !== addressData.id) oldDefaultId = addr.id; // track old default if it's not the one being edited
+            return addr.id === addressData.id ? { ...addr, ...addressData } as ShippingAddress : addr;
+        });
+
+        if (addressData.isDefault) {
+            addresses = addresses.map(addr => 
+                addr.id === addressData.id ? addr : { ...addr, isDefault: false }
+            );
+            localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, addressData.id);
+        } else { // If current edited address is UNSET from default
+            const currentlyEditedAddressWasDefault = addresses.find(a => a.id === addressData.id)?.isDefault === false && selectedAddressIdRaw === addressData.id;
+            if(currentlyEditedAddressWasDefault){
+                // If it was the default and now it's not, we need to find a new default or clear selection
+                 if (addresses.length === 1) { // It's the only address, must remain default
+                    addresses[0].isDefault = true;
+                    localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, addresses[0].id);
+                 } else if (oldDefaultId) { // Another address was default before edit
+                    localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, oldDefaultId);
+                 }
+                 else { // No other default, pick first if available or clear
+                    const firstAddress = addresses.length > 0 ? addresses[0] : null;
+                    if (firstAddress) {
+                        firstAddress.isDefault = true; // Make the first one default
+                        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, firstAddress.id);
+                        addresses = addresses.map(a => a.id === firstAddress.id ? firstAddress : a);
+                    } else {
+                        localStorage.removeItem(SELECTED_ADDRESS_STORAGE_KEY);
+                    }
+                 }
+            }
         }
-        // Otherwise, if other addresses exist and have a default, or user didn't mark this as default, it remains non-default.
+        toast({
+          title: t('toast.address.updated.title'),
+          description: t('toast.address.updated.description'),
+        });
+
+      } else { // Adding new address
+        const newAddress = addressData as ShippingAddress; // ID is now guaranteed
+        if (newAddress.isDefault) {
+          addresses = addresses.map(addr => ({ ...addr, isDefault: false }));
+          localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
+        } else {
+          if (addresses.length === 0) {
+            newAddress.isDefault = true;
+            localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
+          }
+        }
+        addresses.push(newAddress);
+        toast({
+          title: t('toast.address.saved.title'),
+          description: t('toast.address.saved.description'),
+        });
       }
       
-      addresses.push(newAddress);
-      localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addresses));
+      // Ensure at least one address is default if addresses exist
+      if (addresses.length > 0 && !addresses.some(addr => addr.isDefault)) {
+        addresses[0].isDefault = true;
+        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, addresses[0].id);
+      }
 
-      toast({
-        title: 'Địa chỉ đã được lưu',
-        description: 'Địa chỉ mới của bạn đã được thêm thành công.',
-      });
+      localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addresses));
       router.push('/select-address');
+
     } catch (error) {
       console.error("Error saving address to localStorage:", error);
       toast({
-        title: 'Lỗi',
-        description: 'Không thể lưu địa chỉ. Vui lòng thử lại.',
+        title: t('toast.address.error.title'),
+        description: t('toast.address.error.description'),
         variant: 'destructive',
       });
     }
@@ -125,8 +215,10 @@ const AddAddressPage = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/select-address')} className="text-foreground hover:bg-muted hover:text-foreground -ml-2">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground text-center flex-grow">Địa chỉ mới</h1>
-          <div className="w-8"> {/* Spacer to balance the back button */}</div>
+          <h1 className="text-lg font-semibold text-foreground text-center flex-grow">{pageTitle}</h1>
+          <div className="flex items-center">
+             <LanguageSwitcher />
+          </div>
         </div>
       </header>
 
@@ -135,17 +227,19 @@ const AddAddressPage = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 container mx-auto px-4 py-4">
               
-              <Card className="bg-muted">
-                <CardContent className="p-3">
-                  <div className="flex items-center mb-1">
-                    <ClipboardPaste className="w-5 h-5 text-foreground mr-2" />
-                    <span className="text-sm font-semibold text-foreground">Dán và nhập nhanh</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Dán hoặc nhập thông tin, nhấn chọn Tự động điền để nhập tên, số điện thoại và địa chỉ
-                  </p>
-                </CardContent>
-              </Card>
+              {!isEditMode && (
+                <Card className="bg-muted">
+                  <CardContent className="p-3">
+                    <div className="flex items-center mb-1">
+                      <ClipboardPaste className="w-5 h-5 text-foreground mr-2" />
+                      <span className="text-sm font-semibold text-foreground">{t('addAddress.pasteHelper.title')}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {t('addAddress.pasteHelper.description')}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <CardContent className="p-0">
@@ -155,7 +249,7 @@ const AddAddressPage = () => {
                     render={({ field }) => (
                       <FormItem className="border-b border-border">
                         <FormControl>
-                          <Input placeholder="Họ và tên" {...field} className="border-0 rounded-none h-12 px-4 focus-visible:ring-0 focus-visible:ring-offset-0" />
+                          <Input placeholder={t('addAddress.fullNamePlaceholder')} {...field} className="border-0 rounded-none h-12 px-4 focus-visible:ring-0 focus-visible:ring-offset-0" />
                         </FormControl>
                         <FormMessage className="px-4 pb-2 text-xs" />
                       </FormItem>
@@ -168,7 +262,7 @@ const AddAddressPage = () => {
                     render={({ field }) => (
                       <FormItem className="border-b border-border">
                         <FormControl>
-                          <Input type="tel" placeholder="Số điện thoại" {...field} className="border-0 rounded-none h-12 px-4 focus-visible:ring-0 focus-visible:ring-offset-0" />
+                          <Input type="tel" placeholder={t('addAddress.phonePlaceholder')} {...field} className="border-0 rounded-none h-12 px-4 focus-visible:ring-0 focus-visible:ring-offset-0" />
                         </FormControl>
                         <FormMessage className="px-4 pb-2 text-xs" />
                       </FormItem>
@@ -180,10 +274,10 @@ const AddAddressPage = () => {
                     name="province"
                     render={({ field }) => (
                       <FormItem className="border-b border-border">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ""} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger className="border-0 rounded-none h-12 px-4 focus:ring-0 focus:ring-offset-0">
-                              <SelectValue placeholder="Tỉnh/Thành phố" />
+                              <SelectValue placeholder={t('addAddress.provincePlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -200,10 +294,10 @@ const AddAddressPage = () => {
                     name="district"
                     render={({ field }) => (
                       <FormItem className="border-b border-border">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ""} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger className="border-0 rounded-none h-12 px-4 focus:ring-0 focus:ring-offset-0">
-                              <SelectValue placeholder="Quận/Huyện" />
+                              <SelectValue placeholder={t('addAddress.districtPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -220,10 +314,10 @@ const AddAddressPage = () => {
                     name="ward"
                     render={({ field }) => (
                       <FormItem className="border-b border-border">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ""} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger className="border-0 rounded-none h-12 px-4 focus:ring-0 focus:ring-offset-0">
-                              <SelectValue placeholder="Phường/Xã" />
+                              <SelectValue placeholder={t('addAddress.wardPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -241,7 +335,7 @@ const AddAddressPage = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Textarea placeholder="Tên đường, Tòa nhà, Số nhà" {...field} className="border-0 rounded-none min-h-[80px] px-4 py-3 focus-visible:ring-0 focus-visible:ring-offset-0" />
+                          <Textarea placeholder={t('addAddress.streetAddressPlaceholder')} {...field} className="border-0 rounded-none min-h-[80px] px-4 py-3 focus-visible:ring-0 focus-visible:ring-offset-0" />
                         </FormControl>
                         <FormMessage className="px-4 pb-2 text-xs" />
                       </FormItem>
@@ -257,7 +351,7 @@ const AddAddressPage = () => {
                     name="isDefault"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between p-4 border-b border-border">
-                        <FormLabel className="text-sm text-foreground">Đặt làm địa chỉ mặc định</FormLabel>
+                        <FormLabel className="text-sm text-foreground">{t('addAddress.setDefaultLabel')}</FormLabel>
                         <FormControl>
                           <Switch
                             checked={field.value}
@@ -273,7 +367,7 @@ const AddAddressPage = () => {
                     name="addressType"
                     render={({ field }) => ( 
                       <FormItem className="flex flex-row items-center justify-between p-4">
-                        <FormLabel className="text-sm text-foreground">Loại địa chỉ:</FormLabel>
+                        <FormLabel className="text-sm text-foreground">{t('addAddress.addressTypeLabel')}</FormLabel>
                         <div className="flex space-x-2">
                           <Button
                             type="button"
@@ -282,7 +376,7 @@ const AddAddressPage = () => {
                             onClick={() => handleAddressTypeChange('office')}
                             className={`${selectedAddressType === 'office' ? 'bg-foreground text-accent-foreground hover:bg-foreground/90' : 'text-foreground border-muted-foreground hover:bg-muted'}`}
                           >
-                            Văn Phòng
+                            {t('addAddress.addressType.office')}
                           </Button>
                           <Button
                             type="button"
@@ -291,7 +385,7 @@ const AddAddressPage = () => {
                             onClick={() => handleAddressTypeChange('home')}
                              className={`${selectedAddressType === 'home' ? 'bg-foreground text-accent-foreground hover:bg-foreground/90' : 'text-foreground border-muted-foreground hover:bg-muted'}`}
                           >
-                            Nhà Riêng
+                            {t('addAddress.addressType.home')}
                           </Button>
                         </div>
                       </FormItem>
@@ -316,9 +410,9 @@ const AddAddressPage = () => {
             type="submit" 
             size="lg" 
             className="w-full max-w-md bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold" 
-            onClick={form.handleSubmit(onSubmit)} // No need for separate form="addressForm" if button is inside form or form.handleSubmit is used
+            onClick={form.handleSubmit(onSubmit)}
           >
-            HOÀN THÀNH
+            {isEditMode ? t('addAddress.button.saveChanges') : t('addAddress.button.complete')}
           </Button>
         </div>
       </footer>
@@ -327,4 +421,3 @@ const AddAddressPage = () => {
 };
 
 export default AddAddressPage;
-    

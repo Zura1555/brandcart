@@ -1,6 +1,8 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 export const metadata: Metadata = {
   title: 'BrandCart',
@@ -18,8 +20,10 @@ export default function RootLayout({
         {/* Removed Google Font links for Poppins and PT Sans */}
       </head>
       <body className="font-body antialiased">
-        {children}
-        <Toaster />
+        <LanguageProvider>
+          {children}
+          <Toaster />
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -9,77 +9,87 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, Truck, CheckCircle2, XCircle } from 'lucide-react'; // Using XCircle for unavailable
+import { ChevronLeft, Truck, CheckCircle2, XCircle } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useToast } from "@/hooks/use-toast";
 
-const HEADER_HEIGHT = 'h-14'; // approx 56px
-const FOOTER_HEIGHT = 'h-20'; // approx 80px
+const HEADER_HEIGHT = 'h-14'; 
+const FOOTER_HEIGHT = 'h-20';
 
 interface Voucher {
   id: string;
-  type: string; // e.g., "MIỄN PHÍ VẬN CHUYỂN"
+  typeKey: string; 
   title: string;
-  discount: string; // e.g., "Giảm tối đa 500k₫"
-  minOrder: string; // e.g., "Đơn tối thiểu 0₫"
-  usageInfo?: string; // e.g., "Đã dùng 97% - sắp hết hạn"
-  expiryDate?: string; // e.g., "HSD: 12.06.2025"
+  discount: string; 
+  minOrder: string; 
+  usageInfo?: string; 
+  expiryDate?: string; 
   isBestChoice?: boolean;
   isAvailable: boolean;
   unavailableReason?: string;
-  quantity?: number; // e.g., x5
-  colorClass: string; // e.g., 'bg-teal-500'
-  textColorClass?: string; // e.g., 'text-white' or 'text-teal-700'
+  quantity?: number; 
+  colorClass: string; 
+  textColorClass?: string; 
   icon?: React.ElementType;
 }
 
-const mockAvailableVouchers: Voucher[] = [
-  {
-    id: 'voucher1',
-    type: 'MIỄN PHÍ VẬN CHUYỂN',
-    title: 'Miễn Phí Vận Chuyển',
-    discount: 'Giảm tối đa 500k₫',
-    minOrder: 'Đơn tối thiểu 0₫',
-    usageInfo: 'Đã dùng 97% - sắp hết hạn',
-    isBestChoice: true,
-    isAvailable: true,
-    colorClass: 'bg-teal-500',
-    textColorClass: 'text-white',
-    icon: Truck,
-  },
-];
-
-const mockUnavailableVouchers: Voucher[] = [
-  {
-    id: 'voucher2',
-    type: 'MIỄN PHÍ VẬN CHUYỂN',
-    title: 'Miễn Phí Vận Chuyển',
-    discount: 'Giảm tối đa 50k₫',
-    minOrder: 'Đơn tối thiểu 45k₫',
-    expiryDate: 'HSD: 12.06.2025',
-    isAvailable: false,
-    unavailableReason: 'Chưa đạt GTĐH tối thiểu.',
-    quantity: 5,
-    colorClass: 'bg-teal-100',
-    textColorClass: 'text-teal-600',
-    icon: Truck,
-  },
-];
 
 
 const SelectVoucherPage = () => {
   const router = useRouter();
+  const { t } = useLanguage();
+  const { toast } = useToast();
   const [voucherCode, setVoucherCode] = useState('');
-  const [selectedVoucherId, setSelectedVoucherId] = useState<string | undefined>(mockAvailableVouchers.length > 0 ? mockAvailableVouchers[0].id : undefined);
+
+  const mockAvailableVouchers: Voucher[] = [
+    {
+      id: 'voucher1',
+      typeKey: 'selectVoucher.voucherCard.typeFreeShipping',
+      title: 'Miễn Phí Vận Chuyển', // This title could also be a key if it varies
+      discount: 'Giảm tối đa 500k₫',
+      minOrder: 'Đơn tối thiểu 0₫',
+      usageInfo: 'Đã dùng 97% - sắp hết hạn',
+      isBestChoice: true,
+      isAvailable: true,
+      colorClass: 'bg-teal-500',
+      textColorClass: 'text-white',
+      icon: Truck,
+    },
+  ];
+  
+  const mockUnavailableVouchers: Voucher[] = [
+    {
+      id: 'voucher2',
+      typeKey: 'selectVoucher.voucherCard.typeFreeShipping',
+      title: 'Miễn Phí Vận Chuyển',
+      discount: 'Giảm tối đa 50k₫',
+      minOrder: 'Đơn tối thiểu 45k₫',
+      expiryDate: 'HSD: 12.06.2025',
+      isAvailable: false,
+      unavailableReason: 'Chưa đạt GTĐH tối thiểu.', // This should be a translatable key
+      quantity: 5,
+      colorClass: 'bg-teal-100',
+      textColorClass: 'text-teal-600',
+      icon: Truck,
+    },
+  ];
+
+  const [selectedVoucherId, setSelectedVoucherId] = useState<string | undefined>(
+    mockAvailableVouchers.length > 0 ? mockAvailableVouchers[0].id : undefined
+  );
+
 
   const handleApplyCode = () => {
     if (voucherCode.trim() === '') return;
     console.log("Applying voucher code:", voucherCode);
-    alert(`Mã ${voucherCode} đã được áp dụng ( giả lập ).`);
+    toast({
+      title: t('toast.voucher.codeApplied', {code: voucherCode})
+    });
   };
 
   const handleConfirmSelection = () => {
     console.log("Selected voucher ID:", selectedVoucherId);
-    // Here you would typically pass the selected voucher back to the checkout page
-    // e.g., via localStorage or a global state.
     router.push('/checkout');
   };
 
@@ -91,13 +101,13 @@ const SelectVoucherPage = () => {
         <div className="flex">
           <div className={`w-20 ${voucher.colorClass} flex flex-col items-center justify-center p-2 ${voucher.textColorClass || 'text-foreground'}`}>
             {voucher.icon && <voucher.icon className="w-7 h-7 mb-1" />}
-            <span className="font-semibold text-xs text-center leading-tight uppercase">{voucher.type}</span>
+            <span className="font-semibold text-xs text-center leading-tight uppercase">{t(voucher.typeKey)}</span>
           </div>
           <div className="flex-grow p-3 pr-2 space-y-1">
             <div className="flex justify-between items-start">
               <h3 className="text-sm font-semibold text-foreground">{voucher.title}</h3>
               {voucher.isBestChoice && voucher.isAvailable && (
-                <Badge className="bg-orange-500 text-white text-xs px-1.5 py-0.5">Tốt nhất</Badge>
+                <Badge className="bg-orange-500 text-white text-xs px-1.5 py-0.5">{t('selectVoucher.voucherCard.bestChoice')}</Badge>
               )}
               {voucher.quantity && !voucher.isAvailable && (
                 <Badge variant="outline" className="text-xs border-muted-foreground text-muted-foreground">x{voucher.quantity}</Badge>
@@ -108,7 +118,7 @@ const SelectVoucherPage = () => {
             {voucher.usageInfo && voucher.isAvailable && <p className="text-xs text-orange-600">{voucher.usageInfo}</p>}
             {voucher.expiryDate && <p className="text-xs text-muted-foreground">{voucher.expiryDate}</p>}
             {!voucher.isAvailable && voucher.unavailableReason && (
-              <p className="text-xs text-red-600 mt-1">{voucher.unavailableReason}</p>
+              <p className="text-xs text-red-600 mt-1">{voucher.unavailableReason}</p> // This should be translated
             )}
           </div>
           <div className="w-12 flex items-center justify-center p-2 shrink-0">
@@ -136,8 +146,10 @@ const SelectVoucherPage = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/checkout')} className="text-foreground hover:bg-muted hover:text-foreground -ml-2">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground text-center flex-grow">Chọn Shopee Voucher</h1>
-          <div className="w-8"> {/* Spacer */} </div>
+          <h1 className="text-lg font-semibold text-foreground text-center flex-grow">{t('selectVoucher.title')}</h1>
+          <div className="flex items-center">
+             <LanguageSwitcher />
+          </div>
         </div>
       </header>
 
@@ -148,7 +160,7 @@ const SelectVoucherPage = () => {
               <CardContent className="p-3 flex space-x-2">
                 <Input
                   type="text"
-                  placeholder="Nhập mã Shopee Voucher"
+                  placeholder={t('selectVoucher.inputPlaceholder')}
                   value={voucherCode}
                   onChange={(e) => setVoucherCode(e.target.value)}
                   className="flex-grow h-10 text-sm"
@@ -158,14 +170,14 @@ const SelectVoucherPage = () => {
                   disabled={voucherCode.trim() === ''}
                   className="h-10 text-sm bg-foreground hover:bg-foreground/90 text-accent-foreground"
                 >
-                  ÁP DỤNG
+                  {t('selectVoucher.applyButton')}
                 </Button>
               </CardContent>
             </Card>
 
             <RadioGroup value={selectedVoucherId} onValueChange={setSelectedVoucherId}>
               <div>
-                <h2 className="text-sm font-semibold text-muted-foreground mb-2 px-1">Voucher có thể dùng</h2>
+                <h2 className="text-sm font-semibold text-muted-foreground mb-2 px-1">{t('selectVoucher.usableVouchersTitle')}</h2>
                 {mockAvailableVouchers.map(voucher => (
                   <VoucherCard 
                     key={voucher.id} 
@@ -174,20 +186,20 @@ const SelectVoucherPage = () => {
                     onSelect={setSelectedVoucherId}
                   />
                 ))}
-                {mockAvailableVouchers.length === 0 && <p className="text-xs text-muted-foreground px-1">Không có voucher nào có thể dùng.</p>}
+                {mockAvailableVouchers.length === 0 && <p className="text-xs text-muted-foreground px-1">{t('selectVoucher.noUsableVouchers')}</p>}
               </div>
 
               <div className="mt-6">
-                <h2 className="text-sm font-semibold text-muted-foreground mb-2 px-1">Voucher không thể dùng</h2>
+                <h2 className="text-sm font-semibold text-muted-foreground mb-2 px-1">{t('selectVoucher.unusableVouchersTitle')}</h2>
                 {mockUnavailableVouchers.map(voucher => (
                    <VoucherCard 
                     key={voucher.id} 
                     voucher={voucher} 
-                    isSelected={false} // Cannot select unavailable
-                    onSelect={() => {}} // No action
+                    isSelected={false} 
+                    onSelect={() => {}} 
                   />
                 ))}
-                {mockUnavailableVouchers.length === 0 && <p className="text-xs text-muted-foreground px-1">Không có voucher nào không thể dùng.</p>}
+                {mockUnavailableVouchers.length === 0 && <p className="text-xs text-muted-foreground px-1">{t('selectVoucher.noUnusableVouchers')}</p>}
               </div>
             </RadioGroup>
           </div>
@@ -196,14 +208,14 @@ const SelectVoucherPage = () => {
 
       <footer className={`fixed bottom-0 left-0 right-0 z-30 bg-card border-t ${FOOTER_HEIGHT} flex flex-col items-center justify-center p-3`}>
         <p className="text-xs text-muted-foreground mb-2 text-center">
-          {selectedVoucherId ? 'Đã chọn 1 Voucher. Ưu đãi phí vận chuyển đã được áp dụng.' : 'Chưa chọn voucher nào.'}
+          {selectedVoucherId ? t('selectVoucher.footer.selectedInfo') : t('selectVoucher.footer.notSelectedInfo')}
         </p>
         <Button
           size="lg"
           className="w-full max-w-md bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
           onClick={handleConfirmSelection}
         >
-          ĐỒNG Ý
+          {t('selectVoucher.footer.confirmButton')}
         </Button>
       </footer>
     </div>
