@@ -135,15 +135,15 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     return getVariantFromSelection(tempSelectedColorName, tempSelectedSizeValue);
   }, [tempSelectedColorName, tempSelectedSizeValue, getVariantFromSelection]);
 
-  const currentDisplayDetails = useMemo(() => {
+  const currentDisplayDetailsInSheet = useMemo(() => {
     return {
       price: selectedVariantInSheet?.price ?? item.price,
       imageUrl: selectedVariantInSheet?.imageUrl ?? item.imageUrl,
-      stock: selectedVariantInSheet?.stock, // Can be undefined if variant or its stock is not defined
+      stock: selectedVariantInSheet?.stock,
       originalPrice: selectedVariantInSheet?.originalPrice ?? item.originalPrice,
       dataAiHint: selectedVariantInSheet?.dataAiHint ?? item.dataAiHint,
     };
-  }, [selectedVariantInSheet, item.price, item.imageUrl, item.originalPrice, item.dataAiHint]);
+  }, [selectedVariantInSheet, item.price, item.imageUrl, item.originalPrice, item.dataAiHint, item.stock]);
   
   const availableSizesForSelectedColor = useMemo(() => {
     if (!item.availableVariants) return new Set<string>();
@@ -224,7 +224,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 
   const handleConfirmVariant = () => {
     if (selectedVariantInSheet) {
-      // The check for stock > 0 is handled by the button's disabled state
       onVariantChange(item.id, selectedVariantInSheet);
     }
     setIsVariantSheetOpen(false);
@@ -232,33 +231,40 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 
   const hasAvailableVariants = item.availableVariants && item.availableVariants.length > 0;
   
-  // Determine if the "Update" button should be enabled
   const canConfirmSelection = !!selectedVariantInSheet && (selectedVariantInSheet.stock === undefined || selectedVariantInSheet.stock > 0);
 
   const displayVariantNameInBadge = cleanVariantName(item.variant);
 
-  // Stock status display logic
-  let stockStatusText = '';
-  let stockStatusClasses = 'text-sm font-medium ';
+  let stockStatusTextInSheet = '';
+  let stockStatusClassesInSheet = 'text-sm font-medium ';
 
-  if (currentDisplayDetails.stock !== undefined) {
-    if (currentDisplayDetails.stock > 10) {
-      stockStatusText = t('cart.sheet.stock.inStock');
-      stockStatusClasses += 'text-green-600';
-    } else if (currentDisplayDetails.stock > 0) {
-      stockStatusText = t('cart.sheet.stock.remaining', { count: currentDisplayDetails.stock });
-      stockStatusClasses += 'text-orange-600';
+  if (currentDisplayDetailsInSheet.stock !== undefined) {
+    if (currentDisplayDetailsInSheet.stock > 10) {
+      stockStatusTextInSheet = t('cart.sheet.stock.inStock');
+      stockStatusClassesInSheet += 'text-green-600';
+    } else if (currentDisplayDetailsInSheet.stock > 0) {
+      stockStatusTextInSheet = t('cart.sheet.stock.remaining', { count: currentDisplayDetailsInSheet.stock });
+      stockStatusClassesInSheet += 'text-orange-600';
     } else {
-      stockStatusText = t('cart.sheet.stock.outOfStock');
-      stockStatusClasses += 'text-destructive';
+      stockStatusTextInSheet = t('cart.sheet.stock.outOfStock');
+      stockStatusClassesInSheet += 'text-destructive';
     }
-  } else {
-    // Fallback if stock is undefined (e.g. product doesn't track stock, or variant doesn't have specific stock)
-    // Depending on business logic, this could also be "In stock" or hidden.
-    // For now, let's assume undefined means we don't show specific status or treat as "In stock" by default if not explicitly 0.
-    // If you want to treat undefined as out of stock:
-    // stockStatusText = t('cart.sheet.stock.outOfStock');
-    // stockStatusClasses += 'text-destructive';
+  }
+
+  let itemCardStockStatusText = '';
+  let itemCardStockStatusClasses = 'text-xs mt-1 text-right ';
+
+  if (item.stock !== undefined) {
+    if (item.stock > 10) {
+      itemCardStockStatusText = t('cart.sheet.stock.inStock');
+      itemCardStockStatusClasses += 'text-green-600';
+    } else if (item.stock > 0) {
+      itemCardStockStatusText = t('cart.sheet.stock.remaining', { count: item.stock });
+      itemCardStockStatusClasses += 'text-orange-600';
+    } else {
+      itemCardStockStatusText = t('cart.sheet.stock.outOfStock');
+      itemCardStockStatusClasses += 'text-destructive';
+    }
   }
 
 
@@ -313,6 +319,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                   <SheetTrigger asChild>
                     <button type="button" className="text-left block hover:opacity-80 transition-opacity focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
                       <Badge
+                        variant="outline"
                         className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center cursor-pointer"
                       >
                         {displayVariantNameInBadge}
@@ -329,22 +336,22 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                       <div className="p-4 space-y-5">
                         <div className="flex items-start space-x-3">
                           <Image
-                            src={currentDisplayDetails.imageUrl}
+                            src={currentDisplayDetailsInSheet.imageUrl}
                             alt={item.name}
                             width={88}
                             height={88}
                             className="rounded-md object-cover w-20 h-20 sm:w-24 sm:h-24 border flex-shrink-0"
-                            data-ai-hint={currentDisplayDetails.dataAiHint || "product image"}
+                            data-ai-hint={currentDisplayDetailsInSheet.dataAiHint || "product image"}
                           />
                           <div className="flex-grow min-w-0">
                             {item.brand && <p className="text-sm font-semibold text-foreground">{item.brand}</p>}
                             <p className="text-sm text-foreground mt-0.5 line-clamp-2">{item.name}</p>
                             <div className="flex items-baseline space-x-2 mt-1">
-                                <p className="text-lg font-bold text-foreground">{currentDisplayDetails.price.toLocaleString('vi-VN')}₫</p>
-                                {stockStatusText && (
+                                <p className="text-lg font-bold text-foreground">{currentDisplayDetailsInSheet.price.toLocaleString('vi-VN')}₫</p>
+                                {stockStatusTextInSheet && (
                                   <>
                                     <span className="text-sm text-muted-foreground">|</span>
-                                    <span className={stockStatusClasses}>{stockStatusText}</span>
+                                    <span className={stockStatusClassesInSheet}>{stockStatusTextInSheet}</span>
                                   </>
                                 )}
                             </div>
@@ -422,7 +429,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                           </div>
                         )}
                          {(uniqueColors.length === 0 && allPossibleSizes.length === 0 && item.availableVariants && item.availableVariants.length > 1) && (
-                            // This case implies variants exist but are not structured as color/size. Could list them directly.
                             <p className="text-sm text-muted-foreground">{t('cart.sheet.complexVariants')}</p>
                          )}
                          {(!item.availableVariants || item.availableVariants.length === 0 || (item.availableVariants.length === 1 && !uniqueColors.length && !allPossibleSizes.length)) && (
@@ -440,6 +446,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                 </Sheet>
               ) : (
                 <Badge
+                  variant="outline"
                   className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5"
                 >
                   {displayVariantNameInBadge}
@@ -447,9 +454,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
               )
             )}
 
-            {item.stock !== undefined && item.stock > 0 && item.stock <= 5 && !isVariantSheetOpen && ( // Only show if sheet is NOT open
-              <p className="text-xs text-destructive mt-1">{t('cart.sheet.stock.remaining', { count: item.stock })}</p>
-            )}
             <div className="flex items-baseline space-x-2 mt-1">
               <p className="text-sm font-bold text-foreground">{item.price.toLocaleString('vi-VN')}₫</p>
               {item.originalPrice && (
@@ -463,12 +467,15 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
               </div>
             )}
           </div>
-          <div className="shrink-0">
+          <div className="shrink-0 flex flex-col items-end">
             <QuantitySelector
               quantity={item.quantity}
               onIncrement={() => onQuantityChange(item.id, item.quantity + 1)}
               onDecrement={() => onQuantityChange(item.id, item.quantity - 1)}
             />
+            {itemCardStockStatusText && (
+              <p className={itemCardStockStatusClasses}>{itemCardStockStatusText}</p>
+            )}
           </div>
         </div>
       </div>
@@ -477,3 +484,4 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
+
