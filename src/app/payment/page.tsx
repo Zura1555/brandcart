@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const HEADER_HEIGHT = 'h-14';
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
-const STATIC_SHIPPING_COST = 19000; // Assuming a fixed shipping cost as per previous setup
+const STATIC_SHIPPING_COST = 19000; 
 
 interface OrderDetails {
   orderNumber: string;
@@ -38,6 +38,8 @@ const PaymentSuccessPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // This effect attempts to load order details from localStorage.
+    // It runs once on mount or if locale/t/toast change (which are generally stable).
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
     if (rawItems) {
       try {
@@ -62,25 +64,27 @@ const PaymentSuccessPage = () => {
             shippingCost: STATIC_SHIPPING_COST,
             totalAmount,
           });
-
-          // Clear the cart from localStorage after processing
+          // Clear the cart from localStorage only after successfully setting orderDetails
           localStorage.removeItem(CHECKOUT_ITEMS_STORAGE_KEY);
-
-        } else {
-          // If cart is empty, redirect to home
-          router.replace('/');
         }
+        // If items array is empty, orderDetails remains null.
       } catch (error) {
         console.error("Error processing order details:", error);
         toast({ title: t('paymentSuccess.toast.errorProcessingOrder.title'), description: t('paymentSuccess.toast.errorProcessingOrder.description'), variant: 'destructive' });
-        router.replace('/');
+        // orderDetails remains null on error.
       }
-    } else {
-      // No items in checkout, redirect to home
+    }
+    // If rawItems is null (e.g. direct access or refresh after clearing), orderDetails remains null.
+    setIsLoading(false); // Signal that loading attempt is complete.
+  }, [locale, t, toast]); // Dependencies for the data loading effect.
+
+  useEffect(() => {
+    // This effect handles redirection if loading is complete and no order details were found.
+    if (!isLoading && !orderDetails) {
       router.replace('/');
     }
-    setIsLoading(false);
-  }, [locale, router, t]);
+  }, [isLoading, orderDetails, router]); // Dependencies for the redirection effect.
+
 
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')}₫`;
@@ -88,11 +92,10 @@ const PaymentSuccessPage = () => {
 
   const handleRatingSelect = (rating: number) => {
     setSelectedRating(rating);
-    // Here you could potentially send the feedback to a server
     toast({ title: t('paymentSuccess.toast.feedbackReceived.title'), description: t('paymentSuccess.toast.feedbackReceived.description', { rating }) });
   };
 
-  if (isLoading || !orderDetails) {
+  if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <header className={`fixed top-0 left-0 right-0 z-30 bg-card shadow-sm border-b ${HEADER_HEIGHT} flex items-center`}>
@@ -113,6 +116,12 @@ const PaymentSuccessPage = () => {
         </main>
       </div>
     );
+  }
+  
+  // If after loading, orderDetails is still null, the redirection effect above will handle it.
+  // We might return null or a minimal loader here if the redirect effect needs a render cycle.
+  if (!orderDetails) {
+    return null; // Or a minimal loading indicator while redirect effect runs
   }
 
   return (
@@ -212,3 +221,4 @@ const PaymentSuccessPage = () => {
 };
 
 export default PaymentSuccessPage;
+    
