@@ -138,7 +138,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
             {displayVariant && (
               <Badge 
                 variant="outline" 
-                className="bg-foreground text-accent-foreground text-xs mt-1 px-1.5 py-0.5"
+                className="bg-accent text-accent-foreground text-xs mt-1 px-1.5 py-0.5"
               >
                 {displayVariant}
               </Badge>
