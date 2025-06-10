@@ -346,15 +346,13 @@ const CheckoutPage = () => {
                             {p.variant.replace(/\s*\(\+\d+\)\s*$/, '')}
                           </Badge>
                         )}
-                        <div className="mt-1">
-                          <span className="text-sm font-semibold text-foreground">{formatCurrency(p.price)}</span>
-                          {p.originalPrice && (
-                            <span className="text-xs text-muted-foreground line-through ml-1.5">{formatCurrency(p.originalPrice)}</span>
-                          )}
-                        </div>
+                        <p className="text-sm font-semibold text-foreground mt-1">x{p.quantity}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-foreground">x{p.quantity}</p>
+                        <span className="text-sm font-semibold text-foreground">{formatCurrency(p.price)}</span>
+                        {p.originalPrice && (
+                          <span className="text-xs text-muted-foreground line-through ml-1.5 block">{formatCurrency(p.originalPrice)}</span>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -398,15 +396,13 @@ const CheckoutPage = () => {
                           {staticProductPlaceholder.variation}
                         </Badge>
                       )}
-                      <div className="mt-1">
-                        <span className="text-sm font-semibold text-foreground">{formatCurrency(staticProductPlaceholder.price)}</span>
-                        {staticProductPlaceholder.originalPrice && (
-                          <span className="text-xs text-muted-foreground line-through ml-1.5">{formatCurrency(staticProductPlaceholder.originalPrice)}</span>
-                        )}
-                      </div>
+                      <p className="text-sm font-semibold text-foreground mt-1">x{staticProductPlaceholder.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-foreground">x{staticProductPlaceholder.quantity}</p>
+                      <span className="text-sm font-semibold text-foreground">{formatCurrency(staticProductPlaceholder.price)}</span>
+                      {staticProductPlaceholder.originalPrice && (
+                        <span className="text-xs text-muted-foreground line-through ml-1.5 block">{formatCurrency(staticProductPlaceholder.originalPrice)}</span>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -621,3 +617,5 @@ const CheckoutPage = () => {
 
 export default CheckoutPage;
 
+
+    
