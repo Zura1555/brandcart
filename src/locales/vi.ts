@@ -209,7 +209,9 @@ const viTranslations = {
       title: "Trải nghiệm thanh toán của bạn thế nào?",
       veryDifficult: "Rất khó",
       veryEasy: "Rất dễ",
-      tellUsMorePlaceholder: "Cho chúng tôi biết thêm về trải nghiệm của bạn..."
+      tellUsMorePlaceholder: "Cho chúng tôi biết thêm về trải nghiệm của bạn...",
+      submitButton: "Gửi đánh giá",
+      submittedButton: "Đã gửi"
     },
     continueShoppingButton: "Tiếp tục mua sắm",
     loadingOrder: "Đang tải chi tiết đơn hàng...",
@@ -218,9 +220,17 @@ const viTranslations = {
             title: "Lỗi",
             description: "Không thể xử lý chi tiết đơn hàng. Vui lòng thử lại hoặc liên hệ hỗ trợ."
         },
-        feedbackReceived: {
+        feedbackReceived: { // This key seems to be unused after adding specific submit toast
             title: "Đã nhận phản hồi",
             description: "Cảm ơn phản hồi của bạn! Bạn đã đánh giá {rating} trên 5."
+        },
+        reviewSubmitted: {
+            title: "Đã gửi đánh giá",
+            description: "Cảm ơn bạn đã phản hồi!"
+        },
+        selectRating: {
+            title: "Chọn đánh giá",
+            description: "Vui lòng chọn một mức đánh giá trước khi gửi."
         }
     }
   },

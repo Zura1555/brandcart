@@ -39,6 +39,7 @@ const PaymentSuccessPage = () => {
   const [feedbackText, setFeedbackText] = useState('');
   const [showFeedbackTextarea, setShowFeedbackTextarea] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isReviewSubmitted, setIsReviewSubmitted] = useState(false);
 
   useEffect(() => {
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
@@ -87,14 +88,31 @@ const PaymentSuccessPage = () => {
   };
 
   const handleRatingSelect = (rating: number) => {
+    if (isReviewSubmitted) return;
     setSelectedRating(rating);
     if (rating <= 3) {
       setShowFeedbackTextarea(true);
     } else {
       setShowFeedbackTextarea(false);
-      setFeedbackText(''); // Clear text if rating is high
+      setFeedbackText(''); 
     }
-    toast({ title: t('paymentSuccess.toast.feedbackReceived.title'), description: t('paymentSuccess.toast.feedbackReceived.description', { rating }) });
+  };
+
+  const handleSubmitReview = () => {
+    if (selectedRating === null) {
+      toast({
+        title: t('paymentSuccess.toast.selectRating.title'),
+        description: t('paymentSuccess.toast.selectRating.description'),
+        variant: 'destructive'
+      });
+      return;
+    }
+    console.log('Rating:', selectedRating, 'Feedback:', feedbackText);
+    toast({
+      title: t('paymentSuccess.toast.reviewSubmitted.title'),
+      description: t('paymentSuccess.toast.reviewSubmitted.description'),
+    });
+    setIsReviewSubmitted(true);
   };
 
   if (isLoading) {
@@ -198,7 +216,8 @@ const PaymentSuccessPage = () => {
                     variant={selectedRating === rating ? 'default' : 'outline'}
                     size="icon"
                     onClick={() => handleRatingSelect(rating)}
-                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${selectedRating === rating ? 'bg-foreground text-accent-foreground hover:bg-foreground/90' : 'border-muted-foreground text-muted-foreground hover:bg-muted'}`}
+                    disabled={isReviewSubmitted}
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${selectedRating === rating ? 'bg-foreground text-accent-foreground hover:bg-foreground/90' : 'border-muted-foreground text-muted-foreground hover:bg-muted'} ${isReviewSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {rating}
                   </Button>
@@ -213,9 +232,17 @@ const PaymentSuccessPage = () => {
                   placeholder={t('paymentSuccess.feedback.tellUsMorePlaceholder')}
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
-                  className="min-h-[100px]"
+                  disabled={isReviewSubmitted}
+                  className={`min-h-[100px] ${isReviewSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 />
               )}
+              <Button
+                onClick={handleSubmitReview}
+                disabled={selectedRating === null || isReviewSubmitted}
+                className="mt-4 w-full bg-foreground hover:bg-foreground/90 text-accent-foreground"
+              >
+                {isReviewSubmitted ? t('paymentSuccess.feedback.submittedButton') : t('paymentSuccess.feedback.submitButton')}
+              </Button>
             </CardContent>
           </Card>
 

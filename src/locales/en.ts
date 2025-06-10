@@ -25,9 +25,9 @@ const enTranslations = {
       selectColor: "Color",
       selectSize: "Select Size",
       updateButton: "UPDATE",
-      noVariantsAvailable: "No other variants available for this item.", // Used when structured variants like color/size are not present
-      complexVariants: "This product has other options. Please select one.", // For future when variants are just a list
-      noOtherVariants: "This is the only version of this product available.", // If only one variant and no color/size attributes
+      noVariantsAvailable: "No other variants available for this item.", 
+      complexVariants: "This product has other options. Please select one.", 
+      noOtherVariants: "This is the only version of this product available.", 
       currentSelection: "Current selection:",
       stock: {
         inStock: "In stock",
@@ -209,7 +209,9 @@ const enTranslations = {
       title: "How easy was it to checkout?",
       veryDifficult: "Very difficult",
       veryEasy: "Very easy",
-      tellUsMorePlaceholder: "Tell us more about your experience..."
+      tellUsMorePlaceholder: "Tell us more about your experience...",
+      submitButton: "Submit Review",
+      submittedButton: "Submitted"
     },
     continueShoppingButton: "Continue Shopping",
     loadingOrder: "Loading order details...",
@@ -218,9 +220,17 @@ const enTranslations = {
             title: "Error",
             description: "Could not process order details. Please try again or contact support."
         },
-        feedbackReceived: {
+        feedbackReceived: { // This key seems to be unused after adding specific submit toast
             title: "Feedback Received",
             description: "Thanks for your feedback! You rated {rating} out of 5."
+        },
+        reviewSubmitted: {
+            title: "Review Submitted",
+            description: "Thank you for your feedback!"
+        },
+        selectRating: {
+            title: "Select Rating",
+            description: "Please select a rating before submitting."
         }
     }
   },
