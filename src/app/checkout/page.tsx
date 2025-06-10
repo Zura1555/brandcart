@@ -342,7 +342,9 @@ const CheckoutPage = () => {
                       <div className="flex-grow">
                         <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{p.name}</p>
                         {p.variant && (
-                          <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm inline-block">{p.variant.replace(/\s*\(\+\d+\)\s*$/, '')}</p>
+                           <Badge className="bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
+                            {p.variant.replace(/\s*\(\+\d+\)\s*$/, '')}
+                          </Badge>
                         )}
                         <div className="mt-1">
                           <span className="text-sm font-semibold text-foreground">{formatCurrency(p.price)}</span>
@@ -352,7 +354,7 @@ const CheckoutPage = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-muted-foreground">x{p.quantity}</p>
+                        <p className="text-sm font-semibold text-foreground">x{p.quantity}</p>
                       </div>
                     </div>
                   ))}
@@ -392,7 +394,9 @@ const CheckoutPage = () => {
                     <div className="flex-grow">
                       <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{staticProductPlaceholder.name}</p>
                       {staticProductPlaceholder.variation && (
-                        <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm inline-block">{staticProductPlaceholder.variation}</p>
+                        <Badge className="bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
+                          {staticProductPlaceholder.variation}
+                        </Badge>
                       )}
                       <div className="mt-1">
                         <span className="text-sm font-semibold text-foreground">{formatCurrency(staticProductPlaceholder.price)}</span>
@@ -402,7 +406,7 @@ const CheckoutPage = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-muted-foreground">x{staticProductPlaceholder.quantity}</p>
+                      <p className="text-sm font-semibold text-foreground">x{staticProductPlaceholder.quantity}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -420,7 +424,7 @@ const CheckoutPage = () => {
                       </div>
                       <div className="flex items-center">
                         <span className="text-sm text-muted-foreground mr-1">
-                          {eInvoiceSummary}
+                          {eInvoiceSummary || ''}
                         </span>
                         {/* Chevron is part of AccordionTrigger */}
                       </div>

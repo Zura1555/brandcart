@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from 'react';
@@ -17,7 +18,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({ quantity, onIncreme
       <Button variant="outline" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" onClick={onDecrement} disabled={quantity <= 1} aria-label="Decrease quantity">
         <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
       </Button>
-      <span className="font-body text-sm sm:text-md w-6 sm:w-8 text-center tabular-nums">{quantity}</span>
+      <span className="font-body font-semibold text-sm sm:text-md w-6 sm:w-8 text-center tabular-nums">{quantity}</span>
       <Button variant="outline" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" onClick={onIncrement} disabled={quantity >= maxQuantity} aria-label="Increase quantity">
         <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
       </Button>
