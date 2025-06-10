@@ -39,7 +39,6 @@ const getAddressFormSchema = (t: (key: string, params?: Record<string, string | 
 
 type AddressFormValues = z.infer<ReturnType<typeof getAddressFormSchema>>;
 
-// Placeholder data for dropdowns - these should ideally be fetched or localized
 const provinces = [{ value: 'hcm', label: 'TP. Hồ Chí Minh' }, { value: 'hn', label: 'Hà Nội' }];
 const districts = [{ value: 'q1', label: 'Quận 1' }, { value: 'qtb', label: 'Quận Tân Bình' }];
 const wards = [{ value: 'pdk', label: 'Phường Đa Kao' }, { value: 'p2', label: 'Phường 2' }];

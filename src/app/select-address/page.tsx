@@ -10,8 +10,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, PlusCircle } from 'lucide-react';
 import type { ShippingAddress } from '@/interfaces';
-// mockShippingAddresses is now an empty array by default after previous change.
-import { mockShippingAddresses } from '@/lib/mockData'; 
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useToast } from "@/hooks/use-toast";
@@ -35,11 +33,11 @@ const SelectAddressPage = () => {
     if (storedAddressesRaw) {
       try {
         const parsedAddresses = JSON.parse(storedAddressesRaw);
-        // Ensure it's an array and not empty, otherwise treat as if no valid addresses stored
-        if (Array.isArray(parsedAddresses) && parsedAddresses.every(addr => typeof addr === 'object' && addr.id)) {
+        // Ensure it's an array of valid address objects
+        if (Array.isArray(parsedAddresses) && parsedAddresses.every(addr => typeof addr === 'object' && addr !== null && 'id' in addr)) {
           addressesFromStorage = parsedAddresses;
         } else {
-          // Malformed data or not an array of addresses, initialize as empty
+          // Malformed data or not an array of valid addresses, initialize as empty and clear storage
           addressesFromStorage = [];
           localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify([]));
         }
@@ -54,6 +52,13 @@ const SelectAddressPage = () => {
       localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify([]));
     }
 
+    // Ensure a default address exists if there are addresses
+    if (addressesFromStorage.length > 0 && !addressesFromStorage.some(addr => addr.isDefault)) {
+      addressesFromStorage[0].isDefault = true;
+      // Re-save to localStorage if we had to set a default
+      localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
+    }
+    
     const defaultAddress = addressesFromStorage.find(addr => addr.isDefault);
     let sortedAddresses = [...addressesFromStorage];
     if (defaultAddress) {
@@ -63,27 +68,24 @@ const SelectAddressPage = () => {
     setShippingAddresses(sortedAddresses);
 
     const storedSelectedId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
-    const currentSelectedIsValid = storedSelectedId && sortedAddresses.find(addr => addr.id === storedSelectedId);
+    let newSelectedId: string | undefined = undefined;
 
-    if (currentSelectedIsValid) {
-      setSelectedAddressId(storedSelectedId);
-    } else {
-      const currentDefaultAddress = sortedAddresses.find(addr => addr.isDefault);
-      if (currentDefaultAddress) {
-        setSelectedAddressId(currentDefaultAddress.id);
-        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, currentDefaultAddress.id);
-      } else if (sortedAddresses.length > 0) {
-        setSelectedAddressId(sortedAddresses[0].id); // Select first if no default
-        // Optionally make the first one default if none is set
-        // sortedAddresses[0].isDefault = true;
-        // localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(sortedAddresses));
-        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, sortedAddresses[0].id);
-      } else {
-        setSelectedAddressId(undefined);
-        localStorage.removeItem(SELECTED_ADDRESS_STORAGE_KEY); 
-      }
+    if (storedSelectedId && sortedAddresses.find(addr => addr.id === storedSelectedId)) {
+      newSelectedId = storedSelectedId;
+    } else if (defaultAddress) { // Check defaultAddress from the potentially updated list
+      newSelectedId = defaultAddress.id;
+    } else if (sortedAddresses.length > 0) {
+      // If still no default (should not happen if logic above works), select the first
+      newSelectedId = sortedAddresses[0].id;
     }
-  }, []);
+
+    setSelectedAddressId(newSelectedId);
+    if (newSelectedId) {
+      localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newSelectedId);
+    } else {
+      localStorage.removeItem(SELECTED_ADDRESS_STORAGE_KEY); 
+    }
+  }, []); // Run once on mount
 
   const handleSelectAddress = (addressId: string) => {
     setSelectedAddressId(addressId);
