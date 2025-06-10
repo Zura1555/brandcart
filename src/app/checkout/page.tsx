@@ -12,7 +12,6 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CircleDollarSign, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
@@ -73,7 +72,6 @@ const CheckoutPage = () => {
   const [addressLoaded, setAddressLoaded] = useState(false);
 
   // E-Invoice state
-  const [requestVatInvoice, setRequestVatInvoice] = useState(false);
   const [eInvoiceType, setEInvoiceType] = useState<'personal' | 'company'>('personal');
   const [eInvoiceDetails, setEInvoiceDetails] = useState({
     fullName: '',
@@ -233,13 +231,13 @@ const CheckoutPage = () => {
     console.log("E-Invoice Details Saved:", eInvoiceDetails);
     setEInvoiceSummary(eInvoiceType === 'personal' ? eInvoiceDetails.fullName : eInvoiceDetails.companyName);
     toast({ title: t('toast.eInvoice.saved.title'), description: t('toast.eInvoice.saved.description')});
-    // Optionally close the accordion here
   };
 
   const handleCancelEInvoice = () => {
-    setRequestVatInvoice(false);
     setEInvoiceDetails({ fullName: '', companyName: '', idCard: '', taxCode: '', email: '', address: '' });
     setEInvoiceSummary(null);
+    // Optionally reset eInvoiceType to 'personal' if desired
+    // setEInvoiceType('personal');
     toast({ title: t('toast.eInvoice.cancelled.title') });
   };
 
@@ -425,71 +423,55 @@ const CheckoutPage = () => {
                       </div>
                       <div className="flex items-center">
                         <span className="text-sm text-muted-foreground mr-1">
-                          {eInvoiceSummary || (requestVatInvoice ? t('checkout.eInvoice.status.pending') : t('checkout.eInvoice.status.notRequested'))}
+                          {eInvoiceSummary || t('checkout.eInvoice.status.requestNow')}
                         </span>
                         {/* Chevron is part of AccordionTrigger */}
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="p-4">
                       <div className="space-y-4">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox id="request-vat-invoice-cb" checked={requestVatInvoice} onCheckedChange={(checked) => {
-                            setRequestVatInvoice(Boolean(checked));
-                            if (!checked) {
-                                setEInvoiceDetails({ fullName: '', companyName: '', idCard: '', taxCode: '', email: '', address: '' });
-                                setEInvoiceSummary(null);
-                            }
-                          }}/>
-                          <Label htmlFor="request-vat-invoice-cb" className="text-sm font-medium leading-none">
-                            {t('checkout.eInvoice.vatInvoiceLabel')}
-                          </Label>
+                         <p className="text-xs text-muted-foreground">{t('checkout.eInvoice.vatNote')}</p>
+                        <div>
+                          <p className="text-sm font-medium mb-2">{t('checkout.eInvoice.invoiceTypeLabel')}</p>
+                          <RadioGroup
+                            value={eInvoiceType}
+                            onValueChange={(value: 'personal' | 'company') => setEInvoiceType(value)}
+                            className="flex space-x-6"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="personal" id="personal-invoice" />
+                              <Label htmlFor="personal-invoice" className="font-normal">{t('checkout.eInvoice.typePersonal')}</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="company" id="company-invoice" />
+                              <Label htmlFor="company-invoice" className="font-normal">{t('checkout.eInvoice.typeCompany')}</Label>
+                            </div>
+                          </RadioGroup>
                         </div>
-
-                        {requestVatInvoice && (
+                        
+                        {eInvoiceType === 'personal' && (
                           <>
-                            <div>
-                              <p className="text-sm font-medium mb-2">{t('checkout.eInvoice.invoiceTypeLabel')}</p>
-                              <RadioGroup
-                                value={eInvoiceType}
-                                onValueChange={(value: 'personal' | 'company') => setEInvoiceType(value)}
-                                className="flex space-x-6"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="personal" id="personal-invoice" />
-                                  <Label htmlFor="personal-invoice" className="font-normal">{t('checkout.eInvoice.typePersonal')}</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="company" id="company-invoice" />
-                                  <Label htmlFor="company-invoice" className="font-normal">{t('checkout.eInvoice.typeCompany')}</Label>
-                                </div>
-                              </RadioGroup>
-                            </div>
-                            
-                            {eInvoiceType === 'personal' && (
-                              <>
-                                <Input placeholder={t('checkout.eInvoice.fullNamePlaceholder')} name="fullName" value={eInvoiceDetails.fullName} onChange={handleEInvoiceDetailChange} />
-                                <Input placeholder={t('checkout.eInvoice.idCardPlaceholder')} name="idCard" value={eInvoiceDetails.idCard} onChange={handleEInvoiceDetailChange} />
-                              </>
-                            )}
-                            {eInvoiceType === 'company' && (
-                              <>
-                                <Input placeholder={t('checkout.eInvoice.companyNamePlaceholder')} name="companyName" value={eInvoiceDetails.companyName} onChange={handleEInvoiceDetailChange} />
-                                <Input placeholder={t('checkout.eInvoice.taxCodePlaceholder')} name="taxCode" value={eInvoiceDetails.taxCode} onChange={handleEInvoiceDetailChange} />
-                              </>
-                            )}
-                            <Input type="email" placeholder={t('checkout.eInvoice.emailPlaceholder')} name="email" value={eInvoiceDetails.email} onChange={handleEInvoiceDetailChange} />
-                            <Input placeholder={t('checkout.eInvoice.addressPlaceholder')} name="address" value={eInvoiceDetails.address} onChange={handleEInvoiceDetailChange} />
-                            
-                            <div className="flex space-x-3 pt-2">
-                              <Button onClick={handleSaveEInvoice} className="flex-1 bg-foreground hover:bg-foreground/90 text-accent-foreground">
-                                {t('checkout.eInvoice.saveButton')}
-                              </Button>
-                              <Button variant="outline" onClick={handleCancelEInvoice} className="flex-1 border-muted-foreground text-muted-foreground hover:bg-muted">
-                                {t('checkout.eInvoice.doNotIssueButton')}
-                              </Button>
-                            </div>
+                            <Input placeholder={t('checkout.eInvoice.fullNamePlaceholder')} name="fullName" value={eInvoiceDetails.fullName} onChange={handleEInvoiceDetailChange} />
+                            <Input placeholder={t('checkout.eInvoice.idCardPlaceholder')} name="idCard" value={eInvoiceDetails.idCard} onChange={handleEInvoiceDetailChange} />
                           </>
                         )}
+                        {eInvoiceType === 'company' && (
+                          <>
+                            <Input placeholder={t('checkout.eInvoice.companyNamePlaceholder')} name="companyName" value={eInvoiceDetails.companyName} onChange={handleEInvoiceDetailChange} />
+                            <Input placeholder={t('checkout.eInvoice.taxCodePlaceholder')} name="taxCode" value={eInvoiceDetails.taxCode} onChange={handleEInvoiceDetailChange} />
+                          </>
+                        )}
+                        <Input type="email" placeholder={t('checkout.eInvoice.emailPlaceholder')} name="email" value={eInvoiceDetails.email} onChange={handleEInvoiceDetailChange} />
+                        <Input placeholder={t('checkout.eInvoice.addressPlaceholder')} name="address" value={eInvoiceDetails.address} onChange={handleEInvoiceDetailChange} />
+                        
+                        <div className="flex space-x-3 pt-2">
+                          <Button onClick={handleSaveEInvoice} className="flex-1 bg-foreground hover:bg-foreground/90 text-accent-foreground">
+                            {t('checkout.eInvoice.saveButton')}
+                          </Button>
+                          <Button variant="outline" onClick={handleCancelEInvoice} className="flex-1 border-muted-foreground text-muted-foreground hover:bg-muted">
+                            {t('checkout.eInvoice.doNotIssueButton')}
+                          </Button>
+                        </div>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -637,6 +619,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-
-
-    

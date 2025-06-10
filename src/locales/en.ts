@@ -73,10 +73,9 @@ const enTranslations = {
     eInvoice: {
       title: "E-Invoice",
       status: {
-        notRequested: "Request",
-        pending: "Details pending"
+        requestNow: "Request", // Changed from notRequested and pending
       },
-      vatInvoiceLabel: "VAT Invoice",
+      vatInvoiceLabel: "VAT Invoice", // Retained but not directly used with a checkbox now
       vatNote: "Note: Red invoice will be issued including total order value (Products + Shipping fee)",
       invoiceTypeLabel: "INVOICE TYPE",
       typePersonal: "Personal",

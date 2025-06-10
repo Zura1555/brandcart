@@ -73,10 +73,9 @@ const viTranslations = {
     eInvoice: {
       title: "Hóa đơn điện tử",
       status: {
-        notRequested: "Yêu cầu",
-        pending: "Chờ nhập liệu"
+        requestNow: "Yêu cầu", // Changed from notRequested and pending
       },
-      vatInvoiceLabel: "Hóa đơn VAT",
+      vatInvoiceLabel: "Hóa đơn VAT", // Retained but not directly used with a checkbox now
       vatNote: "Lưu ý: Hoá đơn đỏ sẽ được xuất bao gồm tổng giá trị đơn hàng (Sản phẩm + Phí vận chuyển)",
       invoiceTypeLabel: "LOẠI HOÁ ĐƠN",
       typePersonal: "Cá nhân",
