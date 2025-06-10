@@ -137,8 +137,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
             <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
             {displayVariant && (
               <Badge 
-                variant="outline" 
-                className="bg-accent text-accent-foreground text-xs mt-1 px-1.5 py-0.5"
+                className="bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5"
               >
                 {displayVariant}
               </Badge>
@@ -173,3 +172,4 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
+
