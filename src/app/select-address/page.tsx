@@ -22,43 +22,54 @@ const SelectAddressPage = () => {
   const [selectedAddressId, setSelectedAddressId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    let addressesToUse: ShippingAddress[] = [];
+    let addressesFromStorage: ShippingAddress[] = [];
     const storedAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
 
     if (storedAddressesRaw) {
       try {
         const parsedAddresses = JSON.parse(storedAddressesRaw);
         if (Array.isArray(parsedAddresses) && parsedAddresses.length > 0) {
-          addressesToUse = parsedAddresses;
+          addressesFromStorage = parsedAddresses;
         } else {
-          addressesToUse = [...mockShippingAddresses];
-          localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesToUse));
+          addressesFromStorage = [...mockShippingAddresses];
+          localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
         }
       } catch (e) {
         console.error("Failed to parse addresses from localStorage, using mock data.", e);
-        addressesToUse = [...mockShippingAddresses];
-        localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesToUse));
+        addressesFromStorage = [...mockShippingAddresses];
+        localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
       }
     } else {
-      addressesToUse = [...mockShippingAddresses];
-      localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesToUse));
+      addressesFromStorage = [...mockShippingAddresses];
+      localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
     }
-    setShippingAddresses(addressesToUse);
 
+    // Sort addresses: default first, then by original order (which is preserved by filter + unshift)
+    const defaultAddress = addressesFromStorage.find(addr => addr.isDefault);
+    let sortedAddresses = [...addressesFromStorage];
+    if (defaultAddress) {
+      sortedAddresses = sortedAddresses.filter(addr => addr.id !== defaultAddress.id);
+      sortedAddresses.unshift(defaultAddress);
+    }
+    setShippingAddresses(sortedAddresses);
+
+    // Determine selected address ID
     const storedSelectedId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
-    if (storedSelectedId && addressesToUse.find(addr => addr.id === storedSelectedId)) {
+    const currentSelectedIsValid = storedSelectedId && sortedAddresses.find(addr => addr.id === storedSelectedId);
+
+    if (currentSelectedIsValid) {
       setSelectedAddressId(storedSelectedId);
     } else {
-      const defaultAddress = addressesToUse.find(addr => addr.isDefault);
-      if (defaultAddress) {
-        setSelectedAddressId(defaultAddress.id);
-        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, defaultAddress.id);
-      } else if (addressesToUse.length > 0) {
-        // If no default, select the first one and mark it as selected in storage
-        setSelectedAddressId(addressesToUse[0].id);
-        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, addressesToUse[0].id);
+      const currentDefaultAddress = sortedAddresses.find(addr => addr.isDefault);
+      if (currentDefaultAddress) {
+        setSelectedAddressId(currentDefaultAddress.id);
+        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, currentDefaultAddress.id);
+      } else if (sortedAddresses.length > 0) {
+        setSelectedAddressId(sortedAddresses[0].id);
+        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, sortedAddresses[0].id);
       } else {
-        setSelectedAddressId(undefined); // No addresses, no selection
+        setSelectedAddressId(undefined);
+        localStorage.removeItem(SELECTED_ADDRESS_STORAGE_KEY); 
       }
     }
   }, []);
