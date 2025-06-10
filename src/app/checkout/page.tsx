@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, Tag, FileText, Ticket, CircleDollarSign, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
-import { mockShops, mockShippingAddresses } from '@/lib/mockData';
+import { mockShops } from '@/lib/mockData'; // mockShippingAddresses is not used here anymore for fallback
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
@@ -21,6 +21,7 @@ const HEADER_HEIGHT = 'h-14'; // approx 56px
 const FOOTER_HEIGHT = 'h-24'; // approx 96px
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
+const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
 const SHOPEE_COIN_VALUE = 200;
 const SHOPEE_COIN_AMOUNT_TO_USE = 200;
 
@@ -50,7 +51,7 @@ const staticShippingMethod = {
   name: "Quốc tế Nhanh - Express International",
   originalCost: 17000,
   currentCost: 0,
-  deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6", // This date might need localization or dynamic generation
+  deliveryEstimate: "Đảm bảo nhận hàng vào 13 Tháng 6", 
   inspectionAllowed: true,
 };
 
@@ -69,6 +70,7 @@ const CheckoutPage = () => {
   const [useShopeeCoins, setUseShopeeCoins] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
+  const [addressLoaded, setAddressLoaded] = useState(false);
 
   useEffect(() => {
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
@@ -125,15 +127,19 @@ const CheckoutPage = () => {
     }
 
     const selectedAddressId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
-    const userAddressesRaw = localStorage.getItem('userShippingAddresses');
-    let userAddresses: ShippingAddress[] = mockShippingAddresses; // Fallback
+    const userAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
+    let userAddresses: ShippingAddress[] = []; // Initialize as empty, do not use mockShippingAddresses as fallback
     if (userAddressesRaw) {
         try {
             const parsed = JSON.parse(userAddressesRaw);
-            if (Array.isArray(parsed)) userAddresses = parsed;
-        } catch (e) { /* ignore, use fallback */ }
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                 userAddresses = parsed;
+            }
+        } catch (e) { 
+            console.error("Error parsing user addresses from localStorage:", e);
+            // userAddresses remains empty
+        }
     }
-
 
     if (selectedAddressId) {
       const foundAddress = userAddresses.find(addr => addr.id === selectedAddressId);
@@ -141,19 +147,15 @@ const CheckoutPage = () => {
     } else {
       setCurrentShippingAddress(userAddresses.find(addr => addr.isDefault) || (userAddresses.length > 0 ? userAddresses[0] : null));
     }
+    setAddressLoaded(true);
   }, []);
 
   const formatCurrency = (amount: number) => {
-    // Using 'vi-VN' for consistency as the '₫' symbol is Vietnamese.
-    // For EN, if a different symbol or formatting is needed, this could be adjusted.
     return `${amount.toLocaleString('vi-VN')}₫`;
   };
 
   const shippingMethod = useMemo(() => ({
       ...staticShippingMethod,
-      // Potentially translate name or deliveryEstimate here if needed
-      // name: t(`shippingMethods.${staticShippingMethod.id}.name`, staticShippingMethod.name)
-      // deliveryEstimate: t(`shippingMethods.${staticShippingMethod.id}.estimate`, staticShippingMethod.deliveryEstimate)
   }), [t, locale]);
 
 
@@ -161,7 +163,7 @@ const CheckoutPage = () => {
     if (dynamicDisplayShops.length > 0) {
         return dynamicDisplayShops.reduce((sum, shop) => sum + shop.products.length, 0);
     }
-    return 1; // For static placeholder
+    return 1; 
   }, [dynamicDisplayShops]);
 
   const displayTotalAmount = useMemo(() => {
@@ -177,23 +179,13 @@ const CheckoutPage = () => {
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
   const paymentMethods = [
-    // Names could be translated if they differ significantly per region
     { id: 'payoo', name: 'Payoo', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
     { id: 'vnpay', name: 'VNPay', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR.png', iconAiHint: 'VNPay QR logo', details: null },
     { id: 'momo', name: 'Momo', iconUrl: 'https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png', iconAiHint: 'Momo logo', details: null },
     { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg', iconAiHint: 'Apple Pay logo', details: null },
   ];
-
-  if (!currentShippingAddress) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>{t('checkout.address.loading')}</p>
-      </div>
-    );
-  }
   
   const currentAddressNamePhone = currentShippingAddress ? t('checkout.address.namePhone', { name: currentShippingAddress.name, phone: currentShippingAddress.phone }) : '';
-
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
@@ -212,18 +204,42 @@ const CheckoutPage = () => {
       <main className={`flex-grow overflow-y-auto pt-14 pb-24`}>
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3 space-y-3">
-            <Card className="shadow-sm">
-              <CardContent className="p-4 cursor-pointer hover:bg-muted/50" onClick={() => router.push('/select-address')}>
-                <div className="flex items-center">
-                  <MapPin className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                  <div className="flex-grow">
-                    <p className="text-sm font-medium text-foreground">{currentAddressNamePhone}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{currentShippingAddress.address}</p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
-                </div>
-              </CardContent>
-            </Card>
+            {addressLoaded ? (
+                currentShippingAddress ? (
+                <Card className="shadow-sm">
+                    <CardContent className="p-4 cursor-pointer hover:bg-muted/50" onClick={() => router.push('/select-address')}>
+                    <div className="flex items-center">
+                        <MapPin className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
+                        <div className="flex-grow">
+                        <p className="text-sm font-medium text-foreground">{currentAddressNamePhone}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{currentShippingAddress.address}</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
+                    </div>
+                    </CardContent>
+                </Card>
+                ) : (
+                <Card className="shadow-sm border-destructive">
+                    <CardContent className="p-4 cursor-pointer hover:bg-destructive/10" onClick={() => router.push('/select-address')}>
+                    <div className="flex items-center">
+                        <MapPin className="w-5 h-5 text-destructive mr-3 flex-shrink-0" />
+                        <div className="flex-grow">
+                        <p className="text-sm font-medium text-destructive">{t('checkout.address.noAddressSelectedTitle')}</p>
+                        <p className="text-xs text-destructive/80 mt-0.5">{t('checkout.address.noAddressSelectedMessage')}</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-destructive/70 ml-2 flex-shrink-0" />
+                    </div>
+                    </CardContent>
+                </Card>
+                )
+            ) : (
+                <Card className="shadow-sm">
+                    <CardContent className="p-4">
+                        <p>{t('checkout.address.loading')}</p>
+                    </CardContent>
+                </Card>
+            )}
+
 
             {shopsToRender.length > 0 ? shopsToRender.map(shop => (
               <Card key={shop.name} className="shadow-sm">
@@ -488,6 +504,7 @@ const CheckoutPage = () => {
             size="lg"
             className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px]"
             onClick={() => router.push('/payment')}
+            disabled={!currentShippingAddress} 
           >
             {t('checkout.footer.orderButton')}
           </Button>

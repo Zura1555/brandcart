@@ -52,6 +52,8 @@ const viTranslations = {
     address: {
       namePhone: "{name} | {phone}",
       loading: "Đang tải địa chỉ...",
+      noAddressSelectedTitle: "Chưa có địa chỉ giao hàng",
+      noAddressSelectedMessage: "Vui lòng thêm hoặc chọn địa chỉ giao hàng để tiếp tục.",
     },
     shopVoucher: "Voucher của Shop",
     shopVoucherPlaceholder: "Chọn hoặc nhập mã",

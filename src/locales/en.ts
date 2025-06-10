@@ -52,6 +52,8 @@ const enTranslations = {
     address: {
       namePhone: "{name} | {phone}",
       loading: "Loading address...",
+      noAddressSelectedTitle: "No Shipping Address",
+      noAddressSelectedMessage: "Please add or select a shipping address to proceed.",
     },
     shopVoucher: "Shop Voucher",
     shopVoucherPlaceholder: "Select or enter code",
