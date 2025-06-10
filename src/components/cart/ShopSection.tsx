@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { CartItem, Shop } from '@/interfaces';
 import ProductItem from './ProductItem';
+import BrandOfferBanner from './BrandOfferBanner'; // Import the new component
 import { ChevronRight, Gift } from 'lucide-react';
 
 interface ShopSectionProps {
@@ -64,13 +65,21 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
           )}
         </div>
         {shop.promotionText && (
-          <div className="mt-2 flex items-center text-xs text-foreground bg-muted/50 p-2 rounded-md cursor-pointer"> {/* Changed text-accent to text-foreground and bg-red-50 to bg-muted/50 */}
+          <div className="mt-2 flex items-center text-xs text-foreground bg-muted/50 p-2 rounded-md cursor-pointer">
             <Gift className="w-4 h-4 mr-2 flex-shrink-0" />
             <span className="flex-grow min-w-0 truncate">{shop.promotionText}</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto flex-shrink-0" />
           </div>
         )}
       </CardHeader>
+
+      {/* Conditionally render the BrandOfferBanner */}
+      {shop.specialOfferText && (
+        <div className="px-4 sm:px-6 pt-3"> {/* Added padding for consistent alignment */}
+          <BrandOfferBanner offerText={shop.specialOfferText} />
+        </div>
+      )}
+
       <CardContent className="p-0">
         <div className="divide-y divide-border">
           {items.map(item => (

@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -17,6 +18,7 @@ export interface Shop {
   logoUrl?: string;
   logoDataAiHint?: string;
   promotionText?: string;
+  specialOfferText?: string; // New field for special offer banner
   editLinkText?: string; // e.g., "Sửa"
   products: Product[];
 }

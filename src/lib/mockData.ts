@@ -7,6 +7,7 @@ export const mockShops: Shop[] = [
     isFavorite: true, 
     logoUrl: 'https://bizweb.dktcdn.net/100/294/644/themes/737628/assets/logo.png?1727591678269',
     logoDataAiHint: 'MLB logo',
+    specialOfferText: "Mua 2 sản phẩm MLB, nhận ngay giảm giá 30% cho sản phẩm thứ 3.",
     products: [
       {
         id: 'mlb1',
@@ -32,6 +33,7 @@ export const mockShops: Shop[] = [
     name: 'PUMA',
     logoUrl: 'https://file.hstatic.net/1000284478/collection/puma_125ef36b81284505982470da1add1363.jpg',
     logoDataAiHint: 'PUMA logo',
+    specialOfferText: "Ưu đãi đặc biệt: Tặng ngay 1 đôi vớ Puma cao cấp cho đơn hàng Puma từ 1.500.000₫.",
     products: [
       {
         id: 'puma1',
@@ -70,6 +72,7 @@ export const mockShops: Shop[] = [
     name: 'HAVAIANAS',
     logoUrl: 'https://file.hstatic.net/1000284478/collection/havaianas_c0dd7b3e45914a7daaea88a00c61de01.jpg',
     logoDataAiHint: 'HAVAIANAS logo',
+    specialOfferText: "Miễn phí vận chuyển cho tất cả đơn hàng Havaianas.",
     products: [
       {
         id: 'havaianas1',
