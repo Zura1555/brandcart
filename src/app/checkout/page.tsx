@@ -131,7 +131,7 @@ const CheckoutPage = () => {
   }, []);
 
   const formatCurrency = (amount: number) => {
-    return `₫${amount.toLocaleString('vi-VN')}`;
+    return `${amount.toLocaleString('vi-VN')}₫`;
   };
 
   const shippingMethod = staticShippingMethod;
@@ -233,7 +233,7 @@ const CheckoutPage = () => {
                       <div className="flex-grow">
                         <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{p.name}</p>
                         {p.variant && (
-                          <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm inline-block">{p.variant}</p>
+                          <p className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm inline-block">{p.variant.replace(/\s*\(\+\d+\)\s*$/, '')}</p>
                         )}
                         <div className="mt-1">
                           <span className="text-sm font-semibold text-foreground">{formatCurrency(p.price)}</span>

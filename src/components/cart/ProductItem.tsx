@@ -46,9 +46,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           <p className="text-xs text-foreground mt-1">Chỉ còn {item.stock}</p>
         )}
         <div className="flex items-baseline space-x-2 mt-1">
-          <p className="text-sm font-bold text-foreground">₫{item.price.toLocaleString('de-DE')}</p>
+          <p className="text-sm font-bold text-foreground">{item.price.toLocaleString('de-DE')}₫</p>
           {item.originalPrice && (
-            <p className="text-xs text-muted-foreground line-through">₫{item.originalPrice.toLocaleString('de-DE')}</p>
+            <p className="text-xs text-muted-foreground line-through">{item.originalPrice.toLocaleString('de-DE')}₫</p>
           )}
         </div>
         {item.discountDescription && (

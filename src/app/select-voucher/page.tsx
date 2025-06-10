@@ -18,8 +18,8 @@ interface Voucher {
   id: string;
   type: string; // e.g., "MIỄN PHÍ VẬN CHUYỂN"
   title: string;
-  discount: string; // e.g., "Giảm tối đa ₫500k"
-  minOrder: string; // e.g., "Đơn tối thiểu ₫0"
+  discount: string; // e.g., "Giảm tối đa 500k₫"
+  minOrder: string; // e.g., "Đơn tối thiểu 0₫"
   usageInfo?: string; // e.g., "Đã dùng 97% - sắp hết hạn"
   expiryDate?: string; // e.g., "HSD: 12.06.2025"
   isBestChoice?: boolean;
@@ -36,8 +36,8 @@ const mockAvailableVouchers: Voucher[] = [
     id: 'voucher1',
     type: 'MIỄN PHÍ VẬN CHUYỂN',
     title: 'Miễn Phí Vận Chuyển',
-    discount: 'Giảm tối đa ₫500k',
-    minOrder: 'Đơn tối thiểu ₫0',
+    discount: 'Giảm tối đa 500k₫',
+    minOrder: 'Đơn tối thiểu 0₫',
     usageInfo: 'Đã dùng 97% - sắp hết hạn',
     isBestChoice: true,
     isAvailable: true,
@@ -52,8 +52,8 @@ const mockUnavailableVouchers: Voucher[] = [
     id: 'voucher2',
     type: 'MIỄN PHÍ VẬN CHUYỂN',
     title: 'Miễn Phí Vận Chuyển',
-    discount: 'Giảm tối đa ₫50k',
-    minOrder: 'Đơn tối thiểu ₫45k',
+    discount: 'Giảm tối đa 50k₫',
+    minOrder: 'Đơn tối thiểu 45k₫',
     expiryDate: 'HSD: 12.06.2025',
     isAvailable: false,
     unavailableReason: 'Chưa đạt GTĐH tối thiểu.',
@@ -211,5 +211,3 @@ const SelectVoucherPage = () => {
 };
 
 export default SelectVoucherPage;
-
-    

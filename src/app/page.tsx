@@ -225,14 +225,14 @@ const BrandCartPage = () => {
               <div className="flex items-center justify-between py-2 border-b cursor-pointer hover:bg-muted/50 -mx-4 px-4">
                 <div className="flex items-center">
                   <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                  <span className="text-sm text-foreground">Voucher giảm đến ₫5k</span>
+                  <span className="text-sm text-foreground">Voucher giảm đến 5k₫</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
                 <div className="flex items-center">
                   <Truck className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span className="text-sm text-foreground truncate">Giảm ₫700.000 phí vận chuyển đơn tối thiểu...</span>
+                  <span className="text-sm text-foreground truncate">Giảm 700.000₫ phí vận chuyển đơn tối thiểu...</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </div>
@@ -258,7 +258,7 @@ const BrandCartPage = () => {
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Tổng cộng:</p>
               <p className="text-lg font-bold text-foreground">
-                ₫{totalAmount.toLocaleString('de-DE')}
+                {totalAmount.toLocaleString('de-DE')}₫
               </p>
             </div>
             <Button
@@ -282,30 +282,30 @@ const BrandCartPage = () => {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh] pr-1">
-            <div className="space-y-3 py-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
               {cartItems.length > 0 ? cartItems.map(item => (
-                <div key={`cleanup-${item.id}`} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50 border border-transparent has-[:checked]:border-destructive/50 has-[:checked]:bg-destructive/5">
+                <div key={`cleanup-${item.id}`} className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 border border-transparent has-[:checked]:border-destructive/50 has-[:checked]:bg-destructive/5">
                   <Checkbox
                     id={`cleanup-cb-${item.id}`}
                     checked={itemsSelectedForCleanup.has(item.id)}
                     onCheckedChange={() => toggleItemForCleanup(item.id)}
-                    className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
+                    className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive self-end mb-1"
                   />
-                  <label htmlFor={`cleanup-cb-${item.id}`} className="flex-grow flex items-center space-x-3 cursor-pointer">
+                  <label htmlFor={`cleanup-cb-${item.id}`} className="flex flex-col items-center space-y-1 cursor-pointer w-full">
                     <Image 
                       src={item.imageUrl} 
                       alt={item.name} 
-                      width={48} 
-                      height={48} 
-                      className="rounded-md object-cover w-12 h-12 shrink-0 border"
+                      width={64} 
+                      height={64} 
+                      className="rounded-md object-cover w-16 h-16 shrink-0 border" // Increased size
                       data-ai-hint={item.dataAiHint}
                     />
-                    <div className="flex-grow min-w-0">
-                      <p className="text-sm font-medium leading-none truncate" title={item.name}>
+                    <div className="text-center w-full">
+                      <p className="text-xs font-medium leading-tight truncate" title={item.name}>
                         {item.name}
                       </p>
-                      {item.variant && <p className="text-xs text-muted-foreground mt-0.5">{item.variant}</p>}
-                       <p className="text-sm font-semibold text-foreground mt-0.5">₫{item.price.toLocaleString('de-DE')}</p>
+                      {item.variant && <p className="text-xxs text-muted-foreground mt-0.5 truncate">{item.variant.replace(/\s*\(\+\d+\)\s*$/, '')}</p>}
+                       <p className="text-xs font-semibold text-foreground mt-0.5">{item.price.toLocaleString('de-DE')}₫</p>
                     </div>
                   </label>
                 </div>
