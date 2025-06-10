@@ -26,23 +26,11 @@ const BreadcrumbsInner: React.FC<BreadcrumbsMainProps> = ({ totalCartItems }) =>
     const items: BreadcrumbItemDef[] = [];
 
     // Logic for the Cart breadcrumb item
+    // Always use 'breadcrumbs.cartSimple' for the cart link/title, which does not include item count.
     items.push({
       href: '/',
-      labelKey: pathname === '/' ? 'breadcrumbs.cartSimple' : 'breadcrumbs.cart',
-      dynamicLabelParams: (pagePathname, _sParams, itemsCount) => {
-        // If the current page IS the cart page, its title (breadcrumbs.cartSimple) doesn't need params.
-        if (pagePathname === '/') {
-          return undefined;
-        }
-        // If the current page is NOT the cart page, this breadcrumb item is a LINK to the cart.
-        // Its labelKey is 'breadcrumbs.cart' which expects a count.
-        // Provide the count if available and greater than 0.
-        if (itemsCount !== undefined && itemsCount > 0) {
-          return { count: itemsCount };
-        }
-        // Otherwise, no params (t function will handle missing {count} in the string).
-        return undefined;
-      }
+      labelKey: 'breadcrumbs.cartSimple',
+      // dynamicLabelParams is no longer needed for count here, as 'cartSimple' doesn't use it.
     });
 
     if (pathname.startsWith('/checkout') || pathname.startsWith('/select-address') || pathname.startsWith('/add-address') || pathname.startsWith('/select-voucher') || pathname.startsWith('/payment')) {
@@ -114,3 +102,4 @@ const Breadcrumbs: React.FC<BreadcrumbsMainProps> = (props) => {
 };
 
 export default Breadcrumbs;
+
