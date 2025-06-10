@@ -11,6 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CircleDollarSign, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
@@ -18,6 +22,7 @@ import { mockShops } from '@/lib/mockData';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
+import { useToast } from '@/hooks/use-toast';
 
 const HEADER_HEIGHT = 'h-14'; 
 const FOOTER_HEIGHT = 'h-24'; 
@@ -55,15 +60,10 @@ const staticShippingMethod = {
   subLabelKey: 'checkout.shippingMethod.estimatedDeliveryTimeLabel',
 };
 
-const staticTotals = {
-  totalAmount: 20900 + staticShippingMethod.price, // Add shipping cost to default
-  savings: 23600, // Original product savings
-};
-
-
 const CheckoutPage = () => {
   const router = useRouter();
   const { t, locale } = useLanguage();
+  const { toast } = useToast();
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
   const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
   const [initialSavings, setInitialSavings] = useState<number>(0);
@@ -71,6 +71,20 @@ const CheckoutPage = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
+
+  // E-Invoice state
+  const [requestVatInvoice, setRequestVatInvoice] = useState(false);
+  const [eInvoiceType, setEInvoiceType] = useState<'personal' | 'company'>('personal');
+  const [eInvoiceDetails, setEInvoiceDetails] = useState({
+    fullName: '',
+    companyName: '',
+    idCard: '',
+    taxCode: '',
+    email: '',
+    address: '',
+  });
+  const [eInvoiceSummary, setEInvoiceSummary] = useState<string | null>(null);
+
 
   useEffect(() => {
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
@@ -107,7 +121,6 @@ const CheckoutPage = () => {
             }
           });
         } else {
-          // Use static product placeholder if no items in local storage
           itemsTotal = staticProductPlaceholder.price * staticProductPlaceholder.quantity;
           if (staticProductPlaceholder.originalPrice) {
             itemsSavings = (staticProductPlaceholder.originalPrice - staticProductPlaceholder.price) * staticProductPlaceholder.quantity;
@@ -115,14 +128,12 @@ const CheckoutPage = () => {
         }
       } catch (error) {
         console.error("Error parsing checkout items from localStorage:", error);
-        // Use static product placeholder on error
         itemsTotal = staticProductPlaceholder.price * staticProductPlaceholder.quantity;
         if (staticProductPlaceholder.originalPrice) {
             itemsSavings = (staticProductPlaceholder.originalPrice - staticProductPlaceholder.price) * staticProductPlaceholder.quantity;
         }
       }
     } else {
-        // Use static product placeholder if no items key in local storage
         itemsTotal = staticProductPlaceholder.price * staticProductPlaceholder.quantity;
         if (staticProductPlaceholder.originalPrice) {
             itemsSavings = (staticProductPlaceholder.originalPrice - staticProductPlaceholder.price) * staticProductPlaceholder.quantity;
@@ -203,6 +214,35 @@ const CheckoutPage = () => {
     }
     return staticProductPlaceholder.price * staticProductPlaceholder.quantity;
   }, [dynamicDisplayShops]);
+
+  const handleEInvoiceDetailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEInvoiceDetails(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveEInvoice = () => {
+    // Basic validation
+    if (eInvoiceType === 'personal' && (!eInvoiceDetails.fullName || !eInvoiceDetails.idCard || !eInvoiceDetails.email || !eInvoiceDetails.address)) {
+      toast({ title: t('toast.eInvoice.validationError.title'), description: t('toast.eInvoice.validationError.personal'), variant: "destructive"});
+      return;
+    }
+    if (eInvoiceType === 'company' && (!eInvoiceDetails.companyName || !eInvoiceDetails.taxCode || !eInvoiceDetails.email || !eInvoiceDetails.address)) {
+      toast({ title: t('toast.eInvoice.validationError.title'), description: t('toast.eInvoice.validationError.company'), variant: "destructive"});
+      return;
+    }
+    console.log("E-Invoice Details Saved:", eInvoiceDetails);
+    setEInvoiceSummary(eInvoiceType === 'personal' ? eInvoiceDetails.fullName : eInvoiceDetails.companyName);
+    toast({ title: t('toast.eInvoice.saved.title'), description: t('toast.eInvoice.saved.description')});
+    // Optionally close the accordion here
+  };
+
+  const handleCancelEInvoice = () => {
+    setRequestVatInvoice(false);
+    setEInvoiceDetails({ fullName: '', companyName: '', idCard: '', taxCode: '', email: '', address: '' });
+    setEInvoiceSummary(null);
+    toast({ title: t('toast.eInvoice.cancelled.title') });
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
@@ -376,16 +416,87 @@ const CheckoutPage = () => {
 
             <Card className="shadow-sm">
               <CardContent className="p-0 divide-y divide-border">
-                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
-                  <div className="flex items-center">
-                     <FileText className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">{t('checkout.eInvoice')}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-sm text-muted-foreground">{t('checkout.eInvoicePlaceholder')}</span>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
-                  </div>
-                </div>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="e-invoice">
+                    <AccordionTrigger className="p-4 flex items-center justify-between hover:bg-muted/50 hover:no-underline w-full text-sm data-[state=open]:border-b">
+                      <div className="flex items-center">
+                        <FileText className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
+                        <span className="text-sm text-foreground">{t('checkout.eInvoice.title')}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm text-muted-foreground mr-1">
+                          {eInvoiceSummary || (requestVatInvoice ? t('checkout.eInvoice.status.pending') : t('checkout.eInvoice.status.notRequested'))}
+                        </span>
+                        {/* Chevron is part of AccordionTrigger */}
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-4">
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="request-vat-invoice-cb" checked={requestVatInvoice} onCheckedChange={(checked) => {
+                            setRequestVatInvoice(Boolean(checked));
+                            if (!checked) {
+                                setEInvoiceDetails({ fullName: '', companyName: '', idCard: '', taxCode: '', email: '', address: '' });
+                                setEInvoiceSummary(null);
+                            }
+                          }}/>
+                          <Label htmlFor="request-vat-invoice-cb" className="text-sm font-medium leading-none">
+                            {t('checkout.eInvoice.vatInvoiceLabel')}
+                          </Label>
+                        </div>
+
+                        {requestVatInvoice && (
+                          <>
+                            <p className="text-xs text-destructive">{t('checkout.eInvoice.vatNote')}</p>
+
+                            <div>
+                              <p className="text-sm font-medium mb-2">{t('checkout.eInvoice.invoiceTypeLabel')}</p>
+                              <RadioGroup
+                                value={eInvoiceType}
+                                onValueChange={(value: 'personal' | 'company') => setEInvoiceType(value)}
+                                className="flex space-x-6"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="personal" id="personal-invoice" />
+                                  <Label htmlFor="personal-invoice" className="font-normal">{t('checkout.eInvoice.typePersonal')}</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="company" id="company-invoice" />
+                                  <Label htmlFor="company-invoice" className="font-normal">{t('checkout.eInvoice.typeCompany')}</Label>
+                                </div>
+                              </RadioGroup>
+                            </div>
+                            
+                            {eInvoiceType === 'personal' && (
+                              <>
+                                <Input placeholder={t('checkout.eInvoice.fullNamePlaceholder')} name="fullName" value={eInvoiceDetails.fullName} onChange={handleEInvoiceDetailChange} />
+                                <Input placeholder={t('checkout.eInvoice.idCardPlaceholder')} name="idCard" value={eInvoiceDetails.idCard} onChange={handleEInvoiceDetailChange} />
+                              </>
+                            )}
+                            {eInvoiceType === 'company' && (
+                              <>
+                                <Input placeholder={t('checkout.eInvoice.companyNamePlaceholder')} name="companyName" value={eInvoiceDetails.companyName} onChange={handleEInvoiceDetailChange} />
+                                <Input placeholder={t('checkout.eInvoice.taxCodePlaceholder')} name="taxCode" value={eInvoiceDetails.taxCode} onChange={handleEInvoiceDetailChange} />
+                              </>
+                            )}
+                            <Input type="email" placeholder={t('checkout.eInvoice.emailPlaceholder')} name="email" value={eInvoiceDetails.email} onChange={handleEInvoiceDetailChange} />
+                            <Input placeholder={t('checkout.eInvoice.addressPlaceholder')} name="address" value={eInvoiceDetails.address} onChange={handleEInvoiceDetailChange} />
+                            
+                            <div className="flex space-x-3 pt-2">
+                              <Button onClick={handleSaveEInvoice} className="flex-1 bg-foreground hover:bg-foreground/90 text-accent-foreground">
+                                {t('checkout.eInvoice.saveButton')}
+                              </Button>
+                              <Button variant="outline" onClick={handleCancelEInvoice} className="flex-1 border-muted-foreground text-muted-foreground hover:bg-muted">
+                                {t('checkout.eInvoice.doNotIssueButton')}
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+
                 <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
                   <div className="flex items-center">
                     <MessageCircle className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
@@ -408,7 +519,7 @@ const CheckoutPage = () => {
                   <div>
                     <div className="flex items-center">
                       <span className="text-sm font-medium text-foreground mr-2">{shippingMethod.mainLabel}</span>
-                      <Badge variant="secondary" className="text-foreground bg-muted px-2 py-0.5 text-sm">{formatCurrency(shippingMethod.price)}</Badge>
+                      <Badge variant="secondary" className="text-foreground bg-muted px-2 py-0.5 text-xs">{formatCurrency(shippingMethod.price)}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{shippingMethod.subLabel}</p>
                   </div>
@@ -463,7 +574,6 @@ const CheckoutPage = () => {
               <CardHeader className="pb-3 pt-4 px-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium text-foreground">{t('checkout.paymentMethod')}</h3>
-                  {/* <Button variant="link" className="text-xs text-foreground p-0 h-auto hover:text-foreground/80">{t('checkout.viewAll')}</Button> */}
                 </div>
               </CardHeader>
               <CardContent className="p-0 divide-y divide-border">
@@ -529,4 +639,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-

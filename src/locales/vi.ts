@@ -46,6 +46,20 @@ const viTranslations = {
     },
     voucher: {
         codeApplied: "Mã {code} đã được áp dụng ( giả lập )."
+    },
+    eInvoice: {
+      saved: {
+        title: "Đã lưu hóa đơn điện tử",
+        description: "Thông tin hóa đơn điện tử của bạn đã được lưu."
+      },
+      cancelled: {
+        title: "Đã hủy yêu cầu hóa đơn điện tử",
+      },
+      validationError: {
+        title: "Lỗi xác thực",
+        personal: "Vui lòng điền Họ tên, Căn cước công dân, Email, và Địa chỉ cho hóa đơn cá nhân.",
+        company: "Vui lòng điền Tên công ty, Mã số thuế, Email, và Địa chỉ cho hóa đơn công ty."
+      }
     }
   },
   checkout: {
@@ -56,8 +70,26 @@ const viTranslations = {
       noAddressSelectedTitle: "Chưa có địa chỉ giao hàng",
       noAddressSelectedMessage: "Vui lòng thêm hoặc chọn địa chỉ giao hàng để tiếp tục.",
     },
-    eInvoice: "Hóa đơn điện tử",
-    eInvoicePlaceholder: "Yêu cầu",
+    eInvoice: {
+      title: "Hóa đơn điện tử",
+      status: {
+        notRequested: "Yêu cầu",
+        pending: "Chờ nhập liệu"
+      },
+      vatInvoiceLabel: "Hóa đơn VAT",
+      vatNote: "Lưu ý: Hoá đơn đỏ sẽ được xuất bao gồm tổng giá trị đơn hàng (Sản phẩm + Phí vận chuyển)",
+      invoiceTypeLabel: "LOẠI HOÁ ĐƠN",
+      typePersonal: "Cá nhân",
+      typeCompany: "Công ty",
+      fullNamePlaceholder: "Nhập họ tên",
+      companyNamePlaceholder: "Nhập tên công ty",
+      idCardPlaceholder: "Nhập căn cước công dân",
+      taxCodePlaceholder: "Nhập mã số thuế",
+      emailPlaceholder: "Nhập email",
+      addressPlaceholder: "Nhập địa chỉ",
+      saveButton: "Lưu",
+      doNotIssueButton: "Không xuất hoá đơn",
+    },
     messageToShop: "Lời nhắn cho Shop",
     messageToShopPlaceholder: "Để lại lời nhắn",
     shippingMethod: "Phương thức vận chuyển",

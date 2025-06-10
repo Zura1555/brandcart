@@ -46,6 +46,20 @@ const enTranslations = {
     },
     voucher: {
         codeApplied: "Code {code} has been applied (simulated)."
+    },
+    eInvoice: {
+      saved: {
+        title: "E-Invoice Saved",
+        description: "Your e-invoice details have been saved."
+      },
+      cancelled: {
+        title: "E-Invoice Cancelled",
+      },
+      validationError: {
+        title: "Validation Error",
+        personal: "Please fill in Full Name, ID Card, Email, and Address for personal invoice.",
+        company: "Please fill in Company Name, Tax Code, Email, and Address for company invoice."
+      }
     }
   },
   checkout: {
@@ -56,8 +70,26 @@ const enTranslations = {
       noAddressSelectedTitle: "No Shipping Address",
       noAddressSelectedMessage: "Please add or select a shipping address to proceed.",
     },
-    eInvoice: "E-Invoice",
-    eInvoicePlaceholder: "Request",
+    eInvoice: {
+      title: "E-Invoice",
+      status: {
+        notRequested: "Request",
+        pending: "Details pending"
+      },
+      vatInvoiceLabel: "VAT Invoice",
+      vatNote: "Note: Red invoice will be issued including total order value (Products + Shipping fee)",
+      invoiceTypeLabel: "INVOICE TYPE",
+      typePersonal: "Personal",
+      typeCompany: "Company",
+      fullNamePlaceholder: "Enter full name",
+      companyNamePlaceholder: "Enter company name",
+      idCardPlaceholder: "Enter ID card number",
+      taxCodePlaceholder: "Enter tax code",
+      emailPlaceholder: "Enter email",
+      addressPlaceholder: "Enter address",
+      saveButton: "Save",
+      doNotIssueButton: "Don't issue invoice",
+    },
     messageToShop: "Message to Shop",
     messageToShopPlaceholder: "Leave a message",
     shippingMethod: "Shipping Method",
