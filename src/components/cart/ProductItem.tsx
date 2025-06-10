@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import type { CartItem } from '@/interfaces';
 import QuantitySelector from './QuantitySelector';
 import { Check, Trash2 } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 interface ProductItemProps {
   item: CartItem;
@@ -103,7 +104,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       {/* Swipeable Content Wrapper - This is what moves */}
       <div
         ref={swipeableContentRef}
-        className={`relative z-10 bg-card ${item.selected ? 'bg-accent/10' : ''}`}
+        className={cn("relative z-10", item.selected ? 'bg-muted' : 'bg-card')}
         style={{ transform: `translateX(${translateX}px)`, transition: isSwiping ? 'none' : 'transform 0.3s ease-out' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -167,4 +168,3 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
-
