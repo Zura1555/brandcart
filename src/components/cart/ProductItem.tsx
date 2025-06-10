@@ -84,9 +84,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   
   const handleDelete = () => {
     onDeleteItem(item.id);
-    // No need to explicitly setTranslateX(0) here if the item is removed,
-    // but if it could fail or be undone, you might.
-    // For simplicity, we assume successful deletion removes the item.
+    // The item will be removed from the list, so no need to manually reset translateX for this specific item.
   };
 
   return (
@@ -106,7 +104,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       <div
         ref={swipeableContentRef}
         className={`relative z-10 bg-card ${item.selected ? 'bg-accent/10' : ''}`}
-        style={{ transform: `translateX(${translateX}px)`, transition: 'transform 0.3s ease-out' }}
+        style={{ transform: `translateX(${translateX}px)`, transition: isSwiping ? 'none' : 'transform 0.3s ease-out' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -169,3 +167,4 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
+
