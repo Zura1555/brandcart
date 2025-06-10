@@ -483,7 +483,7 @@ const CheckoutPage = () => {
           <div>
             <p className="text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
             <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
-            {displaySavings > 0 && !useShopeeCoins && (
+            {displaySavings > 0 && (
               <p className="text-xs text-green-600">{t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}</p>
             )}
              {useShopeeCoins && (
@@ -505,3 +505,6 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
+
+    
