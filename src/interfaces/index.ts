@@ -1,4 +1,14 @@
 
+export interface SimpleVariant {
+  id: string; // e.g., "variant_red_m"
+  name: string; // e.g., "Color: Red, Size: M"
+  price?: number; // Optional: if variant price differs from base product price
+  originalPrice?: number; // Optional
+  imageUrl?: string; // Optional: if variant has a different image
+  stock?: number; // Optional: specific stock for this variant
+  dataAiHint?: string; // Optional
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -7,9 +17,10 @@ export interface Product {
   brand: string;
   imageUrl: string;
   dataAiHint?: string;
-  variant?: string;
+  variant?: string; // Name of the currently selected variant for display
   stock?: number;
   discountDescription?: string;
+  availableVariants?: SimpleVariant[]; // List of available variants for this product
 }
 
 export interface Shop {
@@ -24,8 +35,12 @@ export interface Shop {
 }
 
 export interface CartItem extends Product {
+  cartItemId: string; // Unique ID for this item *in the cart* (e.g., product.id + (selected_variant_id || 'base'))
   quantity: number;
   selected: boolean;
+  // The 'variant' field from Product will represent the selected variant's name for display.
+  // The 'price', 'originalPrice', 'imageUrl', 'stock', 'dataAiHint' can be from the base product
+  // or overridden by a selected variant if that level of detail is implemented later.
 }
 
 export interface ShippingAddress {
