@@ -191,6 +191,7 @@ const enTranslations = {
       title: "How easy was it to checkout?",
       veryDifficult: "Very difficult",
       veryEasy: "Very easy",
+      tellUsMorePlaceholder: "Tell us more about your experience..."
     },
     continueShoppingButton: "Continue Shopping",
     loadingOrder: "Loading order details...",

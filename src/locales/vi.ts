@@ -191,6 +191,7 @@ const viTranslations = {
       title: "Trải nghiệm thanh toán của bạn thế nào?",
       veryDifficult: "Rất khó",
       veryEasy: "Rất dễ",
+      tellUsMorePlaceholder: "Cho chúng tôi biết thêm về trải nghiệm của bạn..."
     },
     continueShoppingButton: "Tiếp tục mua sắm",
     loadingOrder: "Đang tải chi tiết đơn hàng...",

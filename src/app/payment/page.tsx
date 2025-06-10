@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { CheckCircle2, ChevronLeft } from 'lucide-react';
 import type { CartItem } from '@/interfaces';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -35,11 +36,11 @@ const PaymentSuccessPage = () => {
   const { toast } = useToast();
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [showFeedbackTextarea, setShowFeedbackTextarea] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This effect attempts to load order details from localStorage.
-    // It runs once on mount or if locale/t/toast change (which are generally stable).
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
     if (rawItems) {
       try {
@@ -64,26 +65,21 @@ const PaymentSuccessPage = () => {
             shippingCost: STATIC_SHIPPING_COST,
             totalAmount,
           });
-          // Clear the cart from localStorage only after successfully setting orderDetails
           localStorage.removeItem(CHECKOUT_ITEMS_STORAGE_KEY);
         }
-        // If items array is empty, orderDetails remains null.
       } catch (error) {
         console.error("Error processing order details:", error);
         toast({ title: t('paymentSuccess.toast.errorProcessingOrder.title'), description: t('paymentSuccess.toast.errorProcessingOrder.description'), variant: 'destructive' });
-        // orderDetails remains null on error.
       }
     }
-    // If rawItems is null (e.g. direct access or refresh after clearing), orderDetails remains null.
-    setIsLoading(false); // Signal that loading attempt is complete.
-  }, [locale, t, toast]); // Dependencies for the data loading effect.
+    setIsLoading(false);
+  }, [locale, t, toast]);
 
   useEffect(() => {
-    // This effect handles redirection if loading is complete and no order details were found.
     if (!isLoading && !orderDetails) {
       router.replace('/');
     }
-  }, [isLoading, orderDetails, router]); // Dependencies for the redirection effect.
+  }, [isLoading, orderDetails, router]);
 
 
   const formatCurrency = (amount: number) => {
@@ -92,6 +88,12 @@ const PaymentSuccessPage = () => {
 
   const handleRatingSelect = (rating: number) => {
     setSelectedRating(rating);
+    if (rating <= 3) {
+      setShowFeedbackTextarea(true);
+    } else {
+      setShowFeedbackTextarea(false);
+      setFeedbackText(''); // Clear text if rating is high
+    }
     toast({ title: t('paymentSuccess.toast.feedbackReceived.title'), description: t('paymentSuccess.toast.feedbackReceived.description', { rating }) });
   };
 
@@ -118,10 +120,8 @@ const PaymentSuccessPage = () => {
     );
   }
   
-  // If after loading, orderDetails is still null, the redirection effect above will handle it.
-  // We might return null or a minimal loader here if the redirect effect needs a render cycle.
   if (!orderDetails) {
-    return null; // Or a minimal loading indicator while redirect effect runs
+    return null; 
   }
 
   return (
@@ -204,10 +204,18 @@ const PaymentSuccessPage = () => {
                   </Button>
                 ))}
               </div>
-              <div className="flex justify-between text-xs text-muted-foreground px-1">
+              <div className="flex justify-between text-xs text-muted-foreground px-1 mb-4">
                 <span>{t('paymentSuccess.feedback.veryDifficult')}</span>
                 <span>{t('paymentSuccess.feedback.veryEasy')}</span>
               </div>
+              {showFeedbackTextarea && (
+                <Textarea
+                  placeholder={t('paymentSuccess.feedback.tellUsMorePlaceholder')}
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  className="min-h-[100px]"
+                />
+              )}
             </CardContent>
           </Card>
 
