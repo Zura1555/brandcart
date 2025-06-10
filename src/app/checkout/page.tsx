@@ -342,7 +342,7 @@ const CheckoutPage = () => {
                       <div className="flex-grow">
                         <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{p.name}</p>
                         {p.variant && (
-                           <Badge className="bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
+                           <Badge className="bg-green-600 hover:bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
                             {p.variant.replace(/\s*\(\+\d+\)\s*$/, '')}
                           </Badge>
                         )}
@@ -394,7 +394,7 @@ const CheckoutPage = () => {
                     <div className="flex-grow">
                       <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{staticProductPlaceholder.name}</p>
                       {staticProductPlaceholder.variation && (
-                        <Badge className="bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
+                        <Badge className="bg-green-600 hover:bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
                           {staticProductPlaceholder.variation}
                         </Badge>
                       )}
