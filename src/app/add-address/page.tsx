@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -46,7 +46,7 @@ const wards = [{ value: 'pdk', label: 'Phường Đa Kao' }, { value: 'p2', labe
 
 type AddressTypeOption = 'home' | 'office';
 
-const AddAddressPage = () => {
+const AddAddressFormInner = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -110,7 +110,7 @@ const AddAddressPage = () => {
     const fullAddressString = `${data.streetAddress}, ${wardLabel}, ${districtLabel}, ${provinceLabel}`;
 
     const addressData: Omit<ShippingAddress, 'id'> & { id?: string } = {
-      id: isEditMode ? data.id : `addr-${Date.now().toString()}-${Math.random().toString(36).substring(2, 7)}`,
+      id: isEditMode && data.id ? data.id : `addr-${Date.now().toString()}-${Math.random().toString(36).substring(2, 7)}`,
       name: data.fullName,
       phone: data.phone,
       address: fullAddressString,
@@ -130,7 +130,7 @@ const AddAddressPage = () => {
       if (isEditMode && addressData.id) { // Editing existing address
         let oldDefaultId: string | null = null;
         addresses = addresses.map(addr => {
-            if (addr.isDefault && addr.id !== addressData.id) oldDefaultId = addr.id; // track old default if it's not the one being edited
+            if (addr.isDefault && addr.id !== addressData.id) oldDefaultId = addr.id;
             return addr.id === addressData.id ? { ...addr, ...addressData } as ShippingAddress : addr;
         });
 
@@ -139,20 +139,19 @@ const AddAddressPage = () => {
                 addr.id === addressData.id ? addr : { ...addr, isDefault: false }
             );
             localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, addressData.id);
-        } else { // If current edited address is UNSET from default
+        } else { 
             const currentlyEditedAddressWasDefault = addresses.find(a => a.id === addressData.id)?.isDefault === false && selectedAddressIdRaw === addressData.id;
             if(currentlyEditedAddressWasDefault){
-                // If it was the default and now it's not, we need to find a new default or clear selection
-                 if (addresses.length === 1) { // It's the only address, must remain default
+                 if (addresses.length === 1) { 
                     addresses[0].isDefault = true;
                     localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, addresses[0].id);
-                 } else if (oldDefaultId) { // Another address was default before edit
+                 } else if (oldDefaultId) { 
                     localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, oldDefaultId);
                  }
-                 else { // No other default, pick first if available or clear
+                 else { 
                     const firstAddress = addresses.length > 0 ? addresses[0] : null;
                     if (firstAddress) {
-                        firstAddress.isDefault = true; // Make the first one default
+                        firstAddress.isDefault = true; 
                         localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, firstAddress.id);
                         addresses = addresses.map(a => a.id === firstAddress.id ? firstAddress : a);
                     } else {
@@ -167,7 +166,7 @@ const AddAddressPage = () => {
         });
 
       } else { // Adding new address
-        const newAddress = addressData as ShippingAddress; // ID is now guaranteed
+        const newAddress = addressData as ShippingAddress; 
         if (newAddress.isDefault) {
           addresses = addresses.map(addr => ({ ...addr, isDefault: false }));
           localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
@@ -184,7 +183,6 @@ const AddAddressPage = () => {
         });
       }
       
-      // Ensure at least one address is default if addresses exist
       if (addresses.length > 0 && !addresses.some(addr => addr.isDefault)) {
         addresses[0].isDefault = true;
         localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, addresses[0].id);
@@ -417,6 +415,34 @@ const AddAddressPage = () => {
         </div>
       </footer>
     </div>
+  );
+};
+
+const AddAddressPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col min-h-screen bg-muted/40">
+        <header className={`fixed top-0 left-0 right-0 z-30 bg-card shadow-sm border-b ${HEADER_HEIGHT} flex items-center`}>
+          <div className="container mx-auto px-4 flex items-center h-full">
+            <div className="w-10"></div> {/* Placeholder for back button */}
+            <h1 className="text-lg font-semibold text-foreground text-center flex-grow">Loading...</h1>
+            <div className="w-20"></div> {/* Placeholder for language switcher */}
+          </div>
+        </header>
+        <main className={`flex-grow overflow-y-auto pt-14 pb-20 flex items-center justify-center`}>
+          <p>Loading address form...</p>
+        </main>
+        <footer className={`fixed bottom-0 left-0 right-0 z-30 bg-card border-t ${FOOTER_HEIGHT} flex items-center justify-center`}>
+          <div className="container mx-auto px-4 h-full flex items-center justify-center">
+            <Button size="lg" className="w-full max-w-md bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold" disabled>
+              Loading...
+            </Button>
+          </div>
+        </footer>
+      </div>
+    }>
+      <AddAddressFormInner />
+    </Suspense>
   );
 };
 
