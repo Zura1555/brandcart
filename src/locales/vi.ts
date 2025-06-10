@@ -26,6 +26,7 @@ const viTranslations = {
     noItemsSelectedDescription: "Vui lòng chọn ít nhất một sản phẩm để tiếp tục thanh toán.",
     itemsRemovedTitle: "Đã xóa sản phẩm",
     itemsRemovedDescription: "Đã xóa {count} sản phẩm khỏi giỏ hàng của bạn.",
+    itemRemovedTitleSingle: "Đã xóa {itemName}",
     limitReachedTitle: "Đạt giới hạn",
     limitReachedDescription: "Số lượng tối đa cho mỗi sản phẩm là 99.",
     address: {

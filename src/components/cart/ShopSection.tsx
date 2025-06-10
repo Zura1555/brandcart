@@ -19,9 +19,10 @@ interface ShopSectionProps {
   onShopSelectToggle: (checked: boolean) => void;
   onItemSelectToggle: (itemId: string, checked: boolean) => void;
   onQuantityChange: (itemId: string, quantity: number) => void;
+  onDeleteItem: (itemId: string) => void; // New prop
 }
 
-const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, onShopSelectToggle, onItemSelectToggle, onQuantityChange }) => {
+const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, onShopSelectToggle, onItemSelectToggle, onQuantityChange, onDeleteItem }) => {
   if (items.length === 0) return null;
 
   return (
@@ -78,6 +79,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
               item={item}
               onSelectToggle={onItemSelectToggle}
               onQuantityChange={onQuantityChange}
+              onDeleteItem={onDeleteItem} // Pass down the new prop
             />
           ))}
         </div>

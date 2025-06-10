@@ -72,6 +72,16 @@ const BrandCartPage = () => {
     );
   };
 
+  const handleDeleteItem = (itemId: string) => {
+    const itemToRemove = cartItems.find(item => item.id === itemId);
+    setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
+    if (itemToRemove) {
+      toast({
+        title: t('toast.itemRemovedTitleSingle', { itemName: itemToRemove.name }),
+      });
+    }
+  };
+
   const totalAmount = useMemo(() => {
     return cartItems.reduce((sum, item) => {
       if (item.selected) {
@@ -174,7 +184,7 @@ const BrandCartPage = () => {
       </header>
 
       <main className="flex-grow pt-14 pb-20">
-        <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        <div className="container mx-auto px-0 sm:px-2 py-4 sm:py-6 space-y-4 sm:space-y-6">
           {cartItems.length === 0 ? (
              <div className="text-center py-10">
                 <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -192,11 +202,12 @@ const BrandCartPage = () => {
                   onShopSelectToggle={(checked) => handleToggleShopSelect(itemsByShop[0].name, checked)}
                   onItemSelectToggle={handleToggleItemSelect}
                   onQuantityChange={handleQuantityChange}
+                  onDeleteItem={handleDeleteItem}
                 />
               )}
 
               {cartItems.length > 0 && (
-                <Card className="bg-card p-4 rounded-lg shadow">
+                <Card className="bg-card p-4 rounded-lg shadow mx-2 sm:mx-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Trash2 className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
@@ -224,13 +235,14 @@ const BrandCartPage = () => {
                   onShopSelectToggle={(checked) => handleToggleShopSelect(shopGroup.name, checked)}
                   onItemSelectToggle={handleToggleItemSelect}
                   onQuantityChange={handleQuantityChange}
+                  onDeleteItem={handleDeleteItem}
                 />
               ))}
             </>
           )}
 
           {cartItems.length > 0 && (
-            <Card className="bg-card p-4 rounded-lg shadow">
+            <Card className="bg-card p-4 rounded-lg shadow mx-2 sm:mx-0">
               <div className="flex items-center justify-between py-2 border-b cursor-pointer hover:bg-muted/50 -mx-4 px-4">
                 <div className="flex items-center">
                   <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
@@ -291,7 +303,7 @@ const BrandCartPage = () => {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh] pr-1">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 py-4">
               {cartItems.length > 0 ? cartItems.map(item => (
                 <div key={`cleanup-${item.id}`} className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 border border-transparent has-[:checked]:border-destructive/50 has-[:checked]:bg-destructive/5">
                   <Checkbox

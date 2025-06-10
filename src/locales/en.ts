@@ -26,6 +26,7 @@ const enTranslations = {
     noItemsSelectedDescription: "Please select at least one item to proceed to checkout.",
     itemsRemovedTitle: "Items Removed",
     itemsRemovedDescription: "{count} item(s) have been removed from your cart.",
+    itemRemovedTitleSingle: "{itemName} removed",
     limitReachedTitle: "Limit Reached",
     limitReachedDescription: "Maximum quantity per item is 99.",
     address: {
