@@ -93,25 +93,4 @@ export const mockShops: Shop[] = [
   }
 ];
 
-export const mockShippingAddresses: ShippingAddress[] = [
-  {
-    id: 'addr1',
-    name: "Trần Thượng Tuấn",
-    phone: "(+84) 523 762 477",
-    address: "Sarina, Sala, A00.11, Đường B2, Phường An Lợi Đông, Thành Phố Thủ Đức, TP. Hồ Chí Minh",
-    isDefault: true,
-  },
-  {
-    id: 'addr2',
-    name: "Trần Thượng Tuấn",
-    phone: "(+84) 523 762 477",
-    address: "Số 539, Huỳnh Văn Bánh, Phường 13, Quận Phú Nhuận, TP. Hồ Chí Minh",
-  },
-  {
-    id: 'addr3',
-    name: "Nguyễn Văn An",
-    phone: "(+84) 123 456 789",
-    address: "123 Đường ABC, Phường XYZ, Quận 1, TP. Hồ Chí Minh",
-  },
-];
-
+export const mockShippingAddresses: ShippingAddress[] = [];

@@ -30,6 +30,11 @@ export interface ShippingAddress {
   id: string;
   name: string;
   phone: string;
-  address: string;
+  address: string; // Full concatenated address for display
+  streetAddress: string; // Street, building number part
+  ward: string; // Value for select, e.g., 'pdk'
+  district: string; // Value for select, e.g., 'q1'
+  province: string; // Value for select, e.g., 'hcm'
+  addressType: 'home' | 'office';
   isDefault?: boolean;
 }

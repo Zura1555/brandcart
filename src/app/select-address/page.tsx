@@ -10,7 +10,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, PlusCircle } from 'lucide-react';
 import type { ShippingAddress } from '@/interfaces';
-import { mockShippingAddresses } from '@/lib/mockData';
+// mockShippingAddresses is now empty, so it won't be used for initial population unless localStorage is also empty.
+import { mockShippingAddresses } from '@/lib/mockData'; 
 
 const HEADER_HEIGHT = 'h-14';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
@@ -28,23 +29,24 @@ const SelectAddressPage = () => {
     if (storedAddressesRaw) {
       try {
         const parsedAddresses = JSON.parse(storedAddressesRaw);
-        if (Array.isArray(parsedAddresses) && parsedAddresses.length > 0) {
+        // We accept an empty array from storage, meaning user has no addresses yet or cleared them.
+        if (Array.isArray(parsedAddresses)) { 
           addressesFromStorage = parsedAddresses;
-        } else {
-          addressesFromStorage = [...mockShippingAddresses];
+        } else { // Should not happen if storage is well-managed, but as a fallback:
+          addressesFromStorage = []; // Start fresh if format is incorrect
           localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
         }
       } catch (e) {
-        console.error("Failed to parse addresses from localStorage, using mock data.", e);
-        addressesFromStorage = [...mockShippingAddresses];
+        console.error("Failed to parse addresses from localStorage, starting fresh.", e);
+        addressesFromStorage = [];
         localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
       }
     } else {
-      addressesFromStorage = [...mockShippingAddresses];
+      // If nothing in storage (e.g. first visit), initialize with an empty array.
+      addressesFromStorage = []; 
       localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
     }
 
-    // Sort addresses: default first, then by original order (which is preserved by filter + unshift)
     const defaultAddress = addressesFromStorage.find(addr => addr.isDefault);
     let sortedAddresses = [...addressesFromStorage];
     if (defaultAddress) {
@@ -53,7 +55,6 @@ const SelectAddressPage = () => {
     }
     setShippingAddresses(sortedAddresses);
 
-    // Determine selected address ID
     const storedSelectedId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
     const currentSelectedIsValid = storedSelectedId && sortedAddresses.find(addr => addr.id === storedSelectedId);
 
@@ -82,8 +83,7 @@ const SelectAddressPage = () => {
 
   const handleEditAddress = (addressId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    // Future implementation: router.push(`/edit-address/${addressId}`);
-    alert(`Chức năng sửa địa chỉ (ID: ${addressId}) chưa được cài đặt.`);
+    router.push(`/add-address?editId=${addressId}`);
   };
 
   const handleAddNewAddress = () => {
@@ -136,7 +136,7 @@ const SelectAddressPage = () => {
               <Card className="bg-card rounded-md shadow-sm">
                 <CardContent className="p-6 text-center text-muted-foreground">
                   <p>Không tìm thấy địa chỉ nào.</p>
-                  <p>Vui lòng thêm địa chỉ mới.</p>
+                  <p>Vui lòng thêm địa chỉ mới để tiếp tục.</p>
                 </CardContent>
               </Card>
             )}

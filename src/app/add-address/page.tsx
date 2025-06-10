@@ -1,8 +1,8 @@
 
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,8 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent }
-from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ClipboardPaste } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ShippingAddress } from '@/interfaces';
@@ -37,7 +36,6 @@ const addressFormSchema = z.object({
 
 type AddressFormValues = z.infer<typeof addressFormSchema>;
 
-// Placeholder data for dropdowns
 const provinces = [{ value: 'hcm', label: 'TP. Hồ Chí Minh' }, { value: 'hn', label: 'Hà Nội' }];
 const districts = [{ value: 'q1', label: 'Quận 1' }, { value: 'qtb', label: 'Quận Tân Bình' }];
 const wards = [{ value: 'pdk', label: 'Phường Đa Kao' }, { value: 'p2', label: 'Phường 2' }];
@@ -46,7 +44,12 @@ type AddressTypeOption = 'home' | 'office';
 
 const AddAddressPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+  
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [pageTitle, setPageTitle] = useState('Địa chỉ mới');
+  const [submitButtonText, setSubmitButtonText] = useState('HOÀN THÀNH');
   const [selectedAddressType, setSelectedAddressType] = useState<AddressTypeOption>('home');
 
   const form = useForm<AddressFormValues>({
@@ -63,53 +66,136 @@ const AddAddressPage = () => {
     },
   });
 
+  useEffect(() => {
+    const editId = searchParams.get('editId');
+    if (editId) {
+      setEditingAddressId(editId);
+      setPageTitle('Sửa địa chỉ');
+      setSubmitButtonText('LƯU THAY ĐỔI');
+      try {
+        const existingAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
+        if (existingAddressesRaw) {
+          const addresses: ShippingAddress[] = JSON.parse(existingAddressesRaw);
+          const addressToEdit = addresses.find(addr => addr.id === editId);
+          if (addressToEdit) {
+            form.reset({
+              fullName: addressToEdit.name,
+              phone: addressToEdit.phone,
+              province: addressToEdit.province,
+              district: addressToEdit.district,
+              ward: addressToEdit.ward,
+              streetAddress: addressToEdit.streetAddress,
+              isDefault: addressToEdit.isDefault || false,
+              addressType: addressToEdit.addressType,
+            });
+            setSelectedAddressType(addressToEdit.addressType);
+          } else {
+            toast({ title: 'Lỗi', description: 'Không tìm thấy địa chỉ để sửa.', variant: 'destructive' });
+            router.push('/select-address');
+          }
+        }
+      } catch (error) {
+        console.error("Error loading address for editing:", error);
+        toast({ title: 'Lỗi', description: 'Không thể tải địa chỉ để sửa.', variant: 'destructive' });
+        router.push('/select-address');
+      }
+    }
+  }, [searchParams, form, router, toast]);
+
   const onSubmit = (data: AddressFormValues) => {
     const provinceLabel = provinces.find(p => p.value === data.province)?.label || data.province;
     const districtLabel = districts.find(d => d.value === data.district)?.label || data.district;
     const wardLabel = wards.find(w => w.value === data.ward)?.label || data.ward;
     const fullAddressString = `${data.streetAddress}, ${wardLabel}, ${districtLabel}, ${provinceLabel}`;
 
-    const newAddress: ShippingAddress = {
-      id: `addr-${Date.now().toString()}-${Math.random().toString(36).substring(2, 7)}`,
-      name: data.fullName,
-      phone: data.phone,
-      address: fullAddressString,
-      isDefault: data.isDefault, // Initial value from form
-    };
-
     try {
       const existingAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
       let addresses: ShippingAddress[] = existingAddressesRaw ? JSON.parse(existingAddressesRaw) : [];
 
-      if (newAddress.isDefault) {
-        // If new one is explicitly set as default, unset all others
-        addresses = addresses.map(addr => ({ ...addr, isDefault: false }));
-        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
-      } else {
-        // If new one is NOT set as default by user
-        if (addresses.length === 0) {
-          // And it's the very first address being added (empty list before this)
-          newAddress.isDefault = true; // Make it default
-          localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
+      if (editingAddressId) { // Editing existing address
+        const addressIndex = addresses.findIndex(addr => addr.id === editingAddressId);
+        if (addressIndex === -1) {
+          toast({ title: 'Lỗi', description: 'Không tìm thấy địa chỉ để cập nhật.', variant: 'destructive' });
+          return;
         }
-        // Otherwise, if other addresses exist and have a default, or user didn't mark this as default, it remains non-default.
+        
+        const oldAddress = addresses[addressIndex];
+        const updatedAddress: ShippingAddress = {
+          ...oldAddress,
+          name: data.fullName,
+          phone: data.phone,
+          address: fullAddressString,
+          streetAddress: data.streetAddress,
+          province: data.province,
+          district: data.district,
+          ward: data.ward,
+          addressType: data.addressType,
+          isDefault: data.isDefault,
+        };
+
+        if (updatedAddress.isDefault) {
+          addresses = addresses.map(addr => ({
+            ...addr,
+            isDefault: addr.id === editingAddressId,
+          }));
+          localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, editingAddressId);
+        } else { // updatedAddress.isDefault is false
+          if (oldAddress.isDefault) { // It was default, now being unset.
+            updatedAddress.isDefault = false; // Ensure it's false in the object
+            if (addresses.length === 1) { // If it's the only address, it must remain default
+              updatedAddress.isDefault = true; 
+            } else {
+              // If it was the selected default, clear selected key. select-address will pick new.
+              if (localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY) === editingAddressId) {
+                localStorage.removeItem(SELECTED_ADDRESS_STORAGE_KEY);
+              }
+            }
+          }
+        }
+        addresses[addressIndex] = updatedAddress;
+        toast({ title: 'Địa chỉ đã được cập nhật', description: 'Thông tin địa chỉ của bạn đã được cập nhật.' });
+
+      } else { // Adding new address
+        const newAddress: ShippingAddress = {
+          id: `addr-${Date.now().toString()}-${Math.random().toString(36).substring(2, 7)}`,
+          name: data.fullName,
+          phone: data.phone,
+          address: fullAddressString,
+          streetAddress: data.streetAddress,
+          province: data.province,
+          district: data.district,
+          ward: data.ward,
+          addressType: data.addressType,
+          isDefault: data.isDefault,
+        };
+
+        if (newAddress.isDefault) {
+          addresses = addresses.map(addr => ({ ...addr, isDefault: false }));
+          localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
+        } else {
+          if (addresses.length === 0) {
+            newAddress.isDefault = true;
+            localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
+          }
+        }
+        addresses.push(newAddress);
+        toast({ title: 'Địa chỉ đã được lưu', description: 'Địa chỉ mới của bạn đã được thêm thành công.' });
       }
       
-      addresses.push(newAddress);
+      // If after all operations, no address is default (e.g. unsetting default from last address in edit), make the first one default.
+      // This primarily covers the case where an edit results in no default address, which select-address page would also handle, but good to be robust.
+      const hasDefault = addresses.some(addr => addr.isDefault);
+      if (!hasDefault && addresses.length > 0) {
+        addresses[0].isDefault = true;
+        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, addresses[0].id);
+      }
+      
       localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addresses));
-
-      toast({
-        title: 'Địa chỉ đã được lưu',
-        description: 'Địa chỉ mới của bạn đã được thêm thành công.',
-      });
       router.push('/select-address');
+
     } catch (error) {
       console.error("Error saving address to localStorage:", error);
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể lưu địa chỉ. Vui lòng thử lại.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Lỗi', description: 'Không thể lưu địa chỉ. Vui lòng thử lại.', variant: 'destructive' });
     }
   };
 
@@ -125,7 +211,7 @@ const AddAddressPage = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/select-address')} className="text-foreground hover:bg-muted hover:text-foreground -ml-2">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground text-center flex-grow">Địa chỉ mới</h1>
+          <h1 className="text-lg font-semibold text-foreground text-center flex-grow">{pageTitle}</h1>
           <div className="w-8"> {/* Spacer to balance the back button */}</div>
         </div>
       </header>
@@ -135,17 +221,19 @@ const AddAddressPage = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 container mx-auto px-4 py-4">
               
-              <Card className="bg-muted">
-                <CardContent className="p-3">
-                  <div className="flex items-center mb-1">
-                    <ClipboardPaste className="w-5 h-5 text-foreground mr-2" />
-                    <span className="text-sm font-semibold text-foreground">Dán và nhập nhanh</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Dán hoặc nhập thông tin, nhấn chọn Tự động điền để nhập tên, số điện thoại và địa chỉ
-                  </p>
-                </CardContent>
-              </Card>
+              {!editingAddressId && ( // Hide "Dán và nhập nhanh" when editing
+                <Card className="bg-muted">
+                  <CardContent className="p-3">
+                    <div className="flex items-center mb-1">
+                      <ClipboardPaste className="w-5 h-5 text-foreground mr-2" />
+                      <span className="text-sm font-semibold text-foreground">Dán và nhập nhanh</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Dán hoặc nhập thông tin, nhấn chọn Tự động điền để nhập tên, số điện thoại và địa chỉ
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <CardContent className="p-0">
@@ -180,7 +268,7 @@ const AddAddressPage = () => {
                     name="province"
                     render={({ field }) => (
                       <FormItem className="border-b border-border">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger className="border-0 rounded-none h-12 px-4 focus:ring-0 focus:ring-offset-0">
                               <SelectValue placeholder="Tỉnh/Thành phố" />
@@ -200,7 +288,7 @@ const AddAddressPage = () => {
                     name="district"
                     render={({ field }) => (
                       <FormItem className="border-b border-border">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger className="border-0 rounded-none h-12 px-4 focus:ring-0 focus:ring-offset-0">
                               <SelectValue placeholder="Quận/Huyện" />
@@ -220,7 +308,7 @@ const AddAddressPage = () => {
                     name="ward"
                     render={({ field }) => (
                       <FormItem className="border-b border-border">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger className="border-0 rounded-none h-12 px-4 focus:ring-0 focus:ring-offset-0">
                               <SelectValue placeholder="Phường/Xã" />
@@ -316,9 +404,9 @@ const AddAddressPage = () => {
             type="submit" 
             size="lg" 
             className="w-full max-w-md bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold" 
-            onClick={form.handleSubmit(onSubmit)} // No need for separate form="addressForm" if button is inside form or form.handleSubmit is used
+            onClick={form.handleSubmit(onSubmit)}
           >
-            HOÀN THÀNH
+            {submitButtonText}
           </Button>
         </div>
       </footer>
@@ -327,4 +415,3 @@ const AddAddressPage = () => {
 };
 
 export default AddAddressPage;
-    
