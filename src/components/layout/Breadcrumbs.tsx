@@ -25,11 +25,24 @@ const BreadcrumbsInner: React.FC<BreadcrumbsMainProps> = ({ totalCartItems }) =>
   const getBreadcrumbItems = (): BreadcrumbItemDef[] => {
     const items: BreadcrumbItemDef[] = [];
 
+    // Logic for the Cart breadcrumb item
     items.push({
       href: '/',
-      labelKey: (pathname === '/' && (totalCartItems === undefined || totalCartItems === 0)) ? 'breadcrumbs.cartSimple' : 'breadcrumbs.cart',
-      dynamicLabelParams: (currentPath, _, itemsCount) => 
-        (currentPath === '/' && itemsCount !== undefined && itemsCount > 0) ? { count: itemsCount } : undefined
+      labelKey: pathname === '/' ? 'breadcrumbs.cartSimple' : 'breadcrumbs.cart',
+      dynamicLabelParams: (pagePathname, _sParams, itemsCount) => {
+        // If the current page IS the cart page, its title (breadcrumbs.cartSimple) doesn't need params.
+        if (pagePathname === '/') {
+          return undefined;
+        }
+        // If the current page is NOT the cart page, this breadcrumb item is a LINK to the cart.
+        // Its labelKey is 'breadcrumbs.cart' which expects a count.
+        // Provide the count if available and greater than 0.
+        if (itemsCount !== undefined && itemsCount > 0) {
+          return { count: itemsCount };
+        }
+        // Otherwise, no params (t function will handle missing {count} in the string).
+        return undefined;
+      }
     });
 
     if (pathname.startsWith('/checkout') || pathname.startsWith('/select-address') || pathname.startsWith('/add-address') || pathname.startsWith('/select-voucher') || pathname.startsWith('/payment')) {
@@ -61,11 +74,12 @@ const BreadcrumbsInner: React.FC<BreadcrumbsMainProps> = ({ totalCartItems }) =>
     <nav aria-label="Breadcrumb" className="flex items-center text-sm overflow-x-auto whitespace-nowrap py-1">
       {breadcrumbItems.map((item, index) => {
         // Determine if the current breadcrumb item represents the current page.
-        // For /add-address, it can have query params, so check startsWith.
-        const isCurrentPage = (item.href === pathname) || (pathname.startsWith(item.href) && item.href === '/add-address');
+        const isCurrentPage = item.href === pathname || (pathname.startsWith(item.href) && (item.href === '/add-address' || item.href === '/payment'));
+
 
         let label = t(item.labelKey);
         if (item.dynamicLabelParams) {
+          // Pass the current page's pathname and searchParams, and totalCartItems
           const params = item.dynamicLabelParams(pathname, searchParams, totalCartItems);
           if (params) {
             label = t(item.labelKey, params);
