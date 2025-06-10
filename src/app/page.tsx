@@ -11,7 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight } from 'lucide-react';
-import type { CartItem, Shop } from '@/interfaces';
+import type { CartItem, Shop, SimpleVariant } from '@/interfaces';
 import { mockShops } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
 import { useToast } from "@/hooks/use-toast";
@@ -81,6 +81,28 @@ const BrandCartPage = () => {
       });
     }
   };
+  
+  const handleVariantChange = (itemId: string, newVariantData: SimpleVariant) => {
+    setCartItems(prevItems =>
+      prevItems.map(item => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            variant: newVariantData.name, // Update the display name
+            price: newVariantData.price !== undefined ? newVariantData.price : item.price,
+            originalPrice: newVariantData.originalPrice !== undefined ? newVariantData.originalPrice : item.originalPrice,
+            imageUrl: newVariantData.imageUrl !== undefined ? newVariantData.imageUrl : item.imageUrl,
+            stock: newVariantData.stock !== undefined ? newVariantData.stock : item.stock,
+            dataAiHint: newVariantData.dataAiHint !== undefined ? newVariantData.dataAiHint : item.dataAiHint,
+          };
+        }
+        return item;
+      })
+    );
+    // Optionally, add a toast notification for variant change
+    // toast({ title: `Variant updated for ${itemToUpdate.name}` });
+  };
+
 
   const totalAmount = useMemo(() => {
     return cartItems.reduce((sum, item) => {
@@ -203,6 +225,7 @@ const BrandCartPage = () => {
                   onItemSelectToggle={handleToggleItemSelect}
                   onQuantityChange={handleQuantityChange}
                   onDeleteItem={handleDeleteItem}
+                  onVariantChange={handleVariantChange}
                 />
               )}
 
@@ -236,6 +259,7 @@ const BrandCartPage = () => {
                   onItemSelectToggle={handleToggleItemSelect}
                   onQuantityChange={handleQuantityChange}
                   onDeleteItem={handleDeleteItem}
+                  onVariantChange={handleVariantChange}
                 />
               ))}
             </>
@@ -353,3 +377,4 @@ const BrandCartPage = () => {
 };
 
 export default BrandCartPage;
+

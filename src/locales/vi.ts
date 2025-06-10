@@ -19,6 +19,14 @@ const viTranslations = {
     vouchersAndShipping: {
       voucherLabel: "Voucher giảm đến {amount}₫",
       shippingDiscountLabel: "Giảm {amount}₫ phí vận chuyển đơn tối thiểu..."
+    },
+    sheet: {
+      productInfoTitle: "Thông tin sản phẩm",
+      selectColor: "Màu sắc",
+      selectSize: "Chọn Kích thước",
+      updateButton: "CẬP NHẬT",
+      noVariantsAvailable: "Không có biến thể nào khác cho sản phẩm này.",
+      currentSelection: "Lựa chọn hiện tại:", // Kept for potential future use
     }
   },
   toast: {
@@ -74,6 +82,7 @@ const viTranslations = {
       title: "Hóa đơn điện tử",
       status: {
         requestNow: "Yêu cầu",
+        detailsSaved: "{summary}"
       },
       vatInvoiceLabel: "Hóa đơn VAT",
       vatNote: "Lưu ý: Hoá đơn đỏ sẽ được xuất bao gồm tổng giá trị đơn hàng (Sản phẩm + Phí vận chuyển)",
@@ -222,3 +231,4 @@ const viTranslations = {
 };
 
 export default viTranslations;
+

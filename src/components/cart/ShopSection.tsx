@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import type { CartItem, Shop } from '@/interfaces';
+import type { CartItem, Shop, SimpleVariant } from '@/interfaces';
 import ProductItem from './ProductItem';
 import BrandOfferBanner from './BrandOfferBanner'; // Import the new component
 import { ChevronRight, Gift } from 'lucide-react';
@@ -20,10 +20,11 @@ interface ShopSectionProps {
   onShopSelectToggle: (checked: boolean) => void;
   onItemSelectToggle: (itemId: string, checked: boolean) => void;
   onQuantityChange: (itemId: string, quantity: number) => void;
-  onDeleteItem: (itemId: string) => void; // New prop
+  onDeleteItem: (itemId: string) => void;
+  onVariantChange: (itemId: string, newVariantData: SimpleVariant) => void;
 }
 
-const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, onShopSelectToggle, onItemSelectToggle, onQuantityChange, onDeleteItem }) => {
+const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, onShopSelectToggle, onItemSelectToggle, onQuantityChange, onDeleteItem, onVariantChange }) => {
   if (items.length === 0) return null;
 
   return (
@@ -88,7 +89,8 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
               item={item}
               onSelectToggle={onItemSelectToggle}
               onQuantityChange={onQuantityChange}
-              onDeleteItem={onDeleteItem} // Pass down the new prop
+              onDeleteItem={onDeleteItem}
+              onVariantChange={onVariantChange}
             />
           ))}
         </div>
@@ -98,3 +100,4 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
 };
 
 export default ShopSection;
+

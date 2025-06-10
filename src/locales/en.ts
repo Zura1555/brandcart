@@ -19,6 +19,14 @@ const enTranslations = {
     vouchersAndShipping: {
       voucherLabel: "Voucher up to {amount}₫",
       shippingDiscountLabel: "Save {amount}₫ on shipping for minimum order..."
+    },
+    sheet: {
+      productInfoTitle: "Product Information",
+      selectColor: "Color",
+      selectSize: "Select Size",
+      updateButton: "UPDATE",
+      noVariantsAvailable: "No other variants available for this item.",
+      currentSelection: "Current selection:", // Kept for potential future use
     }
   },
   toast: {
@@ -74,6 +82,7 @@ const enTranslations = {
       title: "E-Invoice",
       status: {
         requestNow: "Request",
+        detailsSaved: "{summary}"
       },
       vatInvoiceLabel: "VAT Invoice", 
       vatNote: "Note: Red invoice will be issued including total order value (Products + Shipping fee)",
@@ -222,3 +231,4 @@ const enTranslations = {
 };
 
 export default enTranslations;
+
