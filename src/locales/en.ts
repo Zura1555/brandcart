@@ -136,11 +136,22 @@ const enTranslations = {
     },
     voucherCard: {
         bestChoice: "Best Choice",
-        typeFreeShipping: "FREE SHIPPING"
+        typeFreeShipping: "FREE SHIPPING",
+        unavailableReasonMinOrder: "Minimum order value not met.",
     },
   },
   general: {
     back: "Back"
+  },
+  breadcrumbs: {
+    cart: "Cart ({count} items)",
+    cartSimple: "Cart",
+    checkout: "Checkout",
+    selectAddress: "Select Address",
+    addAddress: "Add Address",
+    editAddress: "Edit Address",
+    selectVoucher: "Select Voucher",
+    payment: "Payment"
   }
 };
 

@@ -19,14 +19,15 @@ import type { ShippingAddress } from '@/interfaces';
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
-const HEADER_HEIGHT = 'h-14'; // approx 56px
-const FOOTER_HEIGHT = 'h-20'; // approx 80px
+const HEADER_HEIGHT = 'h-14'; 
+const FOOTER_HEIGHT = 'h-20'; 
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 
 const getAddressFormSchema = (t: (key: string, params?: Record<string, string | number>) => string) => z.object({
-  id: z.string().optional(), // For edit mode
+  id: z.string().optional(), 
   fullName: z.string().min(1, { message: t("addAddress.validation.fullNameRequired") }),
   phone: z.string().regex(/^(\+84|0)\d{9,10}$/, { message: t("addAddress.validation.phoneInvalid") }),
   province: z.string().min(1, { message: t("addAddress.validation.provinceRequired") }),
@@ -55,8 +56,7 @@ const AddAddressFormInner = () => {
   const isEditMode = Boolean(editId);
 
   const [selectedAddressType, setSelectedAddressType] = useState<AddressTypeOption>('home');
-  const [pageTitle, setPageTitle] = useState(t('addAddress.title.new'));
-
+  
   const addressFormSchema = useMemo(() => getAddressFormSchema(t), [t]);
 
   const form = useForm<AddressFormValues>({
@@ -75,7 +75,6 @@ const AddAddressFormInner = () => {
   });
 
   useEffect(() => {
-    setPageTitle(isEditMode ? t('addAddress.title.edit') : t('addAddress.title.new'));
     if (isEditMode && editId) {
       const existingAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
       if (existingAddressesRaw) {
@@ -95,7 +94,7 @@ const AddAddressFormInner = () => {
           });
           setSelectedAddressType(addressToEdit.addressType || 'home');
         } else {
-          router.push('/select-address'); // Address not found, redirect
+          router.push('/select-address'); 
         }
       }
     }
@@ -126,7 +125,7 @@ const AddAddressFormInner = () => {
       let addresses: ShippingAddress[] = existingAddressesRaw ? JSON.parse(existingAddressesRaw) : [];
       const selectedAddressIdRaw = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
 
-      if (isEditMode && addressData.id) { // Editing existing address
+      if (isEditMode && addressData.id) { 
         let oldDefaultId: string | null = null;
         addresses = addresses.map(addr => {
             if (addr.isDefault && addr.id !== addressData.id) oldDefaultId = addr.id;
@@ -164,7 +163,7 @@ const AddAddressFormInner = () => {
           description: t('toast.address.updated.description'),
         });
 
-      } else { // Adding new address
+      } else { 
         const newAddress = addressData as ShippingAddress; 
         if (newAddress.isDefault) {
           addresses = addresses.map(addr => ({ ...addr, isDefault: false }));
@@ -212,7 +211,9 @@ const AddAddressFormInner = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/select-address')} className="text-foreground hover:bg-muted hover:text-foreground -ml-2">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground text-center flex-grow">{pageTitle}</h1>
+          <div className="flex-grow flex justify-center items-center min-w-0 px-2">
+             <Breadcrumbs />
+          </div>
           <div className="flex items-center">
              <LanguageSwitcher />
           </div>
@@ -423,9 +424,11 @@ const AddAddressPage = () => {
       <div className="flex flex-col min-h-screen bg-muted/40">
         <header className={`fixed top-0 left-0 right-0 z-30 bg-card shadow-sm border-b ${HEADER_HEIGHT} flex items-center`}>
           <div className="container mx-auto px-4 flex items-center h-full">
-            <div className="w-10"></div> {/* Placeholder for back button */}
-            <h1 className="text-lg font-semibold text-foreground text-center flex-grow">Loading...</h1>
-            <div className="w-20"></div> {/* Placeholder for language switcher */}
+            <div className="w-10"></div> 
+            <div className="flex-grow flex justify-center items-center min-w-0 px-2">
+                <div className="h-5 w-36 bg-muted rounded animate-pulse"></div>
+            </div>
+            <div className="w-20"></div> 
           </div>
         </header>
         <main className={`flex-grow overflow-y-auto pt-14 pb-20 flex items-center justify-center`}>

@@ -13,6 +13,7 @@ import { ChevronLeft, Truck, CheckCircle2, XCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useToast } from "@/hooks/use-toast";
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
 const HEADER_HEIGHT = 'h-14'; 
 const FOOTER_HEIGHT = 'h-20';
@@ -46,7 +47,7 @@ const SelectVoucherPage = () => {
     {
       id: 'voucher1',
       typeKey: 'selectVoucher.voucherCard.typeFreeShipping',
-      title: 'Miễn Phí Vận Chuyển', // This title could also be a key if it varies
+      title: 'Miễn Phí Vận Chuyển', 
       discount: 'Giảm tối đa 500k₫',
       minOrder: 'Đơn tối thiểu 0₫',
       usageInfo: 'Đã dùng 97% - sắp hết hạn',
@@ -67,7 +68,7 @@ const SelectVoucherPage = () => {
       minOrder: 'Đơn tối thiểu 45k₫',
       expiryDate: 'HSD: 12.06.2025',
       isAvailable: false,
-      unavailableReason: 'Chưa đạt GTĐH tối thiểu.', // This should be a translatable key
+      unavailableReason: 'Chưa đạt GTĐH tối thiểu.', 
       quantity: 5,
       colorClass: 'bg-teal-100',
       textColorClass: 'text-teal-600',
@@ -118,7 +119,7 @@ const SelectVoucherPage = () => {
             {voucher.usageInfo && voucher.isAvailable && <p className="text-xs text-orange-600">{voucher.usageInfo}</p>}
             {voucher.expiryDate && <p className="text-xs text-muted-foreground">{voucher.expiryDate}</p>}
             {!voucher.isAvailable && voucher.unavailableReason && (
-              <p className="text-xs text-red-600 mt-1">{voucher.unavailableReason}</p> // This should be translated
+              <p className="text-xs text-red-600 mt-1">{t(voucher.unavailableReason)}</p> 
             )}
           </div>
           <div className="w-12 flex items-center justify-center p-2 shrink-0">
@@ -146,7 +147,9 @@ const SelectVoucherPage = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/checkout')} className="text-foreground hover:bg-muted hover:text-foreground -ml-2">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground text-center flex-grow">{t('selectVoucher.title')}</h1>
+          <div className="flex-grow flex justify-center items-center min-w-0 px-2">
+            <Breadcrumbs />
+          </div>
           <div className="flex items-center">
              <LanguageSwitcher />
           </div>

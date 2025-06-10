@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 
@@ -163,9 +164,9 @@ const BrandCartPage = () => {
           <Button variant="ghost" size="icon" className="text-foreground hover:bg-muted hover:text-foreground">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground">
-            {t('cart.title')} {totalCartProductTypesCount > 0 ? t('cart.totalItems', { count: totalCartProductTypesCount }) : ''}
-          </h1>
+          <div className="flex-grow flex justify-center items-center min-w-0 px-2">
+            <Breadcrumbs totalCartItems={totalCartProductTypesCount} />
+          </div>
           <div className="flex items-center">
             <LanguageSwitcher />
           </div>

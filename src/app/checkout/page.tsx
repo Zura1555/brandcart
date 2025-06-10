@@ -13,12 +13,13 @@ import { Switch } from '@/components/ui/switch';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CircleDollarSign, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
-import { mockShops } from '@/lib/mockData'; // mockShippingAddresses is not used here anymore for fallback
+import { mockShops } from '@/lib/mockData'; 
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
-const HEADER_HEIGHT = 'h-14'; // approx 56px
-const FOOTER_HEIGHT = 'h-24'; // approx 96px
+const HEADER_HEIGHT = 'h-14'; 
+const FOOTER_HEIGHT = 'h-24'; 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
@@ -128,7 +129,7 @@ const CheckoutPage = () => {
 
     const selectedAddressId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
     const userAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
-    let userAddresses: ShippingAddress[] = []; // Initialize as empty, do not use mockShippingAddresses as fallback
+    let userAddresses: ShippingAddress[] = []; 
     if (userAddressesRaw) {
         try {
             const parsed = JSON.parse(userAddressesRaw);
@@ -137,7 +138,6 @@ const CheckoutPage = () => {
             }
         } catch (e) {
             console.error("Error parsing user addresses from localStorage:", e);
-            // userAddresses remains empty
         }
     }
 
@@ -194,7 +194,9 @@ const CheckoutPage = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/')} className="text-foreground hover:bg-muted hover:text-foreground">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground">{t('checkout.title')}</h1>
+          <div className="flex-grow flex justify-center items-center min-w-0 px-2">
+            <Breadcrumbs />
+          </div>
           <div className="flex items-center">
             <LanguageSwitcher />
           </div>
@@ -505,6 +507,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-
-
-    

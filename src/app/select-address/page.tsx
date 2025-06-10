@@ -13,6 +13,7 @@ import type { ShippingAddress } from '@/interfaces';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useToast } from "@/hooks/use-toast";
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
 
 const HEADER_HEIGHT = 'h-14';
@@ -33,11 +34,9 @@ const SelectAddressPage = () => {
     if (storedAddressesRaw) {
       try {
         const parsedAddresses = JSON.parse(storedAddressesRaw);
-        // Ensure it's an array of valid address objects
-        if (Array.isArray(parsedAddresses) && parsedAddresses.every(addr => typeof addr === 'object' && addr !== null && 'id' in addr)) {
+        if (Array.isArray(parsedAddresses) && parsedAddresses.every(addr => typeof addr === 'object' && addr !== null && 'id' in addr && 'name' in addr && 'phone' in addr && 'address' in addr)) {
           addressesFromStorage = parsedAddresses;
         } else {
-          // Malformed data or not an array of valid addresses, initialize as empty and clear storage
           addressesFromStorage = [];
           localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify([]));
         }
@@ -47,15 +46,12 @@ const SelectAddressPage = () => {
         localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify([]));
       }
     } else {
-      // No addresses in localStorage, initialize as empty
       addressesFromStorage = [];
       localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify([]));
     }
 
-    // Ensure a default address exists if there are addresses
     if (addressesFromStorage.length > 0 && !addressesFromStorage.some(addr => addr.isDefault)) {
       addressesFromStorage[0].isDefault = true;
-      // Re-save to localStorage if we had to set a default
       localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify(addressesFromStorage));
     }
     
@@ -72,10 +68,9 @@ const SelectAddressPage = () => {
 
     if (storedSelectedId && sortedAddresses.find(addr => addr.id === storedSelectedId)) {
       newSelectedId = storedSelectedId;
-    } else if (defaultAddress) { // Check defaultAddress from the potentially updated list
+    } else if (defaultAddress) { 
       newSelectedId = defaultAddress.id;
     } else if (sortedAddresses.length > 0) {
-      // If still no default (should not happen if logic above works), select the first
       newSelectedId = sortedAddresses[0].id;
     }
 
@@ -85,7 +80,7 @@ const SelectAddressPage = () => {
     } else {
       localStorage.removeItem(SELECTED_ADDRESS_STORAGE_KEY); 
     }
-  }, []); // Run once on mount
+  }, []); 
 
   const handleSelectAddress = (addressId: string) => {
     setSelectedAddressId(addressId);
@@ -110,7 +105,9 @@ const SelectAddressPage = () => {
           <Button variant="ghost" size="icon" onClick={() => router.push('/checkout')} className="text-foreground hover:bg-muted hover:text-foreground">
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground">{t('selectAddress.title')}</h1>
+          <div className="flex-grow flex justify-center items-center min-w-0 px-2">
+            <Breadcrumbs />
+          </div>
           <div className="flex items-center">
              <LanguageSwitcher />
           </div>

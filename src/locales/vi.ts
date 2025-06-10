@@ -136,11 +136,22 @@ const viTranslations = {
     },
     voucherCard: {
         bestChoice: "Tốt nhất",
-        typeFreeShipping: "MIỄN PHÍ VẬN CHUYỂN"
+        typeFreeShipping: "MIỄN PHÍ VẬN CHUYỂN",
+        unavailableReasonMinOrder: "Chưa đạt GTĐH tối thiểu.",
     },
   },
   general: {
     back: "Trở lại"
+  },
+  breadcrumbs: {
+    cart: "Giỏ hàng ({count} SP)",
+    cartSimple: "Giỏ hàng",
+    checkout: "Thanh toán",
+    selectAddress: "Chọn địa chỉ",
+    addAddress: "Thêm địa chỉ",
+    editAddress: "Sửa địa chỉ",
+    selectVoucher: "Chọn Voucher",
+    payment: "Hoàn tất"
   }
 };
 
