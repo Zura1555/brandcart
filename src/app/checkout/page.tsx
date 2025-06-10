@@ -55,9 +55,9 @@ const staticProductPlaceholder = {
 };
 
 const staticShippingMethod = {
-  mainLabelKey: 'checkout.shippingMethod.standardDeliveryLabel',
+  mainLabelKey: 'checkout.shippingMethodStandardDeliveryLabel',
   price: 19000,
-  subLabelKey: 'checkout.shippingMethod.estimatedDeliveryTimeLabel',
+  subLabelKey: 'checkout.shippingMethodEstimatedDeliveryTimeLabel',
 };
 
 const CheckoutPage = () => {
@@ -447,8 +447,6 @@ const CheckoutPage = () => {
 
                         {requestVatInvoice && (
                           <>
-                            <p className="text-xs text-destructive">{t('checkout.eInvoice.vatNote')}</p>
-
                             <div>
                               <p className="text-sm font-medium mb-2">{t('checkout.eInvoice.invoiceTypeLabel')}</p>
                               <RadioGroup
@@ -639,3 +637,6 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
+
+    
