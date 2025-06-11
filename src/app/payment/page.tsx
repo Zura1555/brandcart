@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, ChevronLeft } from 'lucide-react';
 import type { CartItem } from '@/interfaces';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -40,6 +41,36 @@ const PaymentSuccessPage = () => {
   const [showFeedbackTextarea, setShowFeedbackTextarea] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewSubmitted, setIsReviewSubmitted] = useState(false);
+
+  const cleanVariantNameForCheckout = useCallback((name: string | undefined): string => {
+    if (!name) return '';
+    return name.replace(/\s*\(\+\d+\)\s*$/, ''); 
+  }, []);
+
+  const parseVariantNameForCheckout = useCallback((name: string | undefined): { color: string | null, size: string | null } => {
+    if (!name) return { color: null, size: null };
+    const cleanedName = cleanVariantNameForCheckout(name);
+    const parts = cleanedName.split(',').map(p => p.trim());
+    
+    let color: string | null = null;
+    let size: string | null = null;
+
+    if (parts.length === 1) { 
+        const part = parts[0];
+        const commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', 'Freesize'];
+        if (commonSizes.some(s => part.toUpperCase() === s.toUpperCase())) {
+            size = part;
+        } else {
+            color = part;
+        }
+    } else if (parts.length >= 2) { 
+        color = parts[0] || null;
+        size = parts[1] || null;
+    }
+    
+    return { color, size };
+  }, [cleanVariantNameForCheckout]);
+
 
   useEffect(() => {
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
@@ -173,18 +204,53 @@ const PaymentSuccessPage = () => {
             </CardHeader>
             <CardContent className="pt-0 pb-4">
               <ScrollArea className="max-h-60 pr-3">
-                {orderDetails.items.map(item => (
-                  <div key={item.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
-                    <div className="flex items-center space-x-3">
-                        <Image src={item.imageUrl} alt={item.name} width={40} height={40} className="rounded object-cover border" data-ai-hint={item.dataAiHint || "product image"} />
-                        <div>
-                            <p className="text-sm font-medium text-foreground">{item.name} (x{item.quantity})</p>
-                            {item.variant && <p className="text-xs text-muted-foreground">{item.variant.replace(/\s*\(\+\d+\)\s*$/, '')}</p>}
-                        </div>
+                {orderDetails.items.map(item => {
+                    const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(item.variant);
+                    let displayColor = parsedColor || "N/A";
+                    let displaySize = parsedSize;
+                    if (!displaySize) displaySize = "M"; // Default to M if no size
+                    let displayCode = item.productCode || "N/A";
+                    
+                    const badgeParts = [];
+                    if (parsedColor || parsedSize || item.productCode) { 
+                         badgeParts.push(displayColor);
+                         badgeParts.push(displaySize);
+                         badgeParts.push(displayCode);
+                    }
+                    const badgeText = badgeParts.join(" / ");
+                    const showBadge = badgeText.length > 0 && badgeText !== "N/A / M / N/A";
+
+                  return (
+                    <div key={item.cartItemId || item.id} className="flex justify-between items-start py-3 border-b last:border-b-0">
+                      <div className="flex items-start space-x-3">
+                          <div className="relative w-10 h-10 flex-shrink-0">
+                            <Image 
+                              src={item.imageUrl} 
+                              alt={item.name} 
+                              fill 
+                              className="rounded object-cover border" 
+                              data-ai-hint={item.dataAiHint || "product image"}
+                              sizes="40px" 
+                            />
+                            {item.quantity > 0 && (
+                              <span className="absolute top-0 right-0 transform translate-x-1/3 -translate-y-1/3 bg-green-600 text-white text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center border-2 border-card z-10">
+                                {item.quantity}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-grow">
+                              <p className="text-sm font-medium text-foreground line-clamp-2">{item.name}</p>
+                              {showBadge && (
+                                <Badge className="bg-green-600 hover:bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
+                                  {badgeText}
+                                </Badge>
+                              )}
+                          </div>
+                      </div>
+                      <span className="text-sm text-foreground font-medium ml-2 flex-shrink-0">{formatCurrency(item.price * item.quantity)}</span>
                     </div>
-                    <span className="text-sm text-foreground">{formatCurrency(item.price * item.quantity)}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </ScrollArea>
             </CardContent>
             <CardFooter className="flex flex-col items-stretch space-y-2 pt-4 border-t">
@@ -257,3 +323,4 @@ const PaymentSuccessPage = () => {
 
 export default PaymentSuccessPage;
     
+
