@@ -286,7 +286,12 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 
   return (
     <div className="relative bg-card overflow-hidden">
-      <div className="absolute top-0 right-0 h-full w-20 flex items-center justify-center bg-destructive text-destructive-foreground z-0">
+      <div
+        className={cn(
+          "absolute top-0 right-0 h-full w-20 flex items-center justify-center bg-destructive text-destructive-foreground z-0 transition-opacity duration-200 ease-out",
+          isOutOfStock && translateX === 0 ? "opacity-0" : "opacity-100"
+        )}
+      >
         <button
           onClick={handleDelete}
           className="p-4 h-full w-full flex items-center justify-center"
@@ -334,7 +339,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           <div className="flex-grow min-w-0">
             <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
             
-            {hasAvailableVariants ? ( // Always render Sheet structure if variants exist, but disable trigger if OOS
+            {hasAvailableVariants ? ( 
                 <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
                   <SheetTrigger asChild disabled={isOutOfStock || !canOpenVariantSheet}>
                     <button 
