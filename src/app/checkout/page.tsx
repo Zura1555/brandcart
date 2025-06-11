@@ -24,7 +24,7 @@ import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { useToast } from '@/hooks/use-toast';
 
 const HEADER_HEIGHT = 'h-14'; 
-const FOOTER_HEIGHT = 'h-28'; // Increased footer height
+const FOOTER_HEIGHT = 'h-28'; 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
@@ -256,7 +256,7 @@ const CheckoutPage = () => {
         </div>
       </header>
 
-      <main className={`flex-grow overflow-y-auto pt-14 pb-28`}> {/* Adjusted pb-28 for new footer height */}
+      <main className={`flex-grow overflow-y-auto pt-14 pb-28`}>
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3 space-y-3">
             {addressLoaded ? (
@@ -332,14 +332,21 @@ const CheckoutPage = () => {
                 <CardContent className="p-0">
                   {shop.products.map(p => (
                     <div key={p.id} className="p-4 flex items-start space-x-3 border-b last:border-b-0">
-                      <Image
-                        src={p.imageUrl}
-                        alt={p.name}
-                        width={60}
-                        height={60}
-                        className="rounded border object-cover"
-                        data-ai-hint={p.dataAiHint}
-                      />
+                      <div className="relative w-[60px] h-[60px] flex-shrink-0">
+                        <Image
+                          src={p.imageUrl}
+                          alt={p.name}
+                          fill
+                          className="rounded border object-cover"
+                          data-ai-hint={p.dataAiHint}
+                          sizes="60px"
+                        />
+                        {p.quantity > 0 && (
+                           <span className="absolute top-0 right-0 transform translate-x-1/3 -translate-y-1/3 bg-green-600 text-white text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center border-2 border-card z-10">
+                            {p.quantity}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex-grow">
                         <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{p.name}</p>
                         {p.variant && (
@@ -347,7 +354,6 @@ const CheckoutPage = () => {
                             {p.variant.replace(/\s*\(\+\d+\)\s*$/, '')}
                           </Badge>
                         )}
-                        <p className="text-sm font-semibold text-foreground mt-1">{t('checkout.item.quantityLabel', { count: p.quantity })}</p>
                       </div>
                       <div className="text-right">
                         <span className="text-sm font-semibold text-foreground">{formatCurrency(p.price)}</span>
@@ -382,14 +388,21 @@ const CheckoutPage = () => {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="p-4 flex items-start space-x-3">
-                    <Image
-                      src={staticProductPlaceholder.imageUrl}
-                      alt={staticProductPlaceholder.name}
-                      width={60}
-                      height={60}
-                      className="rounded border object-cover"
-                      data-ai-hint={staticProductPlaceholder.imageAiHint}
-                    />
+                    <div className="relative w-[60px] h-[60px] flex-shrink-0">
+                      <Image
+                        src={staticProductPlaceholder.imageUrl}
+                        alt={staticProductPlaceholder.name}
+                        fill
+                        className="rounded border object-cover"
+                        data-ai-hint={staticProductPlaceholder.imageAiHint}
+                        sizes="60px"
+                      />
+                      {staticProductPlaceholder.quantity > 0 && (
+                        <span className="absolute top-0 right-0 transform translate-x-1/3 -translate-y-1/3 bg-green-600 text-white text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center border-2 border-card z-10">
+                          {staticProductPlaceholder.quantity}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex-grow">
                       <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{staticProductPlaceholder.name}</p>
                       {staticProductPlaceholder.variation && (
@@ -397,7 +410,6 @@ const CheckoutPage = () => {
                           {staticProductPlaceholder.variation}
                         </Badge>
                       )}
-                      <p className="text-sm font-semibold text-foreground mt-1">{t('checkout.item.quantityLabel', { count: staticProductPlaceholder.quantity })}</p>
                     </div>
                     <div className="text-right">
                       <span className="text-sm font-semibold text-foreground">{formatCurrency(staticProductPlaceholder.price)}</span>
@@ -423,7 +435,6 @@ const CheckoutPage = () => {
                         <span className="text-sm text-muted-foreground mr-1">
                           {eInvoiceSummary || ''}
                         </span>
-                        {/* Chevron is part of AccordionTrigger */}
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="p-4">
@@ -623,4 +634,5 @@ export default CheckoutPage;
     
 
     
+
 
