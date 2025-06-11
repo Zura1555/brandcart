@@ -31,7 +31,7 @@ const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
 
-const AVAILABLE_LOYALTY_POINTS = 500;
+const AVAILABLE_LOYALTY_POINTS = 200;
 const LOYALTY_POINTS_TO_REDEEM = 200;
 const LOYALTY_POINTS_DISCOUNT_VALUE = 20000;
 
@@ -729,6 +729,7 @@ export default CheckoutPage;
     
 
     
+
 
 
 
