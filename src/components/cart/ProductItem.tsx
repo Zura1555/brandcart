@@ -242,9 +242,11 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     }
   }
   
-  const badgeDisplayString = [displayColor, displaySize, displayCode].join(" / ");
+  const badgeDisplayString = [displayColor, displaySize, displayCode]
+    .filter(part => part !== "N/A" || (part === "N/A" && (displayColor !== "N/A" || displaySize !== "N/A" || displayCode !== "N/A") )) // Filter out N/A if all are N/A
+    .join(" / ");
   
-  const showSelectVariantPlaceholder = hasAvailableVariants && (!parsedColorFromVariant && !parsedSizeFromVariant && !item.productCode);
+  const showSelectVariantPlaceholder = hasAvailableVariants && !parsedColorFromVariant && !parsedSizeFromVariant && !item.productCode;
 
 
   let stockStatusTextInSheet = '';
@@ -264,7 +266,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   }
 
   let itemCardStockStatusText = '';
-  let itemCardStockStatusClasses = 'text-xs mt-1 '; 
+  let itemCardStockStatusClasses = 'text-xs '; 
 
   if (item.stock !== undefined) {
     if (item.stock > 10) {
@@ -302,7 +304,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
         onTouchEnd={handleTouchEnd}
         onClick={handleContentClick}
       >
-        <div className={`flex items-center p-3 sm:p-4 space-x-3 sm:space-x-4`}>
+        <div className={`flex items-start p-3 sm:p-4 space-x-3 sm:space-x-4`}>
           <Checkbox
             id={`item-${item.id}`}
             checked={item.selected}
@@ -311,7 +313,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                     onSelectToggle(item.id, Boolean(checked));
                 }
             }}
-            className="shrink-0"
+            className="shrink-0 mt-1" 
             aria-label={`Select item ${item.name}`}
           />
           <Image
@@ -335,9 +337,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                         className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center cursor-pointer"
                       >
                         {showSelectVariantPlaceholder ? (
-                           <span className="italic text-white/80">{t('cart.sheet.selectVariantPlaceholder')}</span>
+                           <span className="italic text-white/80 truncate">{t('cart.sheet.selectVariantPlaceholder')}</span>
                         ) : (
-                           badgeDisplayString && <span>{badgeDisplayString}</span>
+                           badgeDisplayString && <span className="truncate">{badgeDisplayString}</span>
                         )}
                         <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
                       </Badge>
@@ -461,16 +463,15 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                   </SheetContent>
                 </Sheet>
               ) : (
-                badgeDisplayString && (
+                badgeDisplayString && !hasAvailableVariants && (
                   <Badge
                     variant="outline"
                     className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center"
                   >
-                    <span>{badgeDisplayString}</span>
+                    <span className="truncate">{badgeDisplayString}</span>
                   </Badge>
                 )
             )}
-
 
             <div className="flex items-baseline space-x-2 mt-1">
               <p className="text-sm font-bold text-foreground">{item.price.toLocaleString('vi-VN')}₫</p>
@@ -478,22 +479,24 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                 <p className="text-xs text-muted-foreground line-through">{item.originalPrice.toLocaleString('vi-VN')}₫</p>
               )}
             </div>
+
             {item.discountDescription && (
               <div className="mt-1 flex items-center text-xs text-green-600">
                 <Check className="w-3 h-3 mr-1 flex-shrink-0" />
                 <span>{item.discountDescription}</span>
               </div>
             )}
-          </div>
-          <div className="shrink-0 flex flex-col items-end space-y-1"> 
-            <QuantitySelector
-              quantity={item.quantity}
-              onIncrement={() => onQuantityChange(item.id, item.quantity + 1)}
-              onDecrement={() => onQuantityChange(item.id, item.quantity - 1)}
-            />
-            {itemCardStockStatusText && (
-              <p className={itemCardStockStatusClasses}>{itemCardStockStatusText}</p>
-            )}
+
+            <div className="flex items-center mt-2 space-x-4">
+              <QuantitySelector
+                quantity={item.quantity}
+                onIncrement={() => onQuantityChange(item.id, item.quantity + 1)}
+                onDecrement={() => onQuantityChange(item.id, item.quantity - 1)}
+              />
+              {itemCardStockStatusText && (
+                <p className={itemCardStockStatusClasses}>{itemCardStockStatusText}</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -502,4 +505,3 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
-
