@@ -24,10 +24,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProductItemProps {
   item: CartItem;
-  onSelectToggle: (itemId: string, checked: boolean) => void;
-  onQuantityChange: (itemId: string, quantity: number) => void;
-  onDeleteItem: (itemId: string) => void;
-  onVariantChange: (itemId: string, newVariantData: SimpleVariant) => void;
+  onSelectToggle: (cartItemId: string, checked: boolean) => void;
+  onQuantityChange: (cartItemId: string, quantity: number) => void;
+  onDeleteItem: (cartItemId: string) => void;
+  onVariantChange: (cartItemId: string, newVariantData: SimpleVariant) => void;
 }
 
 const DELETE_BUTTON_WIDTH_PX = 80;
@@ -56,8 +56,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     if (parts.length === 2) {
       return { color: parts[0] || null, size: parts[1] || null };
     }
-    const commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42'];
-    if (parts[0] && commonSizes.includes(parts[0].toUpperCase())) {
+    const commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', 'Freesize'];
+    if (parts[0] && commonSizes.some(s => parts[0].toUpperCase() === s.toUpperCase())) {
         return { color: null, size: parts[0]};
     }
     return { color: parts[0] || null, size: null };
@@ -92,7 +92,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       if (parsed.size) sizes.add(parsed.size);
     });
     return Array.from(sizes).sort((a, b) => {
-        const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+        const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Freesize'];
         const aIndex = sizeOrder.indexOf(a.toUpperCase());
         const bIndex = sizeOrder.indexOf(b.toUpperCase());
         if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
@@ -214,12 +214,12 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   };
 
   const handleDelete = () => {
-    onDeleteItem(item.id);
+    onDeleteItem(item.cartItemId);
   };
 
   const handleConfirmVariant = () => {
     if (selectedVariantInSheet) {
-      onVariantChange(item.id, selectedVariantInSheet);
+      onVariantChange(item.cartItemId, selectedVariantInSheet);
     }
     setIsVariantSheetOpen(false);
   };
@@ -243,7 +243,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   }
   
   const badgeDisplayString = [displayColor, displaySize, displayCode]
-    .filter(part => part !== "N/A" || (part === "N/A" && (displayColor !== "N/A" || displaySize !== "N/A" || displayCode !== "N/A") )) // Filter out N/A if all are N/A
+    .filter(part => part !== "N/A" || (displayColor !== "N/A" || displaySize !== "M" || displayCode !== "N/A")) 
     .join(" / ");
   
   const showSelectVariantPlaceholder = hasAvailableVariants && !parsedColorFromVariant && !parsedSizeFromVariant && !item.productCode;
@@ -306,11 +306,11 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       >
         <div className={`flex items-start p-3 sm:p-4 space-x-3 sm:space-x-4`}>
           <Checkbox
-            id={`item-${item.id}`}
+            id={`item-${item.cartItemId}`}
             checked={item.selected}
             onCheckedChange={(checked) => {
                 if (translateX === 0) {
-                    onSelectToggle(item.id, Boolean(checked));
+                    onSelectToggle(item.cartItemId, Boolean(checked));
                 }
             }}
             className="shrink-0 mt-1" 
@@ -490,8 +490,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
             <div className="flex items-center mt-2 space-x-4">
               <QuantitySelector
                 quantity={item.quantity}
-                onIncrement={() => onQuantityChange(item.id, item.quantity + 1)}
-                onDecrement={() => onQuantityChange(item.id, item.quantity - 1)}
+                onIncrement={() => onQuantityChange(item.cartItemId, item.quantity + 1)}
+                onDecrement={() => onQuantityChange(item.cartItemId, item.quantity - 1)}
               />
               {itemCardStockStatusText && (
                 <p className={itemCardStockStatusClasses}>{itemCardStockStatusText}</p>
@@ -505,3 +505,4 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
+
