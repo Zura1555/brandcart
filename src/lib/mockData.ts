@@ -16,6 +16,7 @@ export const mockShops: Shop[] = [
         brand: 'MLB',
         imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_large.jpg',
         dataAiHint: 'tshirt lightblue',
+        productCode: 'MLB001X',
         variant: 'Light Blue (+2)', // This is the name of the currently selected variant.
         stock: 15, // Base product stock
         availableVariants: [
@@ -32,6 +33,7 @@ export const mockShops: Shop[] = [
         brand: 'MLB',
         imageUrl: 'https://product.hstatic.net/200000642007/product/50bks_3fspb0553_8_bcdbcdccae8a4f5ba6fc7c09d4b56140_a8ee276c518c4c198e002da20ad42b5e_master.jpg',
         dataAiHint: 'shorts black',
+        productCode: 'MLB002Y',
         variant: 'Black',
         stock: 30,
         availableVariants: [
@@ -55,6 +57,7 @@ export const mockShops: Shop[] = [
         brand: 'PUMA',
         imageUrl: 'https://product.hstatic.net/1000284478/product/000_6325874132_1_1794446cd3d64b4dbc8b7f7cc1fd2c4e_large.jpg',
         dataAiHint: 'backpack darkgrey',
+        productCode: 'PUMAB01',
         discountDescription: '-30%',
         stock: 25,
         // No specific variants listed, so badge won't show variant options
@@ -67,6 +70,7 @@ export const mockShops: Shop[] = [
         brand: 'PUMA',
         imageUrl: 'https://product.hstatic.net/1000284478/product/01_380784_1_f2c2ec6dc2e54db1a6bf5c071f476ffc_large.jpg',
         dataAiHint: 'sneakers white',
+        productCode: 'PUMAS02',
         variant: 'White/Black',
         discountDescription: '-30%',
         stock: 5,
@@ -85,6 +89,7 @@ export const mockShops: Shop[] = [
         brand: 'PUMA',
         imageUrl: 'https://product.hstatic.net/1000284478/product/11_021269_1_096b4a3c4511424abd1f10b5bcf1c550_large.jpg',
         dataAiHint: 'cap olivegreen',
+        productCode: 'PUMAC03',
         variant: 'Olive Green (+14)',
         discountDescription: '-50%',
         stock: 0,
@@ -109,6 +114,7 @@ export const mockShops: Shop[] = [
         brand: 'HAVAIANAS',
         imageUrl: 'https://product.hstatic.net/1000284478/product/1056_4139412_1_ca507b2857b441dd90324dd1f97bc876_large.jpg',
         dataAiHint: 'flipflops white red',
+        productCode: 'HAVD001',
         variant: 'Disney print (+12)',
         stock: 30,
         availableVariants: [
@@ -124,6 +130,7 @@ export const mockShops: Shop[] = [
         brand: 'HAVAIANAS',
         imageUrl: 'https://product.hstatic.net/1000284478/product/3581_4000039_1_e7f19697d4084ee383384952deed5378_large.jpg',
         dataAiHint: 'sandals darkgrey',
+        productCode: 'HAVS002',
         variant: 'Dark Grey (+7)',
         stock: 4,
         // No availableVariants, so badge will only display variant, not open sheet.
@@ -133,3 +140,4 @@ export const mockShops: Shop[] = [
 ];
 
 export const mockShippingAddresses: ShippingAddress[] = [];
+

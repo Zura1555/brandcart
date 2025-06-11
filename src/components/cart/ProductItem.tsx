@@ -313,7 +313,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           <div className="flex-grow min-w-0">
             <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
 
-            {displayVariantNameInBadge && (
+            {(item.productCode || displayVariantNameInBadge) && (
               hasAvailableVariants ? (
                 <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
                   <SheetTrigger asChild>
@@ -322,7 +322,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                         variant="outline"
                         className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center cursor-pointer"
                       >
-                        {displayVariantNameInBadge}
+                        {item.productCode && <span>{item.productCode}</span>}
+                        {item.productCode && displayVariantNameInBadge && <span className="mx-1">-</span>}
+                        {displayVariantNameInBadge && <span>{displayVariantNameInBadge}</span>}
                         <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
                       </Badge>
                     </button>
@@ -445,12 +447,16 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                   </SheetContent>
                 </Sheet>
               ) : (
-                <Badge
-                  variant="outline"
-                  className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5"
-                >
-                  {displayVariantNameInBadge}
-                </Badge>
+                 (item.productCode || displayVariantNameInBadge) && (
+                    <Badge
+                    variant="outline"
+                    className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5"
+                    >
+                    {item.productCode && <span>{item.productCode}</span>}
+                    {item.productCode && displayVariantNameInBadge && <span className="mx-1">-</span>}
+                    {displayVariantNameInBadge && <span>{displayVariantNameInBadge}</span>}
+                    </Badge>
+                 )
               )
             )}
 
