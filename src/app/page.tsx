@@ -101,11 +101,7 @@ const mockUnavailableVouchersSheet: VoucherInterface[] = [
 
 
 const BrandCartPage = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>(() =>
-    mockShops.flatMap(shop =>
-      shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random()}`, quantity: 1, selected: false }))
-    )
-  );
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const router = useRouter();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -132,6 +128,12 @@ const BrandCartPage = () => {
   const [recentlyViewedItems, setRecentlyViewedItems] = useState<Product[]>([]);
 
   useEffect(() => {
+    // Initialize cart items on client mount
+    const initialCartItems = mockShops.flatMap(shop =>
+      shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random()}`, quantity: 1, selected: false }))
+    );
+    setCartItems(initialCartItems);
+
     // Simulate fetching recently viewed items.
     const allProducts = mockShops.flatMap(shop => shop.products);
     const sampleRecentItems: Product[] = [
