@@ -65,6 +65,8 @@ const staticShippingMethod = {
   subLabelKey: 'checkout.shippingMethodEstimatedDeliveryTimeLabel',
 };
 
+type SelectedPaymentMethod = 'payoo' | 'vnpay' | 'momo' | 'applepay' | 'cod';
+
 const CheckoutPage = () => {
   const router = useRouter();
   const { t, locale } = useLanguage();
@@ -72,7 +74,7 @@ const CheckoutPage = () => {
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
   const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
   const [initialSavings, setInitialSavings] = useState<number>(0);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<SelectedPaymentMethod>('payoo');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
   const [shopMessage, setShopMessage] = useState<string>('');
@@ -233,6 +235,7 @@ const CheckoutPage = () => {
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
   const paymentMethods = [
+    { id: 'cod', name: 'COD', iconUrl: 'https://file.hstatic.net/1000284478/file/cod_icon-47_a8768752c1a445da90d600ca0a94675c.svg', iconAiHint: 'cash on delivery icon', details: null },
     { id: 'payoo', name: 'Payoo', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
     { id: 'vnpay', name: 'VNPay', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR.png', iconAiHint: 'VNPay QR logo', details: null },
     { id: 'momo', name: 'Momo', iconUrl: 'https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png', iconAiHint: 'Momo logo', details: null },
@@ -360,7 +363,6 @@ const CheckoutPage = () => {
                         />
                     )}
                     <span className="text-sm font-medium text-foreground">{shop.name}</span>
-                    {/* Favorite badge removed */}
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -433,7 +435,6 @@ const CheckoutPage = () => {
                         />
                     )}
                     <span className="text-sm font-medium text-foreground">{staticProductPlaceholder.seller}</span>
-                    {/* Favorite badge removed for static placeholder */}
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -646,7 +647,7 @@ const CheckoutPage = () => {
                     <div
                       key={method.id}
                       className={`p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50 ${isSelected ? 'bg-muted/80' : ''}`}
-                      onClick={() => setSelectedPaymentMethod(method.id as any)}
+                      onClick={() => setSelectedPaymentMethod(method.id as SelectedPaymentMethod)}
                     >
                       <div className="flex items-center">
                         {method.iconUrl ? (
@@ -736,3 +737,4 @@ export default CheckoutPage;
 
 
     
+
