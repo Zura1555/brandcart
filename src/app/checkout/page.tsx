@@ -360,9 +360,7 @@ const CheckoutPage = () => {
                         />
                     )}
                     <span className="text-sm font-medium text-foreground">{shop.name}</span>
-                    {shop.isFavorite && (
-                      <Badge variant="outline" className="text-foreground border-foreground bg-transparent text-xs px-1.5 py-0.5">Yêu thích</Badge>
-                    )}
+                    {/* Favorite badge removed */}
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -435,9 +433,7 @@ const CheckoutPage = () => {
                         />
                     )}
                     <span className="text-sm font-medium text-foreground">{staticProductPlaceholder.seller}</span>
-                    {staticProductPlaceholder.isFavoriteSeller && (
-                      <Badge variant="outline" className="text-foreground border-foreground bg-transparent text-xs px-1.5 py-0.5">Yêu thích</Badge>
-                    )}
+                    {/* Favorite badge removed for static placeholder */}
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
