@@ -94,6 +94,14 @@ const viTranslations = {
     navigateToBrand: {
       title: "Mua sắm tại {brandName}",
       description: "Tính năng sắp ra mắt!"
+    },
+    stockLimitReached: {
+      title: "Đã đạt giới hạn tồn kho cho {itemName}",
+      description: "Chỉ còn {stock} sản phẩm. Số lượng đã được điều chỉnh."
+    },
+    itemOutOfStock: {
+      title: "{itemName} đã hết hàng",
+      description: "Không thể thêm hoặc tăng số lượng sản phẩm này."
     }
   },
   checkout: {

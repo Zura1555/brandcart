@@ -281,7 +281,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     }
   }
 
-  const canOpenVariantSheet = hasAvailableVariants;
+  const canOpenVariantSheet = hasAvailableVariants && item.stock !== 0;
+  const isOutOfStock = item.stock === 0;
 
   return (
     <div className="relative bg-card overflow-hidden">
@@ -297,7 +298,11 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 
       <div
         ref={swipeableContentRef}
-        className={cn("relative z-10", item.selected ? 'bg-muted' : 'bg-card')}
+        className={cn(
+          "relative z-10", 
+          item.selected && !isOutOfStock ? 'bg-muted' : 'bg-card',
+          isOutOfStock && "opacity-60"
+        )}
         style={{ transform: `translateX(${translateX}px)`, transition: isSwiping ? 'none' : 'transform 0.3s ease-out' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -308,8 +313,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           <Checkbox
             id={`item-${item.cartItemId}`}
             checked={item.selected}
+            disabled={isOutOfStock}
             onCheckedChange={(checked) => {
-                if (translateX === 0) {
+                if (translateX === 0 && !isOutOfStock) {
                     onSelectToggle(item.cartItemId, Boolean(checked));
                 }
             }}
@@ -328,13 +334,23 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           <div className="flex-grow min-w-0">
             <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
             
-            {canOpenVariantSheet ? (
+            {hasAvailableVariants ? ( // Always render Sheet structure if variants exist, but disable trigger if OOS
                 <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
-                  <SheetTrigger asChild>
-                    <button type="button" className="text-left block hover:opacity-80 transition-opacity focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
+                  <SheetTrigger asChild disabled={isOutOfStock || !canOpenVariantSheet}>
+                    <button 
+                      type="button" 
+                      className={cn(
+                        "text-left block hover:opacity-80 transition-opacity focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
+                        (isOutOfStock || !canOpenVariantSheet) && "cursor-not-allowed opacity-70"
+                      )}
+                      disabled={isOutOfStock || !canOpenVariantSheet}
+                    >
                       <Badge
                         variant="outline"
-                        className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center cursor-pointer"
+                        className={cn(
+                            "bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center",
+                            (isOutOfStock || !canOpenVariantSheet) ? "cursor-not-allowed" : "cursor-pointer"
+                        )}
                       >
                         {showSelectVariantPlaceholder ? (
                            <span className="italic text-white/80 truncate">{t('cart.sheet.selectVariantPlaceholder')}</span>
@@ -492,6 +508,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                 quantity={item.quantity}
                 onIncrement={() => onQuantityChange(item.cartItemId, item.quantity + 1)}
                 onDecrement={() => onQuantityChange(item.cartItemId, item.quantity - 1)}
+                maxQuantity={item.stock !== undefined ? Math.min(item.stock, 99) : 99}
+                disabled={isOutOfStock}
               />
               {itemCardStockStatusText && (
                 <p className={itemCardStockStatusClasses}>{itemCardStockStatusText}</p>

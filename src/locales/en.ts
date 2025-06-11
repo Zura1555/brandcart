@@ -94,6 +94,14 @@ const enTranslations = {
     navigateToBrand: {
       title: "Shop {brandName}",
       description: "Feature coming soon!"
+    },
+    stockLimitReached: {
+      title: "Stock Limit Reached for {itemName}",
+      description: "Only {stock} unit(s) available. Quantity adjusted."
+    },
+    itemOutOfStock: {
+      title: "{itemName} is Out of Stock",
+      description: "This item cannot be added or quantity increased."
     }
   },
   checkout: {

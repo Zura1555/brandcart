@@ -120,20 +120,23 @@ const formatVndNumber = (amount: number): string => {
 
 const getShippingVoucherPromotionMessage = (currentCheckoutTotal: number): string => {
   const formatVnd = formatVndNumber;
+  const tiers = [
+    { min: 0, nextMinOrder: 1000000, nextDiscountAmount: 100000 },
+    { min: 1000000, nextMinOrder: 2000000, nextDiscountAmount: 150000 },
+    { min: 2000000, nextMinOrder: 5000000, nextDiscountAmount: 300000 },
+    { min: 5000000, nextMinOrder: 8000000, nextDiscountAmount: 450000 },
+    { min: 8000000, nextMinOrder: Infinity, nextDiscountAmount: 0 }, // Max tier
+  ];
 
-  if (currentCheckoutTotal < 1000000) {
-    return `Giảm ${formatVnd(100000)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(1000000)}đ`;
+  for (const tier of tiers) {
+    if (currentCheckoutTotal < tier.nextMinOrder && currentCheckoutTotal >= tier.min) {
+      if (tier.nextDiscountAmount > 0) {
+        return `Giảm ${formatVnd(tier.nextDiscountAmount)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(tier.nextMinOrder)}đ`;
+      }
+      break; 
+    }
   }
-  if (currentCheckoutTotal < 2000000) {
-    return `Giảm ${formatVnd(150000)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(2000000)}đ`;
-  }
-  if (currentCheckoutTotal < 5000000) {
-    return `Giảm ${formatVnd(300000)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(5000000)}đ`;
-  }
-  if (currentCheckoutTotal < 8000000) {
-    return `Giảm ${formatVnd(450000)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(8000000)}đ`;
-  }
-  return ""; // Max tier reached or exceeded
+  return "";
 };
 
 
@@ -197,13 +200,13 @@ const BrandCartPage = () => {
 
 
   const handleToggleSelectAll = (checked: boolean) => {
-    setCartItems(prevItems => prevItems.map(item => ({ ...item, selected: checked })));
+    setCartItems(prevItems => prevItems.map(item => item.stock !== 0 ? { ...item, selected: checked } : item));
   };
 
   const handleToggleShopSelect = (shopName: string, checked: boolean) => {
     setCartItems(prevItems =>
       prevItems.map(item =>
-        item.brand === shopName ? { ...item, selected: checked } : item
+        (item.brand === shopName && item.stock !== 0) ? { ...item, selected: checked } : item
       )
     );
   };
@@ -211,21 +214,50 @@ const BrandCartPage = () => {
   const handleToggleItemSelect = (cartItemId: string, checked: boolean) => {
     setCartItems(prevItems =>
       prevItems.map(item =>
-        item.cartItemId === cartItemId ? { ...item, selected: checked } : item
+        (item.cartItemId === cartItemId && item.stock !== 0) ? { ...item, selected: checked } : item
       )
     );
   };
 
   const handleQuantityChange = (cartItemId: string, newQuantity: number) => {
+    const itemToUpdate = cartItems.find(item => item.cartItemId === cartItemId);
+    if (!itemToUpdate) return;
+
     if (newQuantity < 1) return;
-    if (newQuantity > 99) {
-      toast({
-        title: t('toast.limitReachedTitle'),
-        description: t('toast.limitReachedDescription'),
-        variant: "destructive",
-      })
-      return;
+
+    const currentItemStock = itemToUpdate.stock;
+    let effectiveMaxQuantity = 99; // Default application-wide max
+
+    if (currentItemStock !== undefined && currentItemStock < effectiveMaxQuantity) {
+      effectiveMaxQuantity = currentItemStock;
     }
+    
+    if (effectiveMaxQuantity === 0 && newQuantity > 0) { 
+      toast({
+        title: t('toast.itemOutOfStock.title', { itemName: itemToUpdate.name }),
+        description: t('toast.itemOutOfStock.description'),
+        variant: "destructive",
+      });
+      return; 
+    }
+
+    if (newQuantity > effectiveMaxQuantity) {
+      if (currentItemStock !== undefined && newQuantity > currentItemStock) {
+        toast({
+          title: t('toast.stockLimitReached.title', { itemName: itemToUpdate.name }),
+          description: t('toast.stockLimitReached.description', { stock: currentItemStock }),
+          variant: "destructive",
+        });
+      } else { 
+         toast({
+          title: t('toast.limitReachedTitle'),
+          description: t('toast.limitReachedDescription'),
+          variant: "destructive",
+        });
+      }
+      newQuantity = effectiveMaxQuantity; 
+    }
+
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.cartItemId === cartItemId ? { ...item, quantity: newQuantity } : item
@@ -247,6 +279,11 @@ const BrandCartPage = () => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.cartItemId === cartItemId) {
+          // If the new variant is out of stock, deselect the item
+          const newSelectedState = newVariantData.stock === 0 ? false : item.selected;
+          const newQuantity = (newVariantData.stock !== undefined && item.quantity > newVariantData.stock) ? Math.max(1, newVariantData.stock) : item.quantity;
+
+
           return {
             ...item,
             variant: newVariantData.name,
@@ -255,6 +292,8 @@ const BrandCartPage = () => {
             imageUrl: newVariantData.imageUrl !== undefined ? newVariantData.imageUrl : item.imageUrl,
             stock: newVariantData.stock !== undefined ? newVariantData.stock : item.stock,
             dataAiHint: newVariantData.dataAiHint !== undefined ? newVariantData.dataAiHint : item.dataAiHint,
+            selected: newSelectedState,
+            quantity: newQuantity,
           };
         }
         return item;
@@ -264,27 +303,28 @@ const BrandCartPage = () => {
 
   const totalAmount = useMemo(() => {
     return cartItems.reduce((sum, item) => {
-      if (item.selected) {
+      if (item.selected && item.stock !== 0) { // Only include selected and in-stock items
         return sum + item.price * item.quantity;
       }
       return sum;
     }, 0);
   }, [cartItems]);
 
-  const isAnythingSelected = useMemo(() => cartItems.some(item => item.selected), [cartItems]);
+  const isAnythingSelected = useMemo(() => cartItems.some(item => item.selected && item.stock !== 0), [cartItems]);
   
   const areAllItemsEffectivelySelected = useMemo(() => {
-    if (cartItems.length === 0) return false;
-    return cartItems.every(item => item.selected);
+    const inStockItems = cartItems.filter(item => item.stock !== 0);
+    if (inStockItems.length === 0) return false;
+    return inStockItems.every(item => item.selected);
   }, [cartItems]);
 
   const selectedItemsCount = useMemo(() => {
-    return cartItems.filter(item => item.selected).length;
+    return cartItems.filter(item => item.selected && item.stock !== 0).length;
   }, [cartItems]);
 
 
   const handleCheckout = () => {
-    const selectedCartItems = cartItems.filter(item => item.selected);
+    const selectedCartItems = cartItems.filter(item => item.selected && item.stock !== 0);
     if (selectedCartItems.length > 0) {
       localStorage.setItem(CHECKOUT_ITEMS_STORAGE_KEY, JSON.stringify(selectedCartItems));
       router.push('/checkout');
@@ -300,10 +340,11 @@ const BrandCartPage = () => {
   const itemsByShop = useMemo(() => {
     return mockShops.map(shopData => {
       const productsInShop = cartItems.filter(item => item.brand === shopData.name);
+      const inStockProductsInShop = productsInShop.filter(item => item.stock !== 0);
       return {
         ...shopData,
         products: productsInShop,
-        isShopSelected: productsInShop.length > 0 && productsInShop.every(item => item.selected),
+        isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
       };
     }).filter(shopGroup => shopGroup.products.length > 0); 
   }, [cartItems]);
@@ -465,11 +506,27 @@ const BrandCartPage = () => {
   const shippingPromotionMessage = useMemo(() => {
     return getShippingVoucherPromotionMessage(totalAmount);
   }, [totalAmount]);
+  
+  const displayShippingMessage = useMemo(() => {
+    const promotion = getShippingVoucherPromotionMessage(totalAmount);
+    if (promotion) {
+      return promotion;
+    }
+    const discount = calculateShippingVoucherDiscount(totalAmount);
+    if (discount > 0) {
+      return t('cart.vouchersAndShipping.shippingDiscountApplied', { amount: formatCurrency(discount) });
+    }
+    return t('cart.vouchersAndShipping.noPromotionsAvailable');
+  }, [totalAmount, t]);
 
   const truckIconClass = useMemo(() => {
-    // Green if max tier reached AND discount applied, otherwise muted
-    return !shippingPromotionMessage && shippingDiscount > 0 ? 'text-green-500' : 'text-muted-foreground';
-  }, [shippingPromotionMessage, shippingDiscount]);
+    const promotion = getShippingVoucherPromotionMessage(totalAmount);
+    const discount = calculateShippingVoucherDiscount(totalAmount);
+    if (!promotion && discount > 0) { // Max tier reached AND discount applied
+      return 'text-green-500';
+    }
+    return 'text-muted-foreground'; // Incentive or no promotion
+  }, [totalAmount]);
 
 
   return (
@@ -647,22 +704,12 @@ const BrandCartPage = () => {
                 </SheetContent>
               </Sheet>
 
-              <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
+             <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
                 <div className="flex items-center">
                   <Truck className={`w-5 h-5 mr-3 flex-shrink-0 ${truckIconClass}`} />
-                  {shippingPromotionMessage ? (
-                    <span className="text-sm text-muted-foreground truncate">
-                      {shippingPromotionMessage}
-                    </span>
-                  ) : shippingDiscount > 0 ? (
-                    <span className="text-sm text-green-600 truncate">
-                      {t('cart.vouchersAndShipping.shippingDiscountApplied', { amount: formatCurrency(shippingDiscount) })}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-muted-foreground truncate">
-                        {t('cart.vouchersAndShipping.noPromotionsAvailable')}
-                    </span>
-                  )}
+                  <span className={cn("text-sm truncate", truckIconClass === 'text-green-500' ? 'text-green-600' : 'text-muted-foreground')}>
+                    {displayShippingMessage}
+                  </span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </div>
@@ -693,6 +740,7 @@ const BrandCartPage = () => {
               checked={areAllItemsEffectivelySelected}
               onCheckedChange={(checked) => handleToggleSelectAll(Boolean(checked))}
               aria-label="Select all items"
+              disabled={cartItems.filter(item => item.stock !== 0).length === 0} // Disable if all in-stock items are 0
             />
             <label htmlFor="select-all-footer" className="text-sm text-foreground cursor-pointer">
               {t('cart.selectAll')}
