@@ -25,12 +25,13 @@ const BrandOfferBanner: React.FC<BrandOfferBannerProps> = ({ offerText, shopNowB
       {shopNowButtonText && onShopNowClick && (
         <Button
           variant="outline"
-          size="sm"
+          size="icon" // Changed from "sm"
           onClick={onShopNowClick}
-          className="text-green-700 border-green-600 hover:bg-green-100 hover:text-green-800 px-3 h-8 text-xs flex-shrink-0" // Adjusted classes
+          className="text-green-700 border-green-600 hover:bg-green-100 hover:text-green-800 h-8 w-8 flex-shrink-0" // Adjusted for icon button
+          aria-label={shopNowButtonText} // Added aria-label
         >
-          {shopNowButtonText}
-          <ChevronRight className="ml-1 h-4 w-4" />
+          {/* shopNowButtonText is removed from visual display */}
+          <ChevronRight className="h-4 w-4" /> {/* Removed ml-1 */}
         </Button>
       )}
     </div>
@@ -38,3 +39,4 @@ const BrandOfferBanner: React.FC<BrandOfferBannerProps> = ({ offerText, shopNowB
 };
 
 export default BrandOfferBanner;
+
