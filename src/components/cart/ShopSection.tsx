@@ -52,9 +52,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
               onCheckedChange={(checked) => onShopSelectToggle(Boolean(checked))}
               aria-label={`Select all items from ${shop.name}`}
             />
-            {shop.isFavorite && (
-              <Badge variant="outline" className="text-foreground border-foreground bg-transparent text-xs px-1.5 py-0.5 font-normal">Yêu thích+</Badge>
-            )}
+            
             <CardTitle className="font-semibold text-base text-foreground flex items-center cursor-pointer">
               {shop.logoUrl && (
                 <div className="mr-2 flex-shrink-0">
