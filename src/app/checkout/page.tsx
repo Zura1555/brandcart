@@ -26,7 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from "@/lib/utils";
 
 const HEADER_HEIGHT = 'h-14'; 
-const FOOTER_HEIGHT = 'h-44'; 
+const FOOTER_HEIGHT = 'h-36'; 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
@@ -292,7 +292,7 @@ const CheckoutPage = () => {
         </div>
       </header>
 
-      <main className={`flex-grow overflow-y-auto pt-14 pb-44`}>
+      <main className={`flex-grow overflow-y-auto pt-14 pb-36`}>
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3 space-y-3">
             {addressLoaded ? (
@@ -369,10 +369,19 @@ const CheckoutPage = () => {
                   {shop.products.map(p => {
                     const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(p.variant);
                     const displayColor = parsedColor || "N/A";
-                    const displaySize = parsedSize || "M";
+                    let displaySize = parsedSize;
+                    if (!displaySize) displaySize = "M"; // Default to M if no size
                     const displayCode = p.productCode || "N/A";
-                    const badgeText = `${displayColor} / ${displaySize} / ${displayCode}`;
-                    const showBadge = parsedColor || parsedSize || p.productCode;
+                    
+                    const badgeParts = [];
+                    if (parsedColor || parsedSize || p.productCode) { // Only form badge if there's something to show
+                        badgeParts.push(displayColor);
+                        badgeParts.push(displaySize);
+                        badgeParts.push(displayCode);
+                    }
+                    const badgeText = badgeParts.join(" / ");
+                    const showBadge = badgeText.length > 0 && badgeText !== "N/A / M / N/A";
+
 
                     return (
                       <div key={p.id} className="p-4 flex items-start space-x-3 border-b last:border-b-0">
@@ -453,10 +462,19 @@ const CheckoutPage = () => {
                       {(() => {
                         const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(staticProductPlaceholder.variation);
                         const displayColor = parsedColor || "N/A";
-                        const displaySize = parsedSize || "M";
+                        let displaySize = parsedSize;
+                        if (!displaySize) displaySize = "M"; 
                         const displayCode = staticProductPlaceholder.productCode || "N/A";
-                        const badgeText = `${displayColor} / ${displaySize} / ${displayCode}`;
-                        const showBadge = parsedColor || parsedSize || staticProductPlaceholder.productCode;
+                        
+                        const badgeParts = [];
+                        if (parsedColor || parsedSize || staticProductPlaceholder.productCode) {
+                            badgeParts.push(displayColor);
+                            badgeParts.push(displaySize);
+                            badgeParts.push(displayCode);
+                        }
+                        const badgeText = badgeParts.join(" / ");
+                        const showBadge = badgeText.length > 0 && badgeText !== "N/A / M / N/A";
+
 
                         return showBadge && (
                           <Badge className="bg-green-600 hover:bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
@@ -679,7 +697,7 @@ const CheckoutPage = () => {
             />
           </div>
 
-          <div className="px-4 pt-3 pb-4 flex-grow flex items-end justify-between">
+          <div className="px-4 pt-2 pb-3 flex justify-between items-center">
             <div className="flex-shrink">
               <p className="text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
               <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
@@ -711,6 +729,7 @@ export default CheckoutPage;
     
 
     
+
 
 
 
