@@ -2,8 +2,8 @@
 "use client";
 
 import type React from 'react';
-import { Tag } from 'lucide-react';
-import { Button } from '@/components/ui/button'; // Added Button import
+import { Tag, ChevronRight } from 'lucide-react'; // Added ChevronRight
+import { Button } from '@/components/ui/button';
 
 interface BrandOfferBannerProps {
   offerText: string;
@@ -24,12 +24,13 @@ const BrandOfferBanner: React.FC<BrandOfferBannerProps> = ({ offerText, shopNowB
       </div>
       {shopNowButtonText && onShopNowClick && (
         <Button
-          variant="link"
+          variant="outline"
           size="sm"
           onClick={onShopNowClick}
-          className="text-green-700 hover:text-green-800 hover:underline px-2 h-auto py-1 flex-shrink-0"
+          className="text-green-700 border-green-600 hover:bg-green-100 hover:text-green-800 px-3 h-8 text-xs flex-shrink-0" // Adjusted classes
         >
           {shopNowButtonText}
+          <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       )}
     </div>
