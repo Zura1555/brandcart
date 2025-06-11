@@ -2,7 +2,7 @@
 "use client";
 
 import type React from 'react';
-import { Tag, ChevronRight } from 'lucide-react'; // Added ChevronRight
+import { Tag, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface BrandOfferBannerProps {
@@ -24,14 +24,13 @@ const BrandOfferBanner: React.FC<BrandOfferBannerProps> = ({ offerText, shopNowB
       </div>
       {shopNowButtonText && onShopNowClick && (
         <Button
-          variant="outline"
-          size="icon" // Changed from "sm"
+          variant="ghost"
+          size="icon"
           onClick={onShopNowClick}
-          className="text-green-700 border-green-600 hover:bg-green-100 hover:text-green-800 h-8 w-8 flex-shrink-0" // Adjusted for icon button
-          aria-label={shopNowButtonText} // Added aria-label
+          className="text-green-700 hover:text-green-600 hover:bg-transparent h-8 w-8 flex-shrink-0"
+          aria-label={shopNowButtonText}
         >
-          {/* shopNowButtonText is removed from visual display */}
-          <ChevronRight className="h-4 w-4" /> {/* Removed ml-1 */}
+          <ChevronRight className="h-4 w-4" />
         </Button>
       )}
     </div>
@@ -39,4 +38,3 @@ const BrandOfferBanner: React.FC<BrandOfferBannerProps> = ({ offerText, shopNowB
 };
 
 export default BrandOfferBanner;
-
