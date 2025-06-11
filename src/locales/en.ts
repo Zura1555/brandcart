@@ -12,6 +12,9 @@ const enTranslations = {
     removeButton: "Remove",
     recentlyViewedTitle: "Recently Viewed",
     addToCartLabel: "Add {itemName} to cart",
+    brandOffer: {
+      shopNowButton: "Shop Now"
+    },
     dialog: {
       removeUnneededTitle: "Remove Unneeded Items",
       removeUnneededDescription: "Select the items you want to remove from your cart. Click \"Remove Selected\" when you're done.",
@@ -87,6 +90,10 @@ const enTranslations = {
         personal: "Please fill in Full Name, ID Card, Email, and Address for personal invoice.",
         company: "Please fill in Company Name, Tax Code, Email, and Address for company invoice."
       }
+    },
+    navigateToBrand: {
+      title: "Shop {brandName}",
+      description: "Feature coming soon!"
     }
   },
   checkout: {

@@ -10,11 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { CartItem, Shop, SimpleVariant } from '@/interfaces';
 import ProductItem from './ProductItem';
-import BrandOfferBanner from './BrandOfferBanner'; // Import the new component
+import BrandOfferBanner from './BrandOfferBanner'; 
 import { ChevronRight, Gift } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface ShopSectionProps {
-  shop: Shop; // Pass the whole shop object
+  shop: Shop; 
   items: CartItem[];
   isShopSelected: boolean;
   onShopSelectToggle: (checked: boolean) => void;
@@ -26,6 +28,18 @@ interface ShopSectionProps {
 
 const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, onShopSelectToggle, onItemSelectToggle, onQuantityChange, onDeleteItem, onVariantChange }) => {
   if (items.length === 0) return null;
+  const { t } = useLanguage();
+  const { toast } = useToast();
+
+  const handleShopNowClick = () => {
+    toast({
+      title: t('toast.navigateToBrand.title', { brandName: shop.name }),
+      description: t('toast.navigateToBrand.description'),
+    });
+    // Placeholder for actual navigation:
+    // if (shop.brandPageUrl) router.push(shop.brandPageUrl);
+    console.log(`Navigate to ${shop.name} brand page. URL (if available): ${shop.brandPageUrl || 'Not specified'}`);
+  };
 
   return (
     <Card className="shadow-md rounded-lg overflow-hidden bg-card">
@@ -49,7 +63,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
                     alt={`${shop.name} logo`}
                     width={60} 
                     height={24} 
-                    className="object-contain max-h-[24px]" // Ensures image fits and respects max height
+                    className="object-contain max-h-[24px]" 
                     data-ai-hint={shop.logoDataAiHint}
                     priority={false} 
                   />
@@ -74,10 +88,13 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
         )}
       </CardHeader>
 
-      {/* Conditionally render the BrandOfferBanner */}
       {shop.specialOfferText && (
-        <div className="px-4 sm:px-6 pt-3"> {/* Added padding for consistent alignment */}
-          <BrandOfferBanner offerText={shop.specialOfferText} />
+        <div className="px-4 sm:px-6 pt-3">
+          <BrandOfferBanner 
+            offerText={shop.specialOfferText}
+            shopNowButtonText={t('cart.brandOffer.shopNowButton')}
+            onShopNowClick={handleShopNowClick}
+          />
         </div>
       )}
 
@@ -85,7 +102,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
         <div className="divide-y divide-border">
           {items.map(item => (
             <ProductItem
-              key={item.id}
+              key={item.cartItemId} // Changed from item.id to item.cartItemId for unique key
               item={item}
               onSelectToggle={onItemSelectToggle}
               onQuantityChange={onQuantityChange}
@@ -100,4 +117,3 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
 };
 
 export default ShopSection;
-

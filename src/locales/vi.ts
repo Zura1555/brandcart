@@ -12,6 +12,9 @@ const viTranslations = {
     removeButton: "Xóa bớt",
     recentlyViewedTitle: "Xem Gần Đây",
     addToCartLabel: "Thêm {itemName} vào giỏ",
+    brandOffer: {
+      shopNowButton: "Mua ngay"
+    },
     dialog: {
       removeUnneededTitle: "Xóa sản phẩm không cần thiết",
       removeUnneededDescription: "Chọn các sản phẩm bạn muốn xóa khỏi giỏ hàng. Nhấn \"Xóa đã chọn\" khi hoàn tất.",
@@ -87,6 +90,10 @@ const viTranslations = {
         personal: "Vui lòng điền Họ tên, Căn cước công dân, Email, và Địa chỉ cho hóa đơn cá nhân.",
         company: "Vui lòng điền Tên công ty, Mã số thuế, Email, và Địa chỉ cho hóa đơn công ty."
       }
+    },
+    navigateToBrand: {
+      title: "Mua sắm tại {brandName}",
+      description: "Tính năng sắp ra mắt!"
     }
   },
   checkout: {
