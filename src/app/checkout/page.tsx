@@ -694,10 +694,10 @@ const CheckoutPage = () => {
             />
           </div>
 
-          <div className="px-4 pt-2 pb-3 flex justify-between items-center">
-            <div className="flex-shrink">
+          <div className="px-4 pt-3 pb-3 flex flex-col gap-3 xs:flex-row xs:justify-between xs:items-center xs:gap-4">
+            <div className="flex-shrink text-center xs:text-left">
               <p className="text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
-              <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
+              <p className="text-lg xs:text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
               {displaySavings > 0 && (
                 <p className="text-xs text-green-600">
                   {t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}
@@ -707,7 +707,7 @@ const CheckoutPage = () => {
             
             <Button
               size="lg"
-              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px] ml-4 flex-shrink-0"
+              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold w-full xs:w-auto xs:min-w-[140px] xs:flex-shrink-0"
               onClick={() => router.push('/payment')}
               disabled={!currentShippingAddress}
             >
@@ -737,6 +737,7 @@ export default CheckoutPage;
 
 
     
+
 
 
 
