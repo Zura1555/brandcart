@@ -165,7 +165,6 @@ const BrandCartPage = () => {
   const [recentlyViewedItems, setRecentlyViewedItems] = useState<Product[]>([]);
 
   useEffect(() => {
-    // Initialize cartItems only on the client-side to avoid hydration issues with Date.now() and Math.random()
     const initialCartItems = mockShops.flatMap(shop =>
       shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random().toString(36).substring(2,7)}`, quantity: 1, selected: false }))
     );
@@ -544,7 +543,7 @@ const BrandCartPage = () => {
           )}
 
           {cartItems.length > 0 && (
-            <Card className="bg-card p-4 rounded-lg shadow mx-2 sm:mx-0">
+            <Card className="bg-card px-4 rounded-lg shadow mx-2 sm:mx-0">
               <Sheet open={isVoucherSheetOpen} onOpenChange={setIsVoucherSheetOpen}>
                 <SheetTrigger asChild>
                   <div className="flex items-center justify-between py-2 border-b cursor-pointer hover:bg-muted/50 -mx-4 px-4">
