@@ -57,7 +57,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       return { color: parts[0] || null, size: parts[1] || null };
     }
     const commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42'];
-    if (commonSizes.includes(parts[0]?.toUpperCase())) {
+    if (parts[0] && commonSizes.includes(parts[0].toUpperCase())) {
         return { color: null, size: parts[0]};
     }
     return { color: parts[0] || null, size: null };
@@ -227,17 +227,24 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const hasAvailableVariants = item.availableVariants && item.availableVariants.length > 0;
   
   const canConfirmSelection = !!selectedVariantInSheet && (selectedVariantInSheet.stock === undefined || selectedVariantInSheet.stock > 0);
+  
+  const { color: parsedColorFromVariant, size: parsedSizeFromVariant } = parseVariantName(item.variant);
 
-  const badgeDisplayString = useMemo(() => {
-    const { color: currentItemColor, size: currentItemSize } = parseVariantName(item.variant);
-    if (currentItemColor || currentItemSize || item.productCode) {
-      const colorPart = currentItemColor || "N/A";
-      const sizePart = currentItemSize || "N/A";
-      const codePart = item.productCode || "N/A";
-      return `${colorPart} / ${sizePart} / ${codePart}`;
+  let displayColor = parsedColorFromVariant || "N/A";
+  let displaySize = parsedSizeFromVariant;
+  let displayCode = item.productCode || "N/A";
+
+  if (!displaySize) { 
+    if (hasAvailableVariants && allPossibleSizes.length > 0) {
+      displaySize = allPossibleSizes[0]; 
+    } else {
+      displaySize = "M"; 
     }
-    return "";
-  }, [item.variant, item.productCode, parseVariantName]);
+  }
+  
+  const badgeDisplayString = [displayColor, displaySize, displayCode].join(" / ");
+  
+  const showSelectVariantPlaceholder = hasAvailableVariants && (!parsedColorFromVariant && !parsedSizeFromVariant && !item.productCode);
 
 
   let stockStatusTextInSheet = '';
@@ -257,7 +264,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   }
 
   let itemCardStockStatusText = '';
-  let itemCardStockStatusClasses = 'text-xs mt-1 '; // Removed text-right
+  let itemCardStockStatusClasses = 'text-xs mt-1 '; 
 
   if (item.stock !== undefined) {
     if (item.stock > 10) {
@@ -327,7 +334,11 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                         variant="outline"
                         className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center cursor-pointer"
                       >
-                        {badgeDisplayString ? <span>{badgeDisplayString}</span> : <span className="italic text-white/80">{t('cart.sheet.selectVariantPlaceholder')}</span>}
+                        {showSelectVariantPlaceholder ? (
+                           <span className="italic text-white/80">{t('cart.sheet.selectVariantPlaceholder')}</span>
+                        ) : (
+                           badgeDisplayString && <span>{badgeDisplayString}</span>
+                        )}
                         <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
                       </Badge>
                     </button>
@@ -387,7 +398,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                   aria-label={color}
                                 >
                                   <Image
-                                    src={`https://placehold.co/56x56.png`}
+                                    src={`https://placehold.co/56x56.png`} 
                                     alt={color}
                                     width={56}
                                     height={56}
@@ -473,9 +484,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                 <span>{item.discountDescription}</span>
               </div>
             )}
-             {/* Stock status display moved to under QuantitySelector */}
           </div>
-          <div className="shrink-0 flex flex-col items-end space-y-1"> {/* Added space-y-1 */}
+          <div className="shrink-0 flex flex-col items-end space-y-1"> 
             <QuantitySelector
               quantity={item.quantity}
               onIncrement={() => onQuantityChange(item.id, item.quantity + 1)}
