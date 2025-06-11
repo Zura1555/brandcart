@@ -573,7 +573,7 @@ const CheckoutPage = () => {
                         </div>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="px-4 pb-4 pt-0">
+                    <AccordionContent className="px-4 pb-4 pt-2">
                       <Textarea
                         placeholder={t('checkout.messageToShopPlaceholder')}
                         value={shopMessage}
@@ -737,3 +737,6 @@ export default CheckoutPage;
 
 
 
+
+
+    
