@@ -165,6 +165,7 @@ const BrandCartPage = () => {
   const [recentlyViewedItems, setRecentlyViewedItems] = useState<Product[]>([]);
 
   useEffect(() => {
+    // Client-side only initialization for cartItems
     const initialCartItems = mockShops.flatMap(shop =>
       shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random().toString(36).substring(2,7)}`, quantity: 1, selected: false }))
     );
@@ -465,6 +466,11 @@ const BrandCartPage = () => {
     return getShippingVoucherPromotionMessage(totalAmount);
   }, [totalAmount]);
 
+  const truckIconClass = useMemo(() => {
+    // Green if max tier reached AND discount applied, otherwise muted
+    return !shippingPromotionMessage && shippingDiscount > 0 ? 'text-green-500' : 'text-muted-foreground';
+  }, [shippingPromotionMessage, shippingDiscount]);
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -643,18 +649,18 @@ const BrandCartPage = () => {
 
               <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
                 <div className="flex items-center">
-                  <Truck className={`w-5 h-5 mr-3 flex-shrink-0 ${shippingDiscount > 0 ? 'text-green-500' : 'text-muted-foreground'}`} />
-                  {shippingDiscount > 0 ? (
-                    <span className="text-sm text-foreground truncate">
-                      {t('cart.vouchersAndShipping.shippingDiscountApplied', { amount: formatCurrency(shippingDiscount) })}
-                    </span>
-                  ) : shippingPromotionMessage ? (
+                  <Truck className={`w-5 h-5 mr-3 flex-shrink-0 ${truckIconClass}`} />
+                  {shippingPromotionMessage ? (
                     <span className="text-sm text-muted-foreground truncate">
                       {shippingPromotionMessage}
                     </span>
+                  ) : shippingDiscount > 0 ? (
+                    <span className="text-sm text-green-600 truncate">
+                      {t('cart.vouchersAndShipping.shippingDiscountApplied', { amount: formatCurrency(shippingDiscount) })}
+                    </span>
                   ) : (
                     <span className="text-sm text-muted-foreground truncate">
-                       {t('cart.vouchersAndShipping.noPromotionsAvailable')}
+                        {t('cart.vouchersAndShipping.noPromotionsAvailable')}
                     </span>
                   )}
                 </div>
