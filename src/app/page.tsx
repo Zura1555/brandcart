@@ -72,6 +72,25 @@ const mockAvailableVouchersSheet: VoucherInterface[] = [
     isSelected: false,
     isAvailable: true,
   },
+  {
+    id: 'v_freeship_50k_sheet',
+    title: 'Miễn phí vận chuyển, đơn từ 50.000₫',
+    imageUrl: 'https://placehold.co/40x40/4CAF50/FFFFFF.png',
+    imageAiHint: 'free shipping truck',
+    expiryInfo: '15/09/2024',
+    isSelected: false,
+    isAvailable: true,
+  },
+  {
+    id: 'v_adidas_10percent_sheet',
+    title: 'Giảm 10% cho sản phẩm Adidas',
+    imageUrl: 'https://placehold.co/40x40/000000/FFFFFF.png',
+    imageAiHint: 'Adidas logo',
+    expiryInfo: '30/09/2024',
+    restrictionText: 'Chỉ áp dụng cho sản phẩm Adidas',
+    isSelected: false,
+    isAvailable: true,
+  },
 ];
 
 const mockUnavailableVouchersSheet: VoucherInterface[] = [
@@ -96,6 +115,27 @@ const mockUnavailableVouchersSheet: VoucherInterface[] = [
     isSelected: false,
     isAvailable: false, // Assuming unavailable for this demo list
     unavailableReason: 'Restricted to specific items.',
+  },
+  {
+    id: 'v_expired_generic_sheet',
+    title: 'Voucher giảm 20.000₫ (Đã hết hạn)',
+    imageUrl: 'https://placehold.co/40x40/9E9E9E/FFFFFF.png',
+    imageAiHint: 'expired voucher',
+    expiryInfo: '01/01/2024 - Hết hạn',
+    isSelected: false,
+    isAvailable: false,
+    unavailableReason: 'Voucher đã hết hạn sử dụng.',
+  },
+  {
+    id: 'v_shopeepay_20k_sheet',
+    title: 'Giảm 20.000₫ khi thanh toán bằng ShopeePay',
+    imageUrl: 'https://placehold.co/40x40/FF6F00/FFFFFF.png',
+    imageAiHint: 'ShopeePay logo',
+    expiryInfo: '31/10/2024',
+    paymentMethodSwitchText: 'Chuyển sang ShopeePay để hưởng ưu đãi này',
+    isSelected: false,
+    isAvailable: false,
+    unavailableReason: 'Cần chọn phương thức thanh toán ShopeePay.',
   },
 ];
 
@@ -517,7 +557,7 @@ const BrandCartPage = () => {
       return t('cart.vouchersAndShipping.shippingDiscountApplied', { amount: formatCurrency(discount) });
     }
     return t('cart.vouchersAndShipping.noPromotionsAvailable');
-  }, [totalAmount, t]);
+  }, [totalAmount, t, formatCurrency]);
 
   const truckIconClass = useMemo(() => {
     const promotion = getShippingVoucherPromotionMessage(totalAmount);
