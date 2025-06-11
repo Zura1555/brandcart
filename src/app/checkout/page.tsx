@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
 import { mockShops } from '@/lib/mockData'; 
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -46,8 +46,9 @@ const staticProductPlaceholder = {
   logoAiHint: "company logo",
   imageUrl: "https://placehold.co/60x60.png",
   imageAiHint: "beaded bracelet black white",
-  name: "Vòng tay quyền rũ mèo đá quý hợp thời trang ...",
-  variation: "Vòng tay Mèo đen",
+  name: "Vòng tay mèo đá quý",
+  variation: "Đen, Freesize",
+  productCode: "VT001",
   price: 20900,
   originalPrice: 27500,
   quantity: 1,
@@ -82,6 +83,36 @@ const CheckoutPage = () => {
     address: '',
   });
   const [eInvoiceSummary, setEInvoiceSummary] = useState<string | null>(null);
+
+
+  const cleanVariantNameForCheckout = useCallback((name: string | undefined): string => {
+    if (!name) return '';
+    return name.replace(/\s*\(\+\d+\)\s*$/, ''); // Removes " (+X)" from variant name if present
+  }, []);
+
+  const parseVariantNameForCheckout = useCallback((name: string | undefined): { color: string | null, size: string | null } => {
+    if (!name) return { color: null, size: null };
+    const cleanedName = cleanVariantNameForCheckout(name);
+    const parts = cleanedName.split(',').map(p => p.trim());
+    
+    let color: string | null = null;
+    let size: string | null = null;
+
+    if (parts.length === 1) { // Only one part, could be color or size
+        const part = parts[0];
+        const commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', 'Freesize'];
+        if (commonSizes.some(s => part.toUpperCase() === s.toUpperCase())) {
+            size = part;
+        } else {
+            color = part;
+        }
+    } else if (parts.length >= 2) { // Two or more parts, assume first is color, second is size
+        color = parts[0] || null;
+        size = parts[1] || null;
+    }
+    
+    return { color, size };
+  }, [cleanVariantNameForCheckout]);
 
 
   useEffect(() => {
@@ -163,7 +194,7 @@ const CheckoutPage = () => {
       setCurrentShippingAddress(userAddresses.find(addr => addr.isDefault) || (userAddresses.length > 0 ? userAddresses[0] : null));
     }
     setAddressLoaded(true);
-  }, []);
+  }, [parseVariantNameForCheckout]); // Added parseVariantNameForCheckout to dependencies
 
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')}₫`;
@@ -322,39 +353,48 @@ const CheckoutPage = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {shop.products.map(p => (
-                    <div key={p.id} className="p-4 flex items-start space-x-3 border-b last:border-b-0">
-                      <div className="relative w-[60px] h-[60px] flex-shrink-0">
-                        <Image
-                          src={p.imageUrl}
-                          alt={p.name}
-                          fill
-                          className="rounded border object-cover"
-                          data-ai-hint={p.dataAiHint}
-                          sizes="60px"
-                        />
-                        {p.quantity > 0 && (
-                           <span className="absolute top-0 right-0 transform translate-x-1/3 -translate-y-1/3 bg-green-600 text-white text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center border-2 border-card z-10">
-                            {p.quantity}
-                          </span>
-                        )}
+                  {shop.products.map(p => {
+                    const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(p.variant);
+                    const displayColor = parsedColor || "N/A";
+                    const displaySize = parsedSize || "M";
+                    const displayCode = p.productCode || "N/A";
+                    const badgeText = `${displayColor} / ${displaySize} / ${displayCode}`;
+                    const showBadge = parsedColor || parsedSize || p.productCode;
+
+                    return (
+                      <div key={p.id} className="p-4 flex items-start space-x-3 border-b last:border-b-0">
+                        <div className="relative w-[60px] h-[60px] flex-shrink-0">
+                          <Image
+                            src={p.imageUrl}
+                            alt={p.name}
+                            fill
+                            className="rounded border object-cover"
+                            data-ai-hint={p.dataAiHint}
+                            sizes="60px"
+                          />
+                          {p.quantity > 0 && (
+                             <span className="absolute top-0 right-0 transform translate-x-1/3 -translate-y-1/3 bg-green-600 text-white text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center border-2 border-card z-10">
+                              {p.quantity}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex-grow">
+                          <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{p.name}</p>
+                          {showBadge && (
+                             <Badge className="bg-green-600 hover:bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
+                              {badgeText}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <span className="text-sm font-semibold text-foreground">{formatCurrency(p.price)}</span>
+                          {p.originalPrice && (
+                            <span className="text-xs text-muted-foreground line-through ml-1.5 block">{formatCurrency(p.originalPrice)}</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-grow">
-                        <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{p.name}</p>
-                        {p.variant && (
-                           <Badge className="bg-green-600 hover:bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
-                            {p.variant.replace(/\s*\(\+\d+\)\s*$/, '')}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm font-semibold text-foreground">{formatCurrency(p.price)}</span>
-                        {p.originalPrice && (
-                          <span className="text-xs text-muted-foreground line-through ml-1.5 block">{formatCurrency(p.originalPrice)}</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </CardContent>
               </Card>
             )) : (
@@ -397,11 +437,20 @@ const CheckoutPage = () => {
                     </div>
                     <div className="flex-grow">
                       <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{staticProductPlaceholder.name}</p>
-                      {staticProductPlaceholder.variation && (
-                        <Badge className="bg-green-600 hover:bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
-                          {staticProductPlaceholder.variation}
-                        </Badge>
-                      )}
+                      {(() => {
+                        const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(staticProductPlaceholder.variation);
+                        const displayColor = parsedColor || "N/A";
+                        const displaySize = parsedSize || "M";
+                        const displayCode = staticProductPlaceholder.productCode || "N/A";
+                        const badgeText = `${displayColor} / ${displaySize} / ${displayCode}`;
+                        const showBadge = parsedColor || parsedSize || staticProductPlaceholder.productCode;
+
+                        return showBadge && (
+                          <Badge className="bg-green-600 hover:bg-green-600 text-white text-xs mt-0.5 px-1.5 py-0.5">
+                            {badgeText}
+                          </Badge>
+                        );
+                      })()}
                     </div>
                     <div className="text-right">
                       <span className="text-sm font-semibold text-foreground">{formatCurrency(staticProductPlaceholder.price)}</span>
@@ -631,6 +680,7 @@ export default CheckoutPage;
     
 
     
+
 
 
 
