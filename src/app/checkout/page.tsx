@@ -24,10 +24,13 @@ import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { useToast } from '@/hooks/use-toast';
 
 const HEADER_HEIGHT = 'h-14'; 
-const FOOTER_HEIGHT = 'h-24'; 
+const FOOTER_HEIGHT = 'h-28'; // Increased footer height
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
+
+const LOYALTY_POINTS_TO_REDEEM = 200;
+const LOYALTY_POINTS_DISCOUNT_VALUE = 20000;
 
 interface DisplayShop {
   name: string;
@@ -67,6 +70,7 @@ const CheckoutPage = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
+  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
 
   // E-Invoice state
   const [eInvoiceType, setEInvoiceType] = useState<'personal' | 'company'>('personal');
@@ -182,8 +186,11 @@ const CheckoutPage = () => {
 
   const displayTotalAmount = useMemo(() => {
     let currentTotal = initialTotalAmount;
+    if (useLoyaltyPoints) {
+      currentTotal -= LOYALTY_POINTS_DISCOUNT_VALUE;
+    }
     return Math.max(0, currentTotal);
-  }, [initialTotalAmount]);
+  }, [initialTotalAmount, useLoyaltyPoints]);
 
   const displaySavings = initialSavings;
 
@@ -249,7 +256,7 @@ const CheckoutPage = () => {
         </div>
       </header>
 
-      <main className={`flex-grow overflow-y-auto pt-14 pb-24`}>
+      <main className={`flex-grow overflow-y-auto pt-14 pb-28`}> {/* Adjusted pb-28 for new footer height */}
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3 space-y-3">
             {addressLoaded ? (
@@ -575,16 +582,30 @@ const CheckoutPage = () => {
 
       <footer className={`fixed bottom-0 left-0 right-0 z-30 bg-card border-t ${FOOTER_HEIGHT}`}>
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
-          <div>
+          <div className="flex-shrink">
             <p className="text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
             <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
             {displaySavings > 0 && (
-              <p className="text-xs text-green-600">{t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}</p>
+              <p className="text-xs text-green-600">
+                {t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}
+              </p>
             )}
+            <div className="mt-1 flex items-center justify-start space-x-2">
+              <Label htmlFor="loyalty-points-switch" className="text-xs text-muted-foreground whitespace-nowrap">
+                {t('checkout.footer.usePointsToggleLabel', { points: LOYALTY_POINTS_TO_REDEEM, value: formatCurrency(LOYALTY_POINTS_DISCOUNT_VALUE) })}
+              </Label>
+              <Switch
+                id="loyalty-points-switch"
+                checked={useLoyaltyPoints}
+                onCheckedChange={setUseLoyaltyPoints}
+                className="scale-75"
+              />
+            </div>
           </div>
+          
           <Button
             size="lg"
-            className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px]"
+            className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px] ml-4 flex-shrink-0"
             onClick={() => router.push('/payment')}
             disabled={!currentShippingAddress}
           >
@@ -597,7 +618,7 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-
+    
 
     
 

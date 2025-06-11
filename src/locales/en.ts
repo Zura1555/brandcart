@@ -121,6 +121,7 @@ const enTranslations = {
       totalLabel: "Total:",
       savings: "Save {amount}",
       orderButton: "Place Order",
+      usePointsToggleLabel: "Use {points} points (Save {value})",
     },
   },
   addAddress: {

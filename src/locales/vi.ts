@@ -121,6 +121,7 @@ const viTranslations = {
       totalLabel: "Tổng cộng:",
       savings: "Tiết kiệm {amount}",
       orderButton: "Đặt hàng",
+      usePointsToggleLabel: "Dùng {points} điểm (Tiết kiệm {value})",
     },
   },
   addAddress: {
