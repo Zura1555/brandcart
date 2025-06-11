@@ -46,14 +46,13 @@ export interface CartItem extends Product {
 
 export interface ShippingAddress {
   id: string;
-  name: string;
+  name: string; // This will store the full name (e.g., "Last First")
   phone: string;
   address: string; // Full concatenated address for display
   streetAddress: string; // Street, building number part
   ward: string; // Value for select, e.g., 'pdk'
   district: string; // Value for select, e.g., 'q1'
   province: string; // Value for select, e.g., 'hcm'
-  addressType: 'home' | 'office';
+  addressType: 'home' | 'office'; // Kept for data integrity if old data exists, but not used in new form
   isDefault?: boolean;
 }
-

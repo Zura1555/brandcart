@@ -13,12 +13,11 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, ClipboardPaste } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ShippingAddress } from '@/interfaces';
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
 const HEADER_HEIGHT = 'h-14'; 
@@ -28,14 +27,14 @@ const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 
 const getAddressFormSchema = (t: (key: string, params?: Record<string, string | number>) => string) => z.object({
   id: z.string().optional(), 
-  fullName: z.string().min(1, { message: t("addAddress.validation.fullNameRequired") }),
+  firstName: z.string().min(1, { message: t("addAddress.validation.firstNameRequired") }),
+  lastName: z.string().min(1, { message: t("addAddress.validation.lastNameRequired") }),
   phone: z.string().regex(/^(\+84|0)\d{9,10}$/, { message: t("addAddress.validation.phoneInvalid") }),
   province: z.string().min(1, { message: t("addAddress.validation.provinceRequired") }),
   district: z.string().min(1, { message: t("addAddress.validation.districtRequired") }),
   ward: z.string().min(1, { message: t("addAddress.validation.wardRequired") }),
   streetAddress: z.string().min(1, { message: t("addAddress.validation.streetAddressRequired") }),
   isDefault: z.boolean().default(false),
-  addressType: z.enum(['home', 'office'], { required_error: t("addAddress.validation.addressTypeRequired") }),
 });
 
 type AddressFormValues = z.infer<ReturnType<typeof getAddressFormSchema>>;
@@ -43,8 +42,6 @@ type AddressFormValues = z.infer<ReturnType<typeof getAddressFormSchema>>;
 const provinces = [{ value: 'hcm', label: 'TP. Hồ Chí Minh' }, { value: 'hn', label: 'Hà Nội' }];
 const districts = [{ value: 'q1', label: 'Quận 1' }, { value: 'qtb', label: 'Quận Tân Bình' }];
 const wards = [{ value: 'pdk', label: 'Phường Đa Kao' }, { value: 'p2', label: 'Phường 2' }];
-
-type AddressTypeOption = 'home' | 'office';
 
 const AddAddressFormInner = () => {
   const router = useRouter();
@@ -54,8 +51,6 @@ const AddAddressFormInner = () => {
 
   const editId = searchParams.get('editId');
   const isEditMode = Boolean(editId);
-
-  const [selectedAddressType, setSelectedAddressType] = useState<AddressTypeOption>('home');
   
   const addressFormSchema = useMemo(() => getAddressFormSchema(t), [t]);
 
@@ -63,14 +58,14 @@ const AddAddressFormInner = () => {
     resolver: zodResolver(addressFormSchema),
     defaultValues: {
       id: undefined,
-      fullName: '',
+      firstName: '',
+      lastName: '',
       phone: '',
       province: '',
       district: '',
       ward: '',
       streetAddress: '',
       isDefault: false,
-      addressType: 'home',
     },
   });
 
@@ -81,18 +76,21 @@ const AddAddressFormInner = () => {
         const addresses: ShippingAddress[] = JSON.parse(existingAddressesRaw);
         const addressToEdit = addresses.find(addr => addr.id === editId);
         if (addressToEdit) {
+          const nameParts = addressToEdit.name.split(' ');
+          const lastName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : ''; // Assuming last word is first name
+          const firstName = nameParts.length > 0 ? nameParts[nameParts.length - 1] : '';
+          
           form.reset({
             id: addressToEdit.id,
-            fullName: addressToEdit.name,
+            firstName: firstName,
+            lastName: lastName,
             phone: addressToEdit.phone,
             province: addressToEdit.province || '',
             district: addressToEdit.district || '',
             ward: addressToEdit.ward || '',
             streetAddress: addressToEdit.streetAddress || '',
             isDefault: addressToEdit.isDefault || false,
-            addressType: addressToEdit.addressType || 'home',
           });
-          setSelectedAddressType(addressToEdit.addressType || 'home');
         } else {
           router.push('/select-address'); 
         }
@@ -106,10 +104,11 @@ const AddAddressFormInner = () => {
     const districtLabel = districts.find(d => d.value === data.district)?.label || data.district;
     const wardLabel = wards.find(w => w.value === data.ward)?.label || data.ward;
     const fullAddressString = `${data.streetAddress}, ${wardLabel}, ${districtLabel}, ${provinceLabel}`;
+    const fullName = `${data.lastName} ${data.firstName}`.trim();
 
-    const addressData: Omit<ShippingAddress, 'id'> & { id?: string } = {
+    const addressData: Omit<ShippingAddress, 'id' | 'addressType'> & { id?: string } = {
       id: isEditMode && data.id ? data.id : `addr-${Date.now().toString()}-${Math.random().toString(36).substring(2, 7)}`,
-      name: data.fullName,
+      name: fullName,
       phone: data.phone,
       address: fullAddressString,
       isDefault: data.isDefault,
@@ -117,7 +116,7 @@ const AddAddressFormInner = () => {
       district: data.district,
       ward: data.ward,
       streetAddress: data.streetAddress,
-      addressType: data.addressType,
+      // addressType removed
     };
 
     try {
@@ -129,8 +128,13 @@ const AddAddressFormInner = () => {
         let oldDefaultId: string | null = null;
         addresses = addresses.map(addr => {
             if (addr.isDefault && addr.id !== addressData.id) oldDefaultId = addr.id;
-            return addr.id === addressData.id ? { ...addr, ...addressData } as ShippingAddress : addr;
+            // Ensure addressType is preserved if it exists on old addresses, or set to 'home'
+            const existingAddrType = (addr as any).addressType || 'home';
+            const updatedAddr = { ...addr, ...addressData, addressType: existingAddrType } as ShippingAddress;
+            if(addr.id === addressData.id) return updatedAddr;
+            return addr;
         });
+        
 
         if (addressData.isDefault) {
             addresses = addresses.map(addr => 
@@ -164,7 +168,8 @@ const AddAddressFormInner = () => {
         });
 
       } else { 
-        const newAddress = addressData as ShippingAddress; 
+        // For new addresses, default addressType to 'home' as it's removed from form
+        const newAddress = { ...addressData, addressType: 'home' } as ShippingAddress;
         if (newAddress.isDefault) {
           addresses = addresses.map(addr => ({ ...addr, isDefault: false }));
           localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, newAddress.id);
@@ -199,10 +204,6 @@ const AddAddressFormInner = () => {
     }
   };
 
-  const handleAddressTypeChange = (type: AddressTypeOption) => {
-    setSelectedAddressType(type);
-    form.setValue('addressType', type, { shouldValidate: true });
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
@@ -214,186 +215,152 @@ const AddAddressFormInner = () => {
           <div className="flex-grow flex justify-center items-center min-w-0 px-2">
              <Breadcrumbs />
           </div>
-          <div className="flex items-center">
-             <LanguageSwitcher />
-          </div>
+          {/* LanguageSwitcher removed */}
+          <div className="w-10"></div> {/* Spacer for balance */}
         </div>
       </header>
 
       <main className={`flex-grow overflow-y-auto pt-14 pb-20`}>
         <ScrollArea className="h-full">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 container mx-auto px-4 py-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 container mx-auto px-4 py-4">
               
-              {!isEditMode && (
-                <Card className="bg-muted">
-                  <CardContent className="p-3">
-                    <div className="flex items-center mb-1">
-                      <ClipboardPaste className="w-5 h-5 text-foreground mr-2" />
-                      <span className="text-sm font-semibold text-foreground">{t('addAddress.pasteHelper.title')}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {t('addAddress.pasteHelper.description')}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem className="bg-card p-3 rounded-lg shadow-sm">
+                    <FormLabel className="text-xs text-muted-foreground">{t('addAddress.lastNameLabel')}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={t('addAddress.lastNamePlaceholder')} {...field} className="mt-1" />
+                    </FormControl>
+                    <FormMessage className="pt-1 text-xs" />
+                  </FormItem>
+                )}
+              />
 
-              <Card>
-                <CardContent className="p-0">
-                  <FormField
-                    control={form.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem className="border-b border-border">
-                        <FormControl>
-                          <Input placeholder={t('addAddress.fullNamePlaceholder')} {...field} className="border-0 rounded-none h-12 px-4 focus-visible:ring-0 focus-visible:ring-offset-0" />
-                        </FormControl>
-                        <FormMessage className="px-4 pb-2 text-xs" />
-                      </FormItem>
-                    )}
-                  />
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem className="bg-card p-3 rounded-lg shadow-sm">
+                    <FormLabel className="text-xs text-muted-foreground">{t('addAddress.firstNameLabel')}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={t('addAddress.firstNamePlaceholder')} {...field} className="mt-1" />
+                    </FormControl>
+                    <FormMessage className="pt-1 text-xs" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem className="bg-card p-3 rounded-lg shadow-sm">
+                    <FormLabel className="text-xs text-muted-foreground">{t('addAddress.phoneLabel')}</FormLabel>
+                    <FormControl>
+                      <Input type="tel" placeholder={t('addAddress.phonePlaceholder')} {...field} className="mt-1" />
+                    </FormControl>
+                    <FormMessage className="pt-1 text-xs" />
+                  </FormItem>
+                )}
+              />
+            
+              <FormField
+                control={form.control}
+                name="province"
+                render={({ field }) => (
+                  <FormItem className="bg-card p-3 rounded-lg shadow-sm">
+                    <FormLabel className="text-xs text-muted-foreground">{t('addAddress.provinceLabel')}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder={t('addAddress.provincePlaceholder')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {provinces.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="pt-1 text-xs" />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem className="border-b border-border">
-                        <FormControl>
-                          <Input type="tel" placeholder={t('addAddress.phonePlaceholder')} {...field} className="border-0 rounded-none h-12 px-4 focus-visible:ring-0 focus-visible:ring-offset-0" />
-                        </FormControl>
-                        <FormMessage className="px-4 pb-2 text-xs" />
-                      </FormItem>
-                    )}
-                  />
-                
-                  <FormField
-                    control={form.control}
-                    name="province"
-                    render={({ field }) => (
-                      <FormItem className="border-b border-border">
-                        <Select onValueChange={field.onChange} value={field.value || ""} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="border-0 rounded-none h-12 px-4 focus:ring-0 focus:ring-offset-0">
-                              <SelectValue placeholder={t('addAddress.provincePlaceholder')} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {provinces.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="px-4 pb-2 text-xs" />
-                      </FormItem>
-                    )}
-                  />
+              <FormField
+                control={form.control}
+                name="district"
+                render={({ field }) => (
+                  <FormItem className="bg-card p-3 rounded-lg shadow-sm">
+                    <FormLabel className="text-xs text-muted-foreground">{t('addAddress.districtLabel')}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder={t('addAddress.districtPlaceholder')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {districts.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="pt-1 text-xs" />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="district"
-                    render={({ field }) => (
-                      <FormItem className="border-b border-border">
-                        <Select onValueChange={field.onChange} value={field.value || ""} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="border-0 rounded-none h-12 px-4 focus:ring-0 focus:ring-offset-0">
-                              <SelectValue placeholder={t('addAddress.districtPlaceholder')} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {districts.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="px-4 pb-2 text-xs" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="ward"
-                    render={({ field }) => (
-                      <FormItem className="border-b border-border">
-                        <Select onValueChange={field.onChange} value={field.value || ""} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="border-0 rounded-none h-12 px-4 focus:ring-0 focus:ring-offset-0">
-                              <SelectValue placeholder={t('addAddress.wardPlaceholder')} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {wards.map(w => <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="px-4 pb-2 text-xs" />
-                      </FormItem>
-                    )}
-                  />
-                
-                  <FormField
-                    control={form.control}
-                    name="streetAddress"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Textarea placeholder={t('addAddress.streetAddressPlaceholder')} {...field} className="border-0 rounded-none min-h-[80px] px-4 py-3 focus-visible:ring-0 focus-visible:ring-offset-0" />
-                        </FormControl>
-                        <FormMessage className="px-4 pb-2 text-xs" />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-0">
-                  <FormField
-                    control={form.control}
-                    name="isDefault"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between p-4 border-b border-border">
-                        <FormLabel className="text-sm text-foreground">{t('addAddress.setDefaultLabel')}</FormLabel>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="addressType"
-                    render={({ field }) => ( 
-                      <FormItem className="flex flex-row items-center justify-between p-4">
-                        <FormLabel className="text-sm text-foreground">{t('addAddress.addressTypeLabel')}</FormLabel>
-                        <div className="flex space-x-2">
-                          <Button
-                            type="button"
-                            variant={selectedAddressType === 'office' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => handleAddressTypeChange('office')}
-                            className={`${selectedAddressType === 'office' ? 'bg-foreground text-accent-foreground hover:bg-foreground/90' : 'text-foreground border-muted-foreground hover:bg-muted'}`}
-                          >
-                            {t('addAddress.addressType.office')}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant={selectedAddressType === 'home' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => handleAddressTypeChange('home')}
-                             className={`${selectedAddressType === 'home' ? 'bg-foreground text-accent-foreground hover:bg-foreground/90' : 'text-foreground border-muted-foreground hover:bg-muted'}`}
-                          >
-                            {t('addAddress.addressType.home')}
-                          </Button>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                   {form.formState.errors.addressType && (
-                    <FormMessage className="px-4 pb-2 text-xs -mt-2">{form.formState.errors.addressType.message}</FormMessage>
+              <FormField
+                control={form.control}
+                name="ward"
+                render={({ field }) => (
+                  <FormItem className="bg-card p-3 rounded-lg shadow-sm">
+                     <FormLabel className="text-xs text-muted-foreground">{t('addAddress.wardLabel')}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder={t('addAddress.wardPlaceholder')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {wards.map(w => <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="pt-1 text-xs" />
+                  </FormItem>
+                )}
+              />
+            
+              <FormField
+                control={form.control}
+                name="streetAddress"
+                render={({ field }) => (
+                  <FormItem className="bg-card p-3 rounded-lg shadow-sm">
+                    <FormLabel className="text-xs text-muted-foreground">{t('addAddress.streetAddressLabel')}</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder={t('addAddress.streetAddressPlaceholder')} {...field} className="mt-1 min-h-[60px]" />
+                    </FormControl>
+                    <FormMessage className="pt-1 text-xs" />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="pt-2"> {/* Spacer before default switch */}
+                <FormField
+                  control={form.control}
+                  name="isDefault"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between p-4 bg-card rounded-lg shadow-sm">
+                      <FormLabel className="text-sm text-foreground">{t('addAddress.setDefaultLabel')}</FormLabel>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
                   )}
-                </CardContent>
-              </Card>
+                />
+              </div>
               
               <div className="pb-4">
               </div>
@@ -410,7 +377,7 @@ const AddAddressFormInner = () => {
             className="w-full max-w-md bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold" 
             onClick={form.handleSubmit(onSubmit)}
           >
-            {isEditMode ? t('addAddress.button.saveChanges') : t('addAddress.button.complete')}
+            {isEditMode ? t('addAddress.button.saveChanges') : t('addAddress.button.saveAddress')}
           </Button>
         </div>
       </footer>
@@ -428,7 +395,7 @@ const AddAddressPage = () => {
             <div className="flex-grow flex justify-center items-center min-w-0 px-2">
                 <div className="h-5 w-36 bg-muted rounded animate-pulse"></div>
             </div>
-            <div className="w-20"></div> 
+            <div className="w-10"></div> {/* Adjusted for balance */}
           </div>
         </header>
         <main className={`flex-grow overflow-y-auto pt-14 pb-20 flex items-center justify-center`}>
