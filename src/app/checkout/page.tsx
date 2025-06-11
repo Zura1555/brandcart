@@ -368,16 +368,16 @@ const CheckoutPage = () => {
                 <CardContent className="p-0">
                   {shop.products.map(p => {
                     const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(p.variant);
-                    const displayColor = parsedColor || "N/A";
+                    let displayColor = parsedColor || "N/A";
                     let displaySize = parsedSize;
                     if (!displaySize) displaySize = "M"; // Default to M if no size
-                    const displayCode = p.productCode || "N/A";
+                    let displayCode = p.productCode || "N/A";
                     
                     const badgeParts = [];
-                    if (parsedColor || parsedSize || p.productCode) { // Only form badge if there's something to show
-                        badgeParts.push(displayColor);
-                        badgeParts.push(displaySize);
-                        badgeParts.push(displayCode);
+                    if (parsedColor || parsedSize || p.productCode) { 
+                         badgeParts.push(displayColor);
+                         badgeParts.push(displaySize);
+                         badgeParts.push(displayCode);
                     }
                     const badgeText = badgeParts.join(" / ");
                     const showBadge = badgeText.length > 0 && badgeText !== "N/A / M / N/A";
@@ -461,10 +461,10 @@ const CheckoutPage = () => {
                       <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{staticProductPlaceholder.name}</p>
                       {(() => {
                         const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(staticProductPlaceholder.variation);
-                        const displayColor = parsedColor || "N/A";
+                        let displayColor = parsedColor || "N/A";
                         let displaySize = parsedSize;
                         if (!displaySize) displaySize = "M"; 
-                        const displayCode = staticProductPlaceholder.productCode || "N/A";
+                        let displayCode = staticProductPlaceholder.productCode || "N/A";
                         
                         const badgeParts = [];
                         if (parsedColor || parsedSize || staticProductPlaceholder.productCode) {
@@ -684,7 +684,7 @@ const CheckoutPage = () => {
           <div className="px-4 py-3 border-b border-border flex justify-between items-center">
             <div>
               <p className="text-sm font-medium text-foreground">
-                {t('checkout.footer.redeemPointsTitle', { pointsToRedeem: LOYALTY_POINTS_TO_REDEEM, availablePoints: AVAILABLE_LOYALTY_POINTS })}
+                {t('checkout.footer.youHavePointsToRedeem', { availablePoints: AVAILABLE_LOYALTY_POINTS })}
               </p>
               <p className="text-xs text-green-600">
                 {t('checkout.footer.redeemPointsSavings', { amount: formatCurrency(LOYALTY_POINTS_DISCOUNT_VALUE) })}
@@ -729,6 +729,7 @@ export default CheckoutPage;
     
 
     
+
 
 
 
