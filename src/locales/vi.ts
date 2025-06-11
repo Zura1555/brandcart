@@ -20,7 +20,8 @@ const viTranslations = {
     },
     vouchersAndShipping: {
       voucherLabel: "Voucher giảm đến {amount}₫",
-      shippingDiscountLabel: "Giảm {amount}₫ phí vận chuyển đơn tối thiểu..."
+      shippingDiscountApplied: "Giảm giá vận chuyển: {amount}",
+      shippingDiscountInfo: "Tăng giá trị đơn hàng để được giảm giá vận chuyển"
     },
     sheet: {
       productInfoTitle: "Thông tin sản phẩm",
@@ -132,7 +133,6 @@ const viTranslations = {
       totalLabel: "Tổng cộng:",
       savings: "Tiết kiệm {amount}",
       orderButton: "Đặt hàng",
-      usePointsToggleLabel: "Dùng {points} điểm (Tiết kiệm {value})",
       redeemPointsTitle: "Dùng {pointsToRedeem} / {availablePoints} Điểm",
       redeemPointsSavings: "Bạn sẽ tiết kiệm {amount}",
       toggleUsePointsAriaLabel: "Bật/tắt sử dụng điểm thưởng"

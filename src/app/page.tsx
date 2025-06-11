@@ -2,7 +2,7 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -99,6 +99,20 @@ const mockUnavailableVouchersSheet: VoucherInterface[] = [
   },
 ];
 
+const calculateShippingVoucherDiscount = (checkoutTotal: number): number => {
+  if (checkoutTotal < 1000000) {
+    return 0;
+  } else if (checkoutTotal >= 1000000 && checkoutTotal < 2000000) {
+    return 100000;
+  } else if (checkoutTotal >= 2000000 && checkoutTotal < 5000000) {
+    return 150000;
+  } else if (checkoutTotal >= 5000000 && checkoutTotal < 8000000) {
+    return 300000;
+  } else if (checkoutTotal >= 8000000) {
+    return 450000;
+  }
+  return 0;
+};
 
 const BrandCartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -128,9 +142,8 @@ const BrandCartPage = () => {
   const [recentlyViewedItems, setRecentlyViewedItems] = useState<Product[]>([]);
 
   useEffect(() => {
-    // Initialize cart items on client mount
     const initialCartItems = mockShops.flatMap(shop =>
-      shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random()}`, quantity: 1, selected: false }))
+      shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random().toString(36).substring(2,7)}`, quantity: 1, selected: false }))
     );
     setCartItems(initialCartItems);
 
@@ -210,8 +223,6 @@ const BrandCartPage = () => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.cartItemId === cartItemId) {
-          // Create a new unique cartItemId if variant changes, as it's a different "line item" conceptually
-          // However, for this app, we'll keep the cartItemId stable and just update variant details.
           return {
             ...item,
             variant: newVariantData.name,
@@ -424,6 +435,10 @@ const BrandCartPage = () => {
     }
   };
 
+  const shippingDiscount = useMemo(() => {
+    return calculateShippingVoucherDiscount(totalAmount);
+  }, [totalAmount]);
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-20 bg-card shadow-sm border-b h-14">
@@ -601,8 +616,16 @@ const BrandCartPage = () => {
 
               <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
                 <div className="flex items-center">
-                  <Truck className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span className="text-sm text-foreground truncate">{t('cart.vouchersAndShipping.shippingDiscountLabel', { amount: "700.000" })}</span>
+                  <Truck className={`w-5 h-5 mr-3 flex-shrink-0 ${shippingDiscount > 0 ? 'text-green-500' : 'text-muted-foreground'}`} />
+                  {shippingDiscount > 0 ? (
+                    <span className="text-sm text-foreground truncate">
+                      {t('cart.vouchersAndShipping.shippingDiscountApplied', { amount: formatCurrency(shippingDiscount) })}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground truncate">
+                      {t('cart.vouchersAndShipping.shippingDiscountInfo')}
+                    </span>
+                  )}
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </div>

@@ -20,7 +20,8 @@ const enTranslations = {
     },
     vouchersAndShipping: {
       voucherLabel: "Voucher up to {amount}₫",
-      shippingDiscountLabel: "Save {amount}₫ on shipping for minimum order..."
+      shippingDiscountApplied: "Shipping discount: {amount}",
+      shippingDiscountInfo: "Increase order value for shipping discount"
     },
     sheet: {
       productInfoTitle: "Product Information",
@@ -132,7 +133,6 @@ const enTranslations = {
       totalLabel: "Total:",
       savings: "Save {amount}",
       orderButton: "Place Order",
-      usePointsToggleLabel: "Use {points} points (Save {value})",
       redeemPointsTitle: "Use {pointsToRedeem} of {availablePoints} Points",
       redeemPointsSavings: "You'll save {amount}",
       toggleUsePointsAriaLabel: "Toggle to use loyalty points"
