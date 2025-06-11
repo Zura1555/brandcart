@@ -2,89 +2,54 @@
 "use client";
 
 import React, { Suspense } from 'react';
-import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ChevronRight } from 'lucide-react';
 
-interface BreadcrumbItemDef {
-  href: string;
-  labelKey: string;
-  dynamicLabelParams?: (pathname: string, searchParams: URLSearchParams, totalCartItems?: number) => Record<string, string | number> | undefined;
-}
+// Define the stages for the progress indicator
+const STAGES_CONFIG = [
+  { key: 'cart', labelKey: 'breadcrumbs.cartSimple', paths: ['/'] },
+  { key: 'checkout', labelKey: 'breadcrumbs.checkout', paths: ['/checkout', '/select-address', '/add-address', '/select-voucher'] },
+  { key: 'complete', labelKey: 'breadcrumbs.payment', paths: ['/payment'] },
+];
 
 interface BreadcrumbsMainProps {
-  totalCartItems?: number; 
+  // totalCartItems prop is no longer needed for this fixed-stage design
 }
 
-const BreadcrumbsInner: React.FC<BreadcrumbsMainProps> = ({ totalCartItems }) => {
+const BreadcrumbsInner: React.FC<BreadcrumbsMainProps> = () => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { t } = useLanguage();
 
-  const getBreadcrumbItems = (): BreadcrumbItemDef[] => {
-    const items: BreadcrumbItemDef[] = [];
-
-    // Logic for the Cart breadcrumb item
-    // Always use 'breadcrumbs.cartSimple' for the cart link/title, which does not include item count.
-    items.push({
-      href: '/',
-      labelKey: 'breadcrumbs.cartSimple',
-      // dynamicLabelParams is no longer needed for count here, as 'cartSimple' doesn't use it.
-    });
-
-    if (pathname.startsWith('/checkout') || pathname.startsWith('/select-address') || pathname.startsWith('/add-address') || pathname.startsWith('/select-voucher') || pathname.startsWith('/payment')) {
-      items.push({ href: '/checkout', labelKey: 'breadcrumbs.checkout' });
+  const determineActiveStageKey = (): string => {
+    for (const stage of STAGES_CONFIG) {
+      if (stage.key === 'cart' && pathname === '/') {
+        return stage.key;
+      }
+      if (stage.paths.some(p => p !== '/' && pathname.startsWith(p))) {
+        return stage.key;
+      }
     }
-
-    if (pathname.startsWith('/select-address') || pathname.startsWith('/add-address')) {
-      items.push({ href: '/select-address', labelKey: 'breadcrumbs.selectAddress' });
-    }
-    if (pathname.startsWith('/add-address')) {
-      const isEdit = !!searchParams.get('editId');
-      items.push({ href: pathname, labelKey: isEdit ? 'breadcrumbs.editAddress' : 'breadcrumbs.addAddress' });
-    }
-
-    if (pathname.startsWith('/select-voucher')) {
-      items.push({ href: '/select-voucher', labelKey: 'breadcrumbs.selectVoucher' });
-    }
-    
-    if (pathname.startsWith('/payment')) { 
-        items.push({ href: '/payment', labelKey: 'breadcrumbs.payment' });
-    }
-
-    return items;
+    // Default to 'cart' if no specific match, though with current routes, one should always match.
+    if (pathname === '/') return 'cart'; 
+    return 'cart'; // Fallback, should ideally not be reached if paths are comprehensive
   };
 
-  const breadcrumbItems = getBreadcrumbItems();
+  const activeStageKey = determineActiveStageKey();
 
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center text-sm overflow-x-auto whitespace-nowrap py-1">
-      {breadcrumbItems.map((item, index) => {
-        // Determine if the current breadcrumb item represents the current page.
-        const isCurrentPage = item.href === pathname || (pathname.startsWith(item.href) && (item.href === '/add-address' || item.href === '/payment'));
+    <nav aria-label="Progress" className="flex items-center text-sm overflow-x-auto whitespace-nowrap py-1">
+      {STAGES_CONFIG.map((stage, index) => {
+        const isActive = stage.key === activeStageKey;
+        const label = t(stage.labelKey);
 
-
-        let label = t(item.labelKey);
-        if (item.dynamicLabelParams) {
-          // Pass the current page's pathname and searchParams, and totalCartItems
-          const params = item.dynamicLabelParams(pathname, searchParams, totalCartItems);
-          if (params) {
-            label = t(item.labelKey, params);
-          }
-        }
-        
         return (
-          <React.Fragment key={item.href + index}>
-            {index > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground mx-1 flex-shrink-0" />}
-            {isCurrentPage ? (
-              <span className="font-semibold text-foreground">
-                {label}
-              </span>
-            ) : (
-              <Link href={item.href} className="text-muted-foreground hover:text-foreground">
-                {label}
-              </Link>
+          <React.Fragment key={stage.key}>
+            <span className={isActive ? "font-semibold text-foreground" : "text-muted-foreground"}>
+              {label}
+            </span>
+            {index < STAGES_CONFIG.length - 1 && (
+              <ChevronRight className="w-4 h-4 text-muted-foreground mx-1 flex-shrink-0" />
             )}
           </React.Fragment>
         );
@@ -102,4 +67,3 @@ const Breadcrumbs: React.FC<BreadcrumbsMainProps> = (props) => {
 };
 
 export default Breadcrumbs;
-

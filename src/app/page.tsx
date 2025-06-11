@@ -142,6 +142,7 @@ const BrandCartPage = () => {
   const [recentlyViewedItems, setRecentlyViewedItems] = useState<Product[]>([]);
 
   useEffect(() => {
+    // Initialize cartItems only on the client-side to avoid hydration issues with Date.now() and Math.random()
     const initialCartItems = mockShops.flatMap(shop =>
       shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random().toString(36).substring(2,7)}`, quantity: 1, selected: false }))
     );
@@ -258,7 +259,6 @@ const BrandCartPage = () => {
     return cartItems.filter(item => item.selected).length;
   }, [cartItems]);
 
-  const totalCartProductTypesCount = cartItems.length;
 
   const handleCheckout = () => {
     const selectedCartItems = cartItems.filter(item => item.selected);
@@ -447,7 +447,7 @@ const BrandCartPage = () => {
             <ChevronLeft className="w-6 h-6" />
           </Button>
           <div className="flex-grow flex justify-center items-center min-w-0 px-2">
-            <Breadcrumbs totalCartItems={totalCartProductTypesCount} />
+            <Breadcrumbs />
           </div>
           <div className="flex items-center">
             <LanguageSwitcher />
