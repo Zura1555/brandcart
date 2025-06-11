@@ -21,7 +21,7 @@ const enTranslations = {
     vouchersAndShipping: {
       voucherLabel: "Voucher up to {amount}₫",
       shippingDiscountApplied: "Shipping discount: {amount}",
-      shippingDiscountInfo: "Increase order value for shipping discount"
+      noPromotionsAvailable: "No shipping promotions currently available."
     },
     sheet: {
       productInfoTitle: "Product Information",

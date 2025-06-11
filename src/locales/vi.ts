@@ -21,7 +21,7 @@ const viTranslations = {
     vouchersAndShipping: {
       voucherLabel: "Voucher giảm đến {amount}₫",
       shippingDiscountApplied: "Giảm giá vận chuyển: {amount}",
-      shippingDiscountInfo: "Tăng giá trị đơn hàng để được giảm giá vận chuyển"
+      noPromotionsAvailable: "Hiện không có khuyến mãi vận chuyển."
     },
     sheet: {
       productInfoTitle: "Thông tin sản phẩm",

@@ -114,6 +114,29 @@ const calculateShippingVoucherDiscount = (checkoutTotal: number): number => {
   return 0;
 };
 
+const formatVndNumber = (amount: number): string => {
+  return amount.toLocaleString('vi-VN');
+};
+
+const getShippingVoucherPromotionMessage = (currentCheckoutTotal: number): string => {
+  const formatVnd = formatVndNumber;
+
+  if (currentCheckoutTotal < 1000000) {
+    return `Giảm ${formatVnd(100000)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(1000000)}đ`;
+  }
+  if (currentCheckoutTotal < 2000000) {
+    return `Giảm ${formatVnd(150000)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(2000000)}đ`;
+  }
+  if (currentCheckoutTotal < 5000000) {
+    return `Giảm ${formatVnd(300000)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(5000000)}đ`;
+  }
+  if (currentCheckoutTotal < 8000000) {
+    return `Giảm ${formatVnd(450000)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(8000000)}đ`;
+  }
+  return ""; // Max tier reached or exceeded
+};
+
+
 const BrandCartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const router = useRouter();
@@ -439,6 +462,11 @@ const BrandCartPage = () => {
     return calculateShippingVoucherDiscount(totalAmount);
   }, [totalAmount]);
 
+  const shippingPromotionMessage = useMemo(() => {
+    return getShippingVoucherPromotionMessage(totalAmount);
+  }, [totalAmount]);
+
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-20 bg-card shadow-sm border-b h-14">
@@ -621,9 +649,13 @@ const BrandCartPage = () => {
                     <span className="text-sm text-foreground truncate">
                       {t('cart.vouchersAndShipping.shippingDiscountApplied', { amount: formatCurrency(shippingDiscount) })}
                     </span>
+                  ) : shippingPromotionMessage ? (
+                    <span className="text-sm text-muted-foreground truncate">
+                      {shippingPromotionMessage}
+                    </span>
                   ) : (
                     <span className="text-sm text-muted-foreground truncate">
-                      {t('cart.vouchersAndShipping.shippingDiscountInfo')}
+                       {t('cart.vouchersAndShipping.noPromotionsAvailable')}
                     </span>
                   )}
                 </div>
