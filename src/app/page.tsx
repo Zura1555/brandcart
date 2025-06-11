@@ -9,16 +9,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle as SheetTitleComponent, SheetFooter } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight, XCircle, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
-import type { CartItem, Shop, SimpleVariant } from '@/interfaces';
+import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight, XCircle, CheckCircle2, Clock, AlertTriangle, ShoppingBag } from 'lucide-react';
+import type { CartItem, Shop, SimpleVariant, Product } from '@/interfaces';
 import { mockShops } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
+import RecentlyViewedItemCard from '@/components/cart/RecentlyViewedItemCard';
 import { useToast } from "@/hooks/use-toast";
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -102,7 +103,7 @@ const mockUnavailableVouchersSheet: VoucherInterface[] = [
 const BrandCartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>(() =>
     mockShops.flatMap(shop =>
-      shop.products.map(p => ({ ...p, quantity: 1, selected: false }))
+      shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random()}`, quantity: 1, selected: false }))
     )
   );
   const router = useRouter();
@@ -128,6 +129,23 @@ const BrandCartPage = () => {
 
   const [finalAppliedVoucherSummary, setFinalAppliedVoucherSummary] = useState<string | null>(null);
 
+  const [recentlyViewedItems, setRecentlyViewedItems] = useState<Product[]>([]);
+
+  useEffect(() => {
+    // Simulate fetching recently viewed items.
+    const allProducts = mockShops.flatMap(shop => shop.products);
+    const sampleRecentItems: Product[] = [
+      allProducts.find(p => p.id === 'puma1'), // Balo
+      allProducts.find(p => p.id === 'havaianas2'), // Sandals
+      allProducts.find(p => p.id === 'mlb1'), // Shirt
+      allProducts.find(p => p.id === 'puma3'), // Cap
+      allProducts.find(p => p.id === 'havaianas1'), // Flipflops
+      allProducts.find(p => p.id === 'mlb2'), // Shorts
+    ].filter(Boolean) as Product[]; 
+
+    setRecentlyViewedItems(sampleRecentItems.slice(0, 6));
+  }, []);
+
 
   useEffect(() => {
     const count = sheetAvailableVouchers.filter(v => v.isSelected).length;
@@ -151,15 +169,15 @@ const BrandCartPage = () => {
     );
   };
 
-  const handleToggleItemSelect = (itemId: string, checked: boolean) => {
+  const handleToggleItemSelect = (cartItemId: string, checked: boolean) => {
     setCartItems(prevItems =>
       prevItems.map(item =>
-        item.id === itemId ? { ...item, selected: checked } : item
+        item.cartItemId === cartItemId ? { ...item, selected: checked } : item
       )
     );
   };
 
-  const handleQuantityChange = (itemId: string, newQuantity: number) => {
+  const handleQuantityChange = (cartItemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
     if (newQuantity > 99) {
       toast({
@@ -171,14 +189,14 @@ const BrandCartPage = () => {
     }
     setCartItems(prevItems =>
       prevItems.map(item =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
+        item.cartItemId === cartItemId ? { ...item, quantity: newQuantity } : item
       )
     );
   };
 
-  const handleDeleteItem = (itemId: string) => {
-    const itemToRemove = cartItems.find(item => item.id === itemId);
-    setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
+  const handleDeleteItem = (cartItemId: string) => {
+    const itemToRemove = cartItems.find(item => item.cartItemId === cartItemId);
+    setCartItems(prevItems => prevItems.filter(item => item.cartItemId !== cartItemId));
     if (itemToRemove) {
       toast({
         title: t('toast.itemRemovedTitleSingle', { itemName: itemToRemove.name }),
@@ -186,10 +204,12 @@ const BrandCartPage = () => {
     }
   };
   
-  const handleVariantChange = (itemId: string, newVariantData: SimpleVariant) => {
+  const handleVariantChange = (cartItemId: string, newVariantData: SimpleVariant) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
-        if (item.id === itemId) {
+        if (item.cartItemId === cartItemId) {
+          // Create a new unique cartItemId if variant changes, as it's a different "line item" conceptually
+          // However, for this app, we'll keep the cartItemId stable and just update variant details.
           return {
             ...item,
             variant: newVariantData.name,
@@ -262,13 +282,13 @@ const BrandCartPage = () => {
     setItemsSelectedForCleanup(new Set());
   };
 
-  const toggleItemForCleanup = (itemId: string) => {
+  const toggleItemForCleanup = (cartItemId: string) => {
     setItemsSelectedForCleanup(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(itemId)) {
-        newSet.delete(itemId);
+      if (newSet.has(cartItemId)) {
+        newSet.delete(cartItemId);
       } else {
-        newSet.add(itemId);
+        newSet.add(cartItemId);
       }
       return newSet;
     });
@@ -276,7 +296,7 @@ const BrandCartPage = () => {
 
   const confirmCleanup = () => {
     const itemsToRemoveCount = itemsSelectedForCleanup.size;
-    setCartItems(prevItems => prevItems.filter(item => !itemsSelectedForCleanup.has(item.id)));
+    setCartItems(prevItems => prevItems.filter(item => !itemsSelectedForCleanup.has(item.cartItemId)));
     closeCleanupDialog();
     if (itemsToRemoveCount > 0) {
       toast({
@@ -378,6 +398,30 @@ const BrandCartPage = () => {
     setIsVoucherSheetOpen(false);
   };
 
+  const handleAddToCartRecentlyViewed = (itemToAdd: Product) => {
+    const existingCartItem = cartItems.find(ci => ci.id === itemToAdd.id);
+
+    if (existingCartItem) {
+      handleQuantityChange(existingCartItem.cartItemId, existingCartItem.quantity + 1);
+      toast({
+        title: t('toast.itemQuantityIncreased.title', { itemName: itemToAdd.name }),
+        description: t('toast.itemQuantityIncreased.description')
+      });
+    } else {
+      const newCartItem: CartItem = {
+        ...itemToAdd,
+        cartItemId: `${itemToAdd.id}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        quantity: 1,
+        selected: false, 
+      };
+      setCartItems(prevItems => [...prevItems, newCartItem]);
+      toast({
+        title: t('toast.itemAddedToCart.title', { itemName: itemToAdd.name }),
+        description: t('toast.itemAddedToCart.description')
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-20 bg-card shadow-sm border-b h-14">
@@ -397,7 +441,7 @@ const BrandCartPage = () => {
       <main className="flex-grow pt-14 pb-20">
         <div className="container mx-auto px-0 sm:px-2 py-4 sm:py-6 space-y-4 sm:space-y-6">
           {cartItems.length === 0 ? (
-             <div className="text-center py-10">
+             <div className="text-center py-10 px-4">
                 <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-xl font-headline text-muted-foreground">{t('cart.emptyCartTitle')}</p>
                 <p className="font-body text-muted-foreground">{t('cart.emptyCartMessage')}</p>
@@ -562,6 +606,20 @@ const BrandCartPage = () => {
               </div>
             </Card>
           )}
+
+          {recentlyViewedItems.length > 0 && (
+            <div className="pt-2">
+              <h2 className="text-lg font-semibold text-foreground mb-3">{t('cart.recentlyViewedTitle')}</h2>
+              <ScrollArea className="w-full whitespace-nowrap" orientation="horizontal">
+                <div className="flex space-x-3 sm:space-x-4 pb-3">
+                  {recentlyViewedItems.map(item => (
+                    <RecentlyViewedItemCard key={`recent-${item.id}`} item={item} onAddToCart={handleAddToCartRecentlyViewed} />
+                  ))}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </div>
+          )}
         </div>
       </main>
 
@@ -608,14 +666,14 @@ const BrandCartPage = () => {
           <ScrollArea className="max-h-[60vh] pr-1">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 py-4">
               {cartItems.length > 0 ? cartItems.map(item => (
-                <div key={`cleanup-${item.id}`} className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 border border-transparent has-[:checked]:border-destructive/50 has-[:checked]:bg-destructive/5">
+                <div key={`cleanup-${item.cartItemId}`} className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 border border-transparent has-[:checked]:border-destructive/50 has-[:checked]:bg-destructive/5">
                   <Checkbox
-                    id={`cleanup-cb-${item.id}`}
-                    checked={itemsSelectedForCleanup.has(item.id)}
-                    onCheckedChange={() => toggleItemForCleanup(item.id)}
+                    id={`cleanup-cb-${item.cartItemId}`}
+                    checked={itemsSelectedForCleanup.has(item.cartItemId)}
+                    onCheckedChange={() => toggleItemForCleanup(item.cartItemId)}
                     className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive self-end mb-1"
                   />
-                  <label htmlFor={`cleanup-cb-${item.id}`} className="flex flex-col items-center space-y-1 cursor-pointer w-full">
+                  <label htmlFor={`cleanup-cb-${item.cartItemId}`} className="flex flex-col items-center space-y-1 cursor-pointer w-full">
                     <Image 
                       src={item.imageUrl} 
                       alt={item.name} 

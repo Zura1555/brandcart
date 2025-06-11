@@ -17,7 +17,7 @@ export interface Product {
   brand: string;
   imageUrl: string;
   dataAiHint?: string;
-  productCode?: string; // Added product code
+  productCode?: string;
   variant?: string; // Name of the currently selected variant for display
   stock?: number;
   discountDescription?: string;

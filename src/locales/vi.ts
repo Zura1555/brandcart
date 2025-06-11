@@ -10,6 +10,8 @@ const viTranslations = {
     emptyCartMessage: "Thêm sản phẩm để bắt đầu mua sắm!",
     unneededItemsTitle: "Các sản phẩm bạn có thể chưa cần",
     removeButton: "Xóa bớt",
+    recentlyViewedTitle: "Xem Gần Đây",
+    addToCartLabel: "Thêm {itemName} vào giỏ",
     dialog: {
       removeUnneededTitle: "Xóa sản phẩm không cần thiết",
       removeUnneededDescription: "Chọn các sản phẩm bạn muốn xóa khỏi giỏ hàng. Nhấn \"Xóa đã chọn\" khi hoàn tất.",
@@ -45,6 +47,14 @@ const viTranslations = {
     itemRemovedTitleSingle: "Đã xóa {itemName}",
     limitReachedTitle: "Đạt giới hạn",
     limitReachedDescription: "Số lượng tối đa cho mỗi sản phẩm là 99.",
+    itemAddedToCart: {
+        title: "Đã thêm {itemName}",
+        description: "Sản phẩm đã được thêm vào giỏ hàng của bạn."
+    },
+    itemQuantityIncreased: {
+        title: "Đã cập nhật số lượng {itemName}",
+        description: "Đã tăng số lượng sản phẩm trong giỏ hàng."
+    },
     address: {
         saved: {
             title: "Địa chỉ đã được lưu",
@@ -254,4 +264,3 @@ const viTranslations = {
 
 export default viTranslations;
 
-    

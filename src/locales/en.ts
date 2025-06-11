@@ -10,6 +10,8 @@ const enTranslations = {
     emptyCartMessage: "Add some products to get started!",
     unneededItemsTitle: "Items you might not need",
     removeButton: "Remove",
+    recentlyViewedTitle: "Recently Viewed",
+    addToCartLabel: "Add {itemName} to cart",
     dialog: {
       removeUnneededTitle: "Remove Unneeded Items",
       removeUnneededDescription: "Select the items you want to remove from your cart. Click \"Remove Selected\" when you're done.",
@@ -45,6 +47,14 @@ const enTranslations = {
     itemRemovedTitleSingle: "{itemName} removed",
     limitReachedTitle: "Limit Reached",
     limitReachedDescription: "Maximum quantity per item is 99.",
+    itemAddedToCart: {
+        title: "{itemName} added",
+        description: "Item successfully added to your cart."
+    },
+    itemQuantityIncreased: {
+        title: "{itemName} quantity updated",
+        description: "Item quantity increased in your cart."
+    },
     address: {
         saved: {
             title: "Address Saved",
@@ -254,4 +264,3 @@ const enTranslations = {
 
 export default enTranslations;
 
-    
