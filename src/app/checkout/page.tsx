@@ -26,10 +26,15 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from "@/lib/utils";
 
 const HEADER_HEIGHT = 'h-14'; 
-const FOOTER_HEIGHT = 'h-28'; 
+const FOOTER_HEIGHT = 'h-44'; 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
+
+const AVAILABLE_LOYALTY_POINTS = 500;
+const LOYALTY_POINTS_TO_REDEEM = 200;
+const LOYALTY_POINTS_DISCOUNT_VALUE = 20000;
+
 
 interface DisplayShop {
   name: string;
@@ -48,7 +53,7 @@ const staticProductPlaceholder = {
   imageAiHint: "beaded bracelet black white",
   name: "Vòng tay mèo đá quý",
   variation: "Đen, Freesize",
-  productCode: "VT001",
+  productCode: "SP001",
   price: 20900,
   originalPrice: 27500,
   quantity: 1,
@@ -71,6 +76,7 @@ const CheckoutPage = () => {
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
   const [shopMessage, setShopMessage] = useState<string>('');
+  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
 
   // E-Invoice state
   const [eInvoiceType, setEInvoiceType] = useState<'personal' | 'company'>('personal');
@@ -87,7 +93,7 @@ const CheckoutPage = () => {
 
   const cleanVariantNameForCheckout = useCallback((name: string | undefined): string => {
     if (!name) return '';
-    return name.replace(/\s*\(\+\d+\)\s*$/, ''); // Removes " (+X)" from variant name if present
+    return name.replace(/\s*\(\+\d+\)\s*$/, ''); 
   }, []);
 
   const parseVariantNameForCheckout = useCallback((name: string | undefined): { color: string | null, size: string | null } => {
@@ -98,7 +104,7 @@ const CheckoutPage = () => {
     let color: string | null = null;
     let size: string | null = null;
 
-    if (parts.length === 1) { // Only one part, could be color or size
+    if (parts.length === 1) { 
         const part = parts[0];
         const commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', 'Freesize'];
         if (commonSizes.some(s => part.toUpperCase() === s.toUpperCase())) {
@@ -106,7 +112,7 @@ const CheckoutPage = () => {
         } else {
             color = part;
         }
-    } else if (parts.length >= 2) { // Two or more parts, assume first is color, second is size
+    } else if (parts.length >= 2) { 
         color = parts[0] || null;
         size = parts[1] || null;
     }
@@ -194,7 +200,7 @@ const CheckoutPage = () => {
       setCurrentShippingAddress(userAddresses.find(addr => addr.isDefault) || (userAddresses.length > 0 ? userAddresses[0] : null));
     }
     setAddressLoaded(true);
-  }, [parseVariantNameForCheckout]); // Added parseVariantNameForCheckout to dependencies
+  }, [parseVariantNameForCheckout]); 
 
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')}₫`;
@@ -214,7 +220,14 @@ const CheckoutPage = () => {
     return 1;
   }, [dynamicDisplayShops]);
 
-  const displayTotalAmount = initialTotalAmount;
+  const displayTotalAmount = useMemo(() => {
+    let total = initialTotalAmount;
+    if (useLoyaltyPoints) {
+      total -= LOYALTY_POINTS_DISCOUNT_VALUE;
+    }
+    return Math.max(0, total); // Ensure total doesn't go below zero
+  }, [initialTotalAmount, useLoyaltyPoints]);
+  
   const displaySavings = initialSavings;
 
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
@@ -279,7 +292,7 @@ const CheckoutPage = () => {
         </div>
       </header>
 
-      <main className={`flex-grow overflow-y-auto pt-14 pb-28`}>
+      <main className={`flex-grow overflow-y-auto pt-14 pb-44`}>
         <ScrollArea className="h-full">
           <div className="container mx-auto px-2 sm:px-4 py-3 space-y-3">
             {addressLoaded ? (
@@ -649,25 +662,43 @@ const CheckoutPage = () => {
       </main>
 
       <footer className={`fixed bottom-0 left-0 right-0 z-30 bg-card border-t ${FOOTER_HEIGHT}`}>
-        <div className="container mx-auto px-4 h-full flex items-center justify-between">
-          <div className="flex-shrink">
-            <p className="text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
-            <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
-            {displaySavings > 0 && (
-              <p className="text-xs text-green-600">
-                {t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}
+        <div className="container mx-auto h-full flex flex-col items-stretch">
+          <div className="px-4 py-3 border-b border-border flex justify-between items-center">
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {t('checkout.footer.redeemPointsTitle', { pointsToRedeem: LOYALTY_POINTS_TO_REDEEM, availablePoints: AVAILABLE_LOYALTY_POINTS })}
               </p>
-            )}
+              <p className="text-xs text-green-600">
+                {t('checkout.footer.redeemPointsSavings', { amount: formatCurrency(LOYALTY_POINTS_DISCOUNT_VALUE) })}
+              </p>
+            </div>
+            <Switch
+              checked={useLoyaltyPoints}
+              onCheckedChange={setUseLoyaltyPoints}
+              aria-label={t('checkout.footer.toggleUsePointsAriaLabel')}
+            />
           </div>
-          
-          <Button
-            size="lg"
-            className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px] ml-4 flex-shrink-0"
-            onClick={() => router.push('/payment')}
-            disabled={!currentShippingAddress}
-          >
-            {t('checkout.footer.orderButton')}
-          </Button>
+
+          <div className="px-4 pt-3 pb-4 flex-grow flex items-end justify-between">
+            <div className="flex-shrink">
+              <p className="text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
+              <p className="text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
+              {displaySavings > 0 && (
+                <p className="text-xs text-green-600">
+                  {t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}
+                </p>
+              )}
+            </div>
+            
+            <Button
+              size="lg"
+              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[140px] ml-4 flex-shrink-0"
+              onClick={() => router.push('/payment')}
+              disabled={!currentShippingAddress}
+            >
+              {t('checkout.footer.orderButton')}
+            </Button>
+          </div>
         </div>
       </footer>
     </div>
@@ -680,6 +711,7 @@ export default CheckoutPage;
     
 
     
+
 
 
 

@@ -133,6 +133,9 @@ const viTranslations = {
       savings: "Tiết kiệm {amount}",
       orderButton: "Đặt hàng",
       usePointsToggleLabel: "Dùng {points} điểm (Tiết kiệm {value})",
+      redeemPointsTitle: "Dùng {pointsToRedeem} / {availablePoints} Điểm",
+      redeemPointsSavings: "Bạn sẽ tiết kiệm {amount}",
+      toggleUsePointsAriaLabel: "Bật/tắt sử dụng điểm thưởng"
     },
   },
   addAddress: {

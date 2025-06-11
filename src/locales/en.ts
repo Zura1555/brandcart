@@ -133,6 +133,9 @@ const enTranslations = {
       savings: "Save {amount}",
       orderButton: "Place Order",
       usePointsToggleLabel: "Use {points} points (Save {value})",
+      redeemPointsTitle: "Use {pointsToRedeem} of {availablePoints} Points",
+      redeemPointsSavings: "You'll save {amount}",
+      toggleUsePointsAriaLabel: "Toggle to use loyalty points"
     },
   },
   addAddress: {
