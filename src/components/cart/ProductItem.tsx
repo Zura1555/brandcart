@@ -228,12 +228,16 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   
   const canConfirmSelection = !!selectedVariantInSheet && (selectedVariantInSheet.stock === undefined || selectedVariantInSheet.stock > 0);
 
-  const { color: currentItemColor, size: currentItemSize } = parseVariantName(item.variant);
-  const badgeParts = [];
-  if (currentItemColor) badgeParts.push(currentItemColor);
-  if (currentItemSize) badgeParts.push(currentItemSize);
-  if (item.productCode) badgeParts.push(item.productCode);
-  const badgeDisplayString = badgeParts.join(' / ');
+  const badgeDisplayString = useMemo(() => {
+    const { color: currentItemColor, size: currentItemSize } = parseVariantName(item.variant);
+    if (currentItemColor || currentItemSize || item.productCode) {
+      const colorPart = currentItemColor || "N/A";
+      const sizePart = currentItemSize || "N/A";
+      const codePart = item.productCode || "N/A";
+      return `${colorPart} / ${sizePart} / ${codePart}`;
+    }
+    return "";
+  }, [item.variant, item.productCode, parseVariantName]);
 
 
   let stockStatusTextInSheet = '';
@@ -253,7 +257,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   }
 
   let itemCardStockStatusText = '';
-  let itemCardStockStatusClasses = 'text-xs mt-1 text-right ';
+  let itemCardStockStatusClasses = 'text-xs mt-1 '; // Removed text-right
 
   if (item.stock !== undefined) {
     if (item.stock > 10) {
@@ -268,6 +272,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     }
   }
 
+  const canOpenVariantSheet = hasAvailableVariants;
 
   return (
     <div className="relative bg-card overflow-hidden">
@@ -313,9 +318,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           />
           <div className="flex-grow min-w-0">
             <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
-
-            {badgeDisplayString && (
-              hasAvailableVariants ? (
+            
+            {canOpenVariantSheet ? (
                 <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
                   <SheetTrigger asChild>
                     <button type="button" className="text-left block hover:opacity-80 transition-opacity focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
@@ -323,7 +327,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                         variant="outline"
                         className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center cursor-pointer"
                       >
-                        <span>{badgeDisplayString}</span>
+                        {badgeDisplayString ? <span>{badgeDisplayString}</span> : <span className="italic text-white/80">{t('cart.sheet.selectVariantPlaceholder')}</span>}
                         <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
                       </Badge>
                     </button>
@@ -446,13 +450,14 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                   </SheetContent>
                 </Sheet>
               ) : (
-                <Badge
-                  variant="outline"
-                  className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center"
-                >
-                  <span>{badgeDisplayString}</span>
-                </Badge>
-              )
+                badgeDisplayString && (
+                  <Badge
+                    variant="outline"
+                    className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center"
+                  >
+                    <span>{badgeDisplayString}</span>
+                  </Badge>
+                )
             )}
 
 
@@ -468,8 +473,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                 <span>{item.discountDescription}</span>
               </div>
             )}
+             {/* Stock status display moved to under QuantitySelector */}
           </div>
-          <div className="shrink-0 flex flex-col items-end">
+          <div className="shrink-0 flex flex-col items-end space-y-1"> {/* Added space-y-1 */}
             <QuantitySelector
               quantity={item.quantity}
               onIncrement={() => onQuantityChange(item.id, item.quantity + 1)}

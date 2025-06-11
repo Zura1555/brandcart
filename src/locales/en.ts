@@ -33,7 +33,8 @@ const enTranslations = {
         inStock: "In stock",
         remaining: "Remaining stock: {count}",
         outOfStock: "Out of stock"
-      }
+      },
+      selectVariantPlaceholder: "Select variant"
     }
   },
   toast: {

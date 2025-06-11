@@ -33,7 +33,8 @@ const viTranslations = {
         inStock: "Còn hàng",
         remaining: "Còn lại: {count}",
         outOfStock: "Hết hàng"
-      }
+      },
+      selectVariantPlaceholder: "Chọn phân loại"
     }
   },
   toast: {
