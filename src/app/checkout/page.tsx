@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
@@ -22,15 +23,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from "@/lib/utils";
 
 const HEADER_HEIGHT = 'h-14'; 
 const FOOTER_HEIGHT = 'h-28'; 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
-
-const LOYALTY_POINTS_TO_REDEEM = 200;
-const LOYALTY_POINTS_DISCOUNT_VALUE = 20000;
 
 interface DisplayShop {
   name: string;
@@ -70,7 +69,7 @@ const CheckoutPage = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
-  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
+  const [shopMessage, setShopMessage] = useState<string>('');
 
   // E-Invoice state
   const [eInvoiceType, setEInvoiceType] = useState<'personal' | 'company'>('personal');
@@ -184,14 +183,7 @@ const CheckoutPage = () => {
     return 1;
   }, [dynamicDisplayShops]);
 
-  const displayTotalAmount = useMemo(() => {
-    let currentTotal = initialTotalAmount;
-    if (useLoyaltyPoints) {
-      currentTotal -= LOYALTY_POINTS_DISCOUNT_VALUE;
-    }
-    return Math.max(0, currentTotal);
-  }, [initialTotalAmount, useLoyaltyPoints]);
-
+  const displayTotalAmount = initialTotalAmount;
   const displaySavings = initialSavings;
 
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
@@ -485,17 +477,33 @@ const CheckoutPage = () => {
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
+                
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="shop-message">
+                    <AccordionTrigger className="p-4 flex items-center justify-between hover:bg-muted/50 hover:no-underline w-full text-sm text-left font-normal data-[state=open]:pb-2 data-[state=open]:border-b">
+                      <div className="flex items-center w-full justify-between">
+                        <div className="flex items-center">
+                            <MessageCircle className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
+                            <span className="text-sm text-foreground">{t('checkout.messageToShop')}</span>
+                        </div>
+                        <div className="flex items-center">
+                            <span className={cn("text-sm mr-1 truncate max-w-[100px] xs:max-w-[150px] sm:max-w-xs", shopMessage ? "text-foreground" : "text-muted-foreground")}>
+                              {shopMessage || t('checkout.messageToShopPlaceholder')}
+                            </span>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4 pt-0">
+                      <Textarea
+                        placeholder={t('checkout.messageToShopPlaceholder')}
+                        value={shopMessage}
+                        onChange={(e) => setShopMessage(e.target.value)}
+                        className="min-h-[80px] text-sm"
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
 
-                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50">
-                  <div className="flex items-center">
-                    <MessageCircle className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">{t('checkout.messageToShop')}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-sm text-muted-foreground">{t('checkout.messageToShopPlaceholder')}</span>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground ml-2 flex-shrink-0" />
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
@@ -601,17 +609,6 @@ const CheckoutPage = () => {
                 {t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}
               </p>
             )}
-            <div className="mt-1 flex items-center justify-start space-x-2">
-              <Label htmlFor="loyalty-points-switch" className="text-xs text-muted-foreground whitespace-nowrap">
-                {t('checkout.footer.usePointsToggleLabel', { points: LOYALTY_POINTS_TO_REDEEM, value: formatCurrency(LOYALTY_POINTS_DISCOUNT_VALUE) })}
-              </Label>
-              <Switch
-                id="loyalty-points-switch"
-                checked={useLoyaltyPoints}
-                onCheckedChange={setUseLoyaltyPoints}
-                className="scale-75"
-              />
-            </div>
           </div>
           
           <Button
@@ -634,5 +631,6 @@ export default CheckoutPage;
     
 
     
+
 
 
