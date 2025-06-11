@@ -237,7 +237,7 @@ const CheckoutPage = () => {
   const paymentMethods = [
     { id: 'payoo', name: 'Payoo', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
     { id: 'vnpay', name: 'VNPay', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR.png', iconAiHint: 'VNPay QR logo', details: null },
-    { id: 'momo', name: 'Momo', iconUrl: 'https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png', iconAiHint: 'Momo logo', details: null },
+    { id: 'momo', name: 'Momo', iconUrl: 'https://file.hstatic.net/1000284478/file/momo-45_eee48d6f0f9e41f1bd2c5f06ab4214a2.svg', iconAiHint: 'Momo logo', details: null },
     { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg', iconAiHint: 'Apple Pay logo', details: null },
     { id: 'cod', name: 'COD', iconUrl: 'https://file.hstatic.net/1000284478/file/cod_icon-47_a8768752c1a445da90d600ca0a94675c.svg', iconAiHint: 'cash on delivery icon', details: null },
   ];
@@ -737,5 +737,6 @@ export default CheckoutPage;
 
 
     
+
 
 
