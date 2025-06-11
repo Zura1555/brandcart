@@ -114,9 +114,15 @@ const enTranslations = {
     },
     eInvoice: {
       title: "E-Invoice",
+      requestLabel: "E-invoice Request",
+      option: {
+        noInvoice: "No Invoice",
+        issueInvoice: "Issue E-invoice"
+      },
       status: {
         requestNow: "Enter Details", 
-        detailsSaved: "{summary}"
+        detailsSaved: "{summary}",
+        enterDetails: "Enter Details"
       },
       vatNote: "Note: Red invoice will be issued including total order value (Products + Shipping fee)",
       invoiceTypeLabel: "INVOICE TYPE",

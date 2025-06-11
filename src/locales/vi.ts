@@ -114,9 +114,15 @@ const viTranslations = {
     },
     eInvoice: {
       title: "Hóa đơn điện tử",
+      requestLabel: "Yêu cầu hóa đơn điện tử",
+      option: {
+        noInvoice: "Không xuất hóa đơn",
+        issueInvoice: "Xuất hóa đơn điện tử"
+      },
       status: {
         requestNow: "Nhập thông tin",
-        detailsSaved: "{summary}"
+        detailsSaved: "{summary}",
+        enterDetails: "Nhập thông tin"
       },
       vatNote: "Lưu ý: Hoá đơn đỏ sẽ được xuất bao gồm tổng giá trị đơn hàng (Sản phẩm + Phí vận chuyển)",
       invoiceTypeLabel: "LOẠI HOÁ ĐƠN",
