@@ -174,21 +174,26 @@ const viTranslations = {
     addNewButton: "Thêm Địa Chỉ Mới",
   },
   selectVoucher: {
-    title: "Chọn Shopee Voucher",
-    inputPlaceholder: "Nhập mã Shopee Voucher",
+    title: "Chọn Shopee Voucher", // Old, might be unused
+    titleOffers: "Ưu đãi",
+    typeOfVoucherLabel: "Loại Voucher",
+    allVouchersOption: "Tất cả voucher",
+    inputPlaceholder: "Nhập mã khuyến mãi hoặc Gift Code",
     applyButton: "ÁP DỤNG",
-    usableVouchersTitle: "Voucher có thể dùng",
+    usableVouchersTitle: "Voucher có thể dùng", // Might be removed
     unusableVouchersTitle: "Voucher không thể dùng",
     noUsableVouchers: "Không có voucher nào có thể dùng.",
     noUnusableVouchers: "Không có voucher nào không thể dùng.",
     footer: {
-      selectedInfo: "Đã chọn 1 Voucher. Ưu đãi phí vận chuyển đã được áp dụng.",
+      selectedInfo: "Đã chọn 1 Voucher. Ưu đãi phí vận chuyển đã được áp dụng.", // Old, might be unused
       notSelectedInfo: "Chưa chọn voucher nào.",
-      confirmButton: "ĐỒNG Ý",
+      vouchersSelected: "Đã chọn {count} Voucher",
+      confirmButton: "ĐỒNG Ý", // Old, replaced by useVoucherButton
+      useVoucherButton: "Dùng Voucher",
     },
     voucherCard: {
-        bestChoice: "Tốt nhất",
-        typeFreeShipping: "MIỄN PHÍ VẬN CHUYỂN",
+        bestChoice: "Tốt nhất", // Old, unused
+        typeFreeShipping: "MIỄN PHÍ VẬN CHUYỂN", // Old, unused
         unavailableReasonMinOrder: "Chưa đạt GTĐH tối thiểu.",
     },
   },
@@ -220,7 +225,7 @@ const viTranslations = {
             title: "Lỗi",
             description: "Không thể xử lý chi tiết đơn hàng. Vui lòng thử lại hoặc liên hệ hỗ trợ."
         },
-        feedbackReceived: { // This key seems to be unused after adding specific submit toast
+        feedbackReceived: { 
             title: "Đã nhận phản hồi",
             description: "Cảm ơn phản hồi của bạn! Bạn đã đánh giá {rating} trên 5."
         },

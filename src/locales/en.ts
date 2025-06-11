@@ -174,21 +174,26 @@ const enTranslations = {
     addNewButton: "Add New Address",
   },
   selectVoucher: {
-    title: "Select Shopee Voucher",
-    inputPlaceholder: "Enter Shopee Voucher Code",
+    title: "Select Shopee Voucher", // Old, might be unused
+    titleOffers: "Offers",
+    typeOfVoucherLabel: "Type of Voucher",
+    allVouchersOption: "All vouchers",
+    inputPlaceholder: "Enter promo or Gift Code here",
     applyButton: "APPLY",
-    usableVouchersTitle: "Usable Vouchers",
+    usableVouchersTitle: "Usable Vouchers", // Might be removed if not explicitly needed for a header
     unusableVouchersTitle: "Unusable Vouchers",
     noUsableVouchers: "No usable vouchers available.",
     noUnusableVouchers: "No unusable vouchers.",
     footer: {
-      selectedInfo: "1 Voucher selected. Shipping discount applied.",
+      selectedInfo: "1 Voucher selected. Shipping discount applied.", // Old, might be unused
       notSelectedInfo: "No voucher selected.",
-      confirmButton: "CONFIRM",
+      vouchersSelected: "{count} Vouchers Selected",
+      confirmButton: "CONFIRM", // Old, replaced by useVoucherButton
+      useVoucherButton: "Use Voucher",
     },
     voucherCard: {
-        bestChoice: "Best Choice",
-        typeFreeShipping: "FREE SHIPPING",
+        bestChoice: "Best Choice", // Old, unused in new design
+        typeFreeShipping: "FREE SHIPPING", // Old, unused in new design
         unavailableReasonMinOrder: "Minimum order value not met.",
     },
   },
@@ -220,7 +225,7 @@ const enTranslations = {
             title: "Error",
             description: "Could not process order details. Please try again or contact support."
         },
-        feedbackReceived: { // This key seems to be unused after adding specific submit toast
+        feedbackReceived: { 
             title: "Feedback Received",
             description: "Thanks for your feedback! You rated {rating} out of 5."
         },

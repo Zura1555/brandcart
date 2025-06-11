@@ -7,14 +7,15 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card'; // CardContent needed if VoucherCardSheet uses it
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle as SheetTitlePrimitive, SheetFooter as SheetFooterPrimitive } from '@/components/ui/sheet'; // Renamed to avoid conflict if local SheetTitle/Footer are defined
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle as SheetTitleComponent, SheetFooter } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight, XCircle, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight, XCircle, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import type { CartItem, Shop, SimpleVariant } from '@/interfaces';
 import { mockShops } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
@@ -23,57 +24,77 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
+import { cn } from "@/lib/utils";
 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 
-// Define Voucher interface and mock data directly in this component for the sheet
 interface VoucherInterface {
   id: string;
-  typeKey: string;
   title: string;
-  discount: string;
-  minOrder: string;
-  usageInfo?: string;
-  expiryDate?: string;
-  isBestChoice?: boolean;
+  imageUrl?: string;
+  imageAiHint?: string;
+  expiryInfo: string; // e.g., "31/08/2024" or "31/07/2024 - 3 days left"
+  conditionText?: string; // e.g., "Spend 500,000 ₫ more to get this voucher"
+  restrictionText?: string; // e.g., "Only Apply for PUMA items"
+  paymentMethodSwitchText?: string; // e.g., "Switch your payment method to enjoy this offer"
+  isSelected: boolean; // For managing selection in the sheet
   isAvailable: boolean;
-  unavailableReason?: string;
-  quantity?: number;
-  colorClass: string;
-  textColorClass?: string;
-  icon?: React.ElementType;
+  unavailableReason?: string; // If !isAvailable
 }
 
 const mockAvailableVouchersSheet: VoucherInterface[] = [
   {
-    id: 'voucher1sheet',
-    typeKey: 'selectVoucher.voucherCard.typeFreeShipping',
-    title: 'Miễn Phí Vận Chuyển',
-    discount: 'Giảm tối đa 500k₫',
-    minOrder: 'Đơn tối thiểu 0₫',
-    usageInfo: 'Đã dùng 97% - sắp hết hạn',
-    isBestChoice: true,
+    id: 'v_birthday_100k',
+    title: 'Birthday Voucher ưu đãi 100.000 ₫',
+    imageUrl: 'https://placehold.co/40x40/E91E63/FFFFFF.png', // Pinkish placeholder
+    imageAiHint: 'birthday gift voucher',
+    expiryInfo: '31/08/2024',
+    isSelected: true, // Initially selected for demo
     isAvailable: true,
-    colorClass: 'bg-teal-500',
-    textColorClass: 'text-white',
-    icon: Truck,
+  },
+  {
+    id: 'v_techcom_50k',
+    title: 'Ưu đãi 50.000, đơn từ 1.000.000 ₫',
+    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', // Red placeholder
+    imageAiHint: 'Techcombank logo',
+    expiryInfo: '31/08/2024',
+    isSelected: true, // Initially selected for demo
+    isAvailable: true,
+  },
+  {
+    id: 'v_zalopay_5percent',
+    title: 'Zalo Pay giảm 5% giá trị đơn hàng',
+    imageUrl: 'https://placehold.co/40x40/2196F3/FFFFFF.png', // Blue placeholder
+    imageAiHint: 'ZaloPay logo',
+    expiryInfo: '02/09/2024',
+    paymentMethodSwitchText: 'Switch your payment method to enjoy this offer',
+    isSelected: false,
+    isAvailable: true,
   },
 ];
 
 const mockUnavailableVouchersSheet: VoucherInterface[] = [
   {
-    id: 'voucher2sheet',
-    typeKey: 'selectVoucher.voucherCard.typeFreeShipping',
-    title: 'Miễn Phí Vận Chuyển',
-    discount: 'Giảm tối đa 50k₫',
-    minOrder: 'Đơn tối thiểu 45k₫',
-    expiryDate: 'HSD: 12.06.2025',
+    id: 'v_techcom_100k_spend',
+    title: 'Ưu đãi 100.000, đơn từ 2.000.000 ₫',
+    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', // Red placeholder
+    imageAiHint: 'Techcombank logo',
+    expiryInfo: '31/07/2024 - 3 days left',
+    conditionText: 'Spend 500,000 ₫ more to get this voucher',
+    isSelected: false,
     isAvailable: false,
     unavailableReason: 'selectVoucher.voucherCard.unavailableReasonMinOrder',
-    quantity: 5,
-    colorClass: 'bg-teal-100',
-    textColorClass: 'text-teal-600',
-    icon: Truck,
+  },
+  {
+    id: 'v_honda_1m_puma',
+    title: 'Honda Voucher ưu đãi 1.000.000 ₫',
+    imageUrl: 'https://placehold.co/40x40/F44336/FFFFFF.png', // Another red placeholder
+    imageAiHint: 'Honda logo',
+    expiryInfo: '31/12/2024',
+    restrictionText: 'Only Apply for PUMA items',
+    isSelected: false,
+    isAvailable: false, // Assuming unavailable for this demo list
+    unavailableReason: 'Restricted to specific items.',
   },
 ];
 
@@ -91,13 +112,31 @@ const BrandCartPage = () => {
   const [isCleanupDialogOpen, setIsCleanupDialogOpen] = useState(false);
   const [itemsSelectedForCleanup, setItemsSelectedForCleanup] = useState<Set<string>>(new Set());
 
-  // State for Voucher Sheet
   const [isVoucherSheetOpen, setIsVoucherSheetOpen] = useState(false);
   const [voucherCodeInput, setVoucherCodeInput] = useState('');
-  const [selectedVoucherIdInSheet, setSelectedVoucherIdInSheet] = useState<string | undefined>(
-    mockAvailableVouchersSheet.length > 0 ? mockAvailableVouchersSheet[0].id : undefined
+  
+  const [sheetAvailableVouchers, setSheetAvailableVouchers] = useState<VoucherInterface[]>(
+    mockAvailableVouchersSheet.map(v => ({...v})) // Create copies to allow local modification
   );
-  const [finalAppliedVoucherInfo, setFinalAppliedVoucherInfo] = useState<{ id: string; title: string } | null>(null);
+  const [sheetUnavailableVouchers, setSheetUnavailableVouchers] = useState<VoucherInterface[]>(
+     mockUnavailableVouchersSheet.map(v => ({...v}))
+  );
+
+  const selectedVoucherCountInSheet = useMemo(() => {
+    return sheetAvailableVouchers.filter(v => v.isSelected).length;
+  }, [sheetAvailableVouchers]);
+
+  const [finalAppliedVoucherSummary, setFinalAppliedVoucherSummary] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    const count = sheetAvailableVouchers.filter(v => v.isSelected).length;
+    if (count > 0) {
+      setFinalAppliedVoucherSummary(t('selectVoucher.footer.vouchersSelected', { count }));
+    } else {
+      setFinalAppliedVoucherSummary(null);
+    }
+  }, [sheetAvailableVouchers, t]);
 
 
   const handleToggleSelectAll = (checked: boolean) => {
@@ -251,50 +290,72 @@ const BrandCartPage = () => {
     return `${amount.toLocaleString('vi-VN')}₫`;
   };
 
-  // Voucher Sheet Logic
-  const VoucherCardSheet = ({ voucher, isSelected, onSelect }: { voucher: VoucherInterface; isSelected: boolean; onSelect: (id: string) => void; }) => {
-    const cardOpacity = voucher.isAvailable ? 'opacity-100' : 'opacity-70';
+  const VoucherCardDisplay = ({ voucher, onToggleSelect }: { voucher: VoucherInterface; onToggleSelect: (id: string) => void; }) => {
     const { t } = useLanguage();
-    
+    const canSelect = voucher.isAvailable;
+
     return (
-      <Card className={`mb-3 shadow-sm overflow-hidden ${cardOpacity} ${isSelected && voucher.isAvailable ? 'border-2 border-teal-500' : 'border'}`}>
-        <div className="flex">
-          <div className={`w-20 ${voucher.colorClass} flex flex-col items-center justify-center p-2 ${voucher.textColorClass || 'text-foreground'}`}>
-            {voucher.icon && <voucher.icon className="w-7 h-7 mb-1" />}
-            <span className="font-semibold text-xs text-center leading-tight uppercase">{t(voucher.typeKey)}</span>
-          </div>
-          <div className="flex-grow p-3 pr-2 space-y-1">
-            <div className="flex justify-between items-start">
-              <h3 className="text-sm font-semibold text-foreground">{voucher.title}</h3>
-              {voucher.isBestChoice && voucher.isAvailable && (
-                <Badge className="bg-orange-500 text-white text-xs px-1.5 py-0.5">{t('selectVoucher.voucherCard.bestChoice')}</Badge>
-              )}
-              {voucher.quantity && !voucher.isAvailable && (
-                <Badge variant="outline" className="text-xs border-muted-foreground text-muted-foreground">x{voucher.quantity}</Badge>
+      <Card 
+        className={cn(
+          "mb-3 shadow-sm overflow-hidden border",
+          !canSelect && "bg-muted/50 opacity-70",
+          canSelect && "cursor-pointer hover:bg-muted/20",
+          voucher.isSelected && canSelect && "border-2 border-ring"
+        )}
+        onClick={() => canSelect && onToggleSelect(voucher.id)}
+      >
+        <CardContent className="p-3">
+          <div className="flex items-start space-x-3">
+            {voucher.imageUrl && (
+              <Image
+                src={voucher.imageUrl}
+                alt={voucher.imageAiHint || 'voucher logo'}
+                width={40}
+                height={40}
+                className="rounded object-contain flex-shrink-0 mt-0.5 border"
+                data-ai-hint={voucher.imageAiHint || "voucher logo"}
+              />
+            )}
+            <div className="flex-grow min-w-0">
+              <p className="text-sm font-semibold text-foreground truncate">{voucher.title}</p>
+              {voucher.conditionText && <p className="text-xs text-muted-foreground mt-0.5">{voucher.conditionText}</p>}
+              <div className="flex items-center text-xs text-muted-foreground mt-1">
+                <Clock className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
+                <span>{voucher.expiryInfo}</span>
+              </div>
+              {voucher.paymentMethodSwitchText && (
+                <p className="text-xs text-blue-600 mt-1">{voucher.paymentMethodSwitchText}</p>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">{voucher.discount}</p>
-            <p className="text-xs text-muted-foreground">{voucher.minOrder}</p>
-            {voucher.usageInfo && voucher.isAvailable && <p className="text-xs text-orange-600">{voucher.usageInfo}</p>}
-            {voucher.expiryDate && <p className="text-xs text-muted-foreground">{voucher.expiryDate}</p>}
-            {!voucher.isAvailable && voucher.unavailableReason && (
-              <p className="text-xs text-red-600 mt-1">{t(voucher.unavailableReason)}</p> 
+            {canSelect && (
+              <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
+                {voucher.isSelected ? (
+                  <CheckCircle2 className="w-5 h-5 text-foreground" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full border-2 border-muted-foreground" />
+                )}
+              </div>
+            )}
+            {!canSelect && voucher.unavailableReason && (
+               <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
+                 <XCircle className="w-5 h-5 text-destructive" />
+               </div>
             )}
           </div>
-          <div className="w-12 flex items-center justify-center p-2 shrink-0">
-            {voucher.isAvailable ? (
-              <RadioGroupItem 
-                value={voucher.id} 
-                id={`voucher-sheet-radio-${voucher.id}`} 
-                className={`w-5 h-5 ${isSelected ? 'border-teal-600 text-teal-600' : 'border-muted-foreground'}`}
-                onClick={() => onSelect(voucher.id)}
-              />
-            ) : (
-               <XCircle className="w-5 h-5 text-muted-foreground" />
-            )}
-          </div>
-        </div>
+          {voucher.restrictionText && (
+            <div className="mt-2 bg-destructive/80 text-destructive-foreground text-xs p-2 rounded flex items-center">
+              <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0" />
+              <span>{voucher.restrictionText}</span>
+            </div>
+          )}
+        </CardContent>
       </Card>
+    );
+  };
+
+  const handleToggleVoucherInSheet = (voucherId: string) => {
+    setSheetAvailableVouchers(prev => 
+      prev.map(v => v.id === voucherId ? { ...v, isSelected: !v.isSelected } : v)
     );
   };
 
@@ -303,21 +364,19 @@ const BrandCartPage = () => {
     toast({
       title: t('toast.voucher.codeApplied', {code: voucherCodeInput})
     });
-    // In a real app, you'd validate the code here
   };
 
   const handleConfirmVoucherSelectionInSheet = () => {
-    const selected = mockAvailableVouchersSheet.find(v => v.id === selectedVoucherIdInSheet);
-    if (selected) {
-      setFinalAppliedVoucherInfo({ id: selected.id, title: selected.title });
-      toast({ title: `Voucher "${selected.title}" selected (simulated)` });
+    const selectedCount = sheetAvailableVouchers.filter(v => v.isSelected).length;
+    if (selectedCount > 0) {
+      setFinalAppliedVoucherSummary(t('selectVoucher.footer.vouchersSelected', { count: selectedCount }));
+      toast({ title: t('selectVoucher.footer.vouchersSelected', { count: selectedCount }) });
     } else {
-      setFinalAppliedVoucherInfo(null);
-      toast({ title: "No voucher selected or selection cleared (simulated)" });
+      setFinalAppliedVoucherSummary(null);
+      toast({ title: t('selectVoucher.footer.notSelectedInfo') });
     }
     setIsVoucherSheetOpen(false);
   };
-
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -403,9 +462,9 @@ const BrandCartPage = () => {
                     <div className="flex items-center">
                       <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                       <span className="text-sm text-foreground">
-                        {finalAppliedVoucherInfo 
-                          ? `Đã chọn: ${finalAppliedVoucherInfo.title.substring(0,15)}...` 
-                          : t('cart.vouchersAndShipping.voucherLabel', { amount: "5k" })
+                        {finalAppliedVoucherSummary 
+                          ? finalAppliedVoucherSummary 
+                          : t('cart.vouchersAndShipping.voucherLabel', { amount: "5k" }) // Fallback
                         }
                       </span>
                     </div>
@@ -413,11 +472,27 @@ const BrandCartPage = () => {
                   </div>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="max-h-[85vh] flex flex-col p-0 rounded-t-lg">
-                  <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10"> {/* Corrected usage */}
-                    <SheetTitlePrimitive className="text-lg text-center font-semibold">{t('selectVoucher.title')}</SheetTitlePrimitive>
+                  <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10 flex flex-row items-center justify-between">
+                     <Button variant="ghost" size="icon" onClick={() => setIsVoucherSheetOpen(false)} className="-ml-2">
+                        <ChevronLeft className="w-5 h-5" />
+                     </Button>
+                    <SheetTitleComponent className="text-lg text-center font-semibold flex-grow">{t('selectVoucher.titleOffers')}</SheetTitleComponent>
+                    <div className="w-8"></div> {/* Spacer to balance the back button */}
                   </SheetHeader>
                   
-                  <div className="p-4 border-b sticky top-[calc(3.5rem)] bg-card z-10"> {/* Adjust top based on header height */}
+                  <div className="p-4 border-b bg-card z-10 space-y-3">
+                    <div className="flex items-center space-x-2">
+                        <Label htmlFor="voucherTypeSelect" className="text-sm whitespace-nowrap">{t('selectVoucher.typeOfVoucherLabel')}:</Label>
+                        <Select defaultValue="all">
+                            <SelectTrigger id="voucherTypeSelect" className="h-9 text-sm">
+                                <SelectValue placeholder={t('selectVoucher.allVouchersOption')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{t('selectVoucher.allVouchersOption')}</SelectItem>
+                                {/* Add other filter options here later */}
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <div className="flex space-x-2">
                       <Input
                         type="text"
@@ -437,47 +512,44 @@ const BrandCartPage = () => {
                   </div>
 
                   <ScrollArea className="flex-grow p-4">
-                    <RadioGroup value={selectedVoucherIdInSheet} onValueChange={setSelectedVoucherIdInSheet}>
                       <div>
-                        <h2 className="text-sm font-semibold text-muted-foreground mb-2 px-1">{t('selectVoucher.usableVouchersTitle')}</h2>
-                        {mockAvailableVouchersSheet.map(voucher => (
-                          <VoucherCardSheet 
+                        {/* Usable Vouchers Title is part of general list now */}
+                        {sheetAvailableVouchers.map(voucher => (
+                          <VoucherCardDisplay
                             key={voucher.id} 
                             voucher={voucher} 
-                            isSelected={selectedVoucherIdInSheet === voucher.id}
-                            onSelect={setSelectedVoucherIdInSheet}
+                            onToggleSelect={handleToggleVoucherInSheet}
                           />
                         ))}
-                        {mockAvailableVouchersSheet.length === 0 && <p className="text-xs text-muted-foreground px-1">{t('selectVoucher.noUsableVouchers')}</p>}
+                        {sheetAvailableVouchers.length === 0 && <p className="text-xs text-muted-foreground px-1 py-4 text-center">{t('selectVoucher.noUsableVouchers')}</p>}
                       </div>
 
-                      <div className="mt-6">
-                        <h2 className="text-sm font-semibold text-muted-foreground mb-2 px-1">{t('selectVoucher.unusableVouchersTitle')}</h2>
-                        {mockUnavailableVouchersSheet.map(voucher => (
-                          <VoucherCardSheet 
-                            key={voucher.id} 
-                            voucher={voucher} 
-                            isSelected={false} 
-                            onSelect={() => {}} 
-                          />
-                        ))}
-                        {mockUnavailableVouchersSheet.length === 0 && <p className="text-xs text-muted-foreground px-1">{t('selectVoucher.noUnusableVouchers')}</p>}
-                      </div>
-                    </RadioGroup>
+                      {sheetUnavailableVouchers.length > 0 && (
+                        <div className="mt-6">
+                          <h2 className="text-sm font-semibold text-muted-foreground mb-2 px-1">{t('selectVoucher.unusableVouchersTitle')}</h2>
+                          {sheetUnavailableVouchers.map(voucher => (
+                            <VoucherCardDisplay
+                              key={voucher.id} 
+                              voucher={voucher} 
+                              onToggleSelect={() => {}} // Non-selectable
+                            />
+                          ))}
+                        </div>
+                      )}
                   </ScrollArea>
                   
-                  <SheetFooterPrimitive className="p-3 border-t sticky bottom-0 bg-card z-10 flex flex-col items-center justify-center">
-                    <p className="text-xs text-muted-foreground mb-2 text-center">
-                      {selectedVoucherIdInSheet ? t('selectVoucher.footer.selectedInfo') : t('selectVoucher.footer.notSelectedInfo')}
+                  <SheetFooter className="p-3 border-t sticky bottom-0 bg-card z-10 flex flex-row items-center justify-between w-full">
+                    <p className="text-sm text-foreground font-medium">
+                      {t('selectVoucher.footer.vouchersSelected', {count: selectedVoucherCountInSheet })}
                     </p>
                     <Button
-                      size="lg"
-                      className="w-full max-w-md bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                      className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold min-w-[120px]"
                       onClick={handleConfirmVoucherSelectionInSheet}
+                      disabled={selectedVoucherCountInSheet === 0 && voucherCodeInput.trim() === ''} // Allow confirm if code entered
                     >
-                      {t('selectVoucher.footer.confirmButton')}
+                      {t('selectVoucher.footer.useVoucherButton')}
                     </Button>
-                  </SheetFooterPrimitive>
+                  </SheetFooter>
                 </SheetContent>
               </Sheet>
 
@@ -584,3 +656,4 @@ const BrandCartPage = () => {
 };
 
 export default BrandCartPage;
+
