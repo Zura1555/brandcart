@@ -66,7 +66,7 @@ const CheckoutPage = () => {
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
   const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
   const [initialSavings, setInitialSavings] = useState<number>(0);
-  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
+  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false); // This state remains for other parts of the page if needed.
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
@@ -519,33 +519,43 @@ const CheckoutPage = () => {
             </Card>
 
             <Card className="shadow-sm">
-              <CardContent className="p-0 divide-y divide-border">
+              <CardContent className="p-0"> {/* Removed divide-y and divide-border */}
                 <div
                   className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50"
                   onClick={() => router.push('/select-voucher')}
                 >
                   <div className="flex items-center">
                     <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">{t('checkout.yourVoucher')}</span>
+                    <span className="text-sm text-foreground">
+                      {t('checkout.yourVoucherAvailable', { count: 3 })} {/* Used mock count 3 */}
+                    </span>
                   </div>
                   <div className="flex items-center">
-                    <Badge variant="outline" className="text-green-600 border-green-600 bg-green-50 text-xs px-1.5 py-0.5 mr-2">{t('checkout.freeShippingBadge')}</Badge>
+                    {/* Free Shipping Badge removed */}
                     <ChevronRight className="w-5 h-5 text-muted-foreground ml-1 flex-shrink-0" />
                   </div>
                 </div>
+                {/* Loyalty Points section removed from here */}
+              </CardContent>
+            </Card>
+            
+            {/* Loyalty Points Card - can be moved to a new separate card if needed or kept elsewhere */}
+            <Card className="shadow-sm">
+              <CardContent className="p-0">
                 <div className="p-4 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <CircleDollarSign className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                    <span className="text-sm text-foreground">{t('checkout.loyaltyPointsLabel', { count: LOYALTY_POINTS_TO_REDEEM })}</span>
-                  </div>
-                  <Switch
-                    checked={useLoyaltyPoints}
-                    onCheckedChange={setUseLoyaltyPoints}
-                    aria-label={t('checkout.loyaltyPointsAriaLabel')}
-                  />
+                    <div className="flex items-center">
+                        <CircleDollarSign className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
+                        <span className="text-sm text-foreground">{t('checkout.loyaltyPointsLabel', { count: LOYALTY_POINTS_TO_REDEEM })}</span>
+                    </div>
+                    <Switch
+                        checked={useLoyaltyPoints}
+                        onCheckedChange={setUseLoyaltyPoints}
+                        aria-label={t('checkout.loyaltyPointsAriaLabel')}
+                    />
                 </div>
               </CardContent>
             </Card>
+
 
             <Card className="shadow-sm">
               <CardHeader className="pb-3 pt-4 px-4">
