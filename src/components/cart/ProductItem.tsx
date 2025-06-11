@@ -111,9 +111,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     if (!item.availableVariants) return undefined;
     return item.availableVariants.find(v => {
       const parsedV = parseVariantName(v.name);
-      // Match color: either no color is part of selection criteria, or it matches.
       const colorMatch = (uniqueColors.length === 0 || !color) || parsedV.color === color;
-      // Match size: either no size is part of selection criteria, or it matches.
       const sizeMatch = (allPossibleSizes.length === 0 || !size) || parsedV.size === size;
 
       if (uniqueColors.length > 0 && allPossibleSizes.length > 0) {
@@ -123,9 +121,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       } else if (allPossibleSizes.length > 0) {
         return parsedV.size === size;
       }
-      // If a product has NO variants defined with color OR size (e.g. a single-variant product listed in availableVariants)
       if (uniqueColors.length === 0 && allPossibleSizes.length === 0 && item.availableVariants?.length === 1) {
-        return true; // Match the only variant
+        return true; 
       }
       return false;
     });
@@ -147,7 +144,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   
   const availableSizesForSelectedColor = useMemo(() => {
     if (!item.availableVariants) return new Set<string>();
-    // If no color is selected, or if the product primarily varies by size (no distinct colors)
     if (uniqueColors.length === 0 || !tempSelectedColorName) {
       const sizes = new Set<string>();
       item.availableVariants.forEach(v => {
@@ -157,7 +153,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       return sizes;
     }
 
-    // If a color is selected
     const sizes = new Set<string>();
     item.availableVariants.forEach(v => {
       const parsed = parseVariantName(v.name);
@@ -233,7 +228,13 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   
   const canConfirmSelection = !!selectedVariantInSheet && (selectedVariantInSheet.stock === undefined || selectedVariantInSheet.stock > 0);
 
-  const displayVariantNameInBadge = cleanVariantName(item.variant);
+  const { color: currentItemColor, size: currentItemSize } = parseVariantName(item.variant);
+  const badgeParts = [];
+  if (currentItemColor) badgeParts.push(currentItemColor);
+  if (currentItemSize) badgeParts.push(currentItemSize);
+  if (item.productCode) badgeParts.push(item.productCode);
+  const badgeDisplayString = badgeParts.join(' / ');
+
 
   let stockStatusTextInSheet = '';
   let stockStatusClassesInSheet = 'text-sm font-medium ';
@@ -313,7 +314,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           <div className="flex-grow min-w-0">
             <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
 
-            {(item.productCode || displayVariantNameInBadge) && (
+            {badgeDisplayString && (
               hasAvailableVariants ? (
                 <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
                   <SheetTrigger asChild>
@@ -322,9 +323,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                         variant="outline"
                         className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center cursor-pointer"
                       >
-                        {item.productCode && <span>{item.productCode}</span>}
-                        {item.productCode && displayVariantNameInBadge && <span className="mx-1">-</span>}
-                        {displayVariantNameInBadge && <span>{displayVariantNameInBadge}</span>}
+                        <span>{badgeDisplayString}</span>
                         <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
                       </Badge>
                     </button>
@@ -447,18 +446,15 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                   </SheetContent>
                 </Sheet>
               ) : (
-                 (item.productCode || displayVariantNameInBadge) && (
-                    <Badge
-                    variant="outline"
-                    className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5"
-                    >
-                    {item.productCode && <span>{item.productCode}</span>}
-                    {item.productCode && displayVariantNameInBadge && <span className="mx-1">-</span>}
-                    {displayVariantNameInBadge && <span>{displayVariantNameInBadge}</span>}
-                    </Badge>
-                 )
+                <Badge
+                  variant="outline"
+                  className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center"
+                >
+                  <span>{badgeDisplayString}</span>
+                </Badge>
               )
             )}
+
 
             <div className="flex items-baseline space-x-2 mt-1">
               <p className="text-sm font-bold text-foreground">{item.price.toLocaleString('vi-VN')}₫</p>
