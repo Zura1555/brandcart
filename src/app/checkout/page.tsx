@@ -14,7 +14,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CircleDollarSign, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
 import { mockShops } from '@/lib/mockData'; 
@@ -28,8 +28,6 @@ const FOOTER_HEIGHT = 'h-24';
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
-const LOYALTY_POINTS_DISCOUNT_VALUE = 200;
-const LOYALTY_POINTS_TO_REDEEM = 200;
 
 interface DisplayShop {
   name: string;
@@ -66,7 +64,6 @@ const CheckoutPage = () => {
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
   const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
   const [initialSavings, setInitialSavings] = useState<number>(0);
-  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false); // This state remains for other parts of the page if needed.
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'payoo' | 'vnpay' | 'momo' | 'applepay'>('payoo');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
@@ -185,11 +182,8 @@ const CheckoutPage = () => {
 
   const displayTotalAmount = useMemo(() => {
     let currentTotal = initialTotalAmount;
-    if (useLoyaltyPoints) {
-      currentTotal -= LOYALTY_POINTS_DISCOUNT_VALUE;
-    }
     return Math.max(0, currentTotal);
-  }, [initialTotalAmount, useLoyaltyPoints]);
+  }, [initialTotalAmount]);
 
   const displaySavings = initialSavings;
 
@@ -519,7 +513,7 @@ const CheckoutPage = () => {
             </Card>
 
             <Card className="shadow-sm">
-              <CardContent className="p-0"> {/* Removed divide-y and divide-border */}
+              <CardContent className="p-0"> 
                 <div
                   className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50"
                   onClick={() => router.push('/select-voucher')}
@@ -527,36 +521,16 @@ const CheckoutPage = () => {
                   <div className="flex items-center">
                     <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                     <span className="text-sm text-foreground">
-                      {t('checkout.yourVoucherAvailable', { count: 3 })} {/* Used mock count 3 */}
+                      {t('checkout.yourVoucherAvailable', { count: 3 })} 
                     </span>
                   </div>
                   <div className="flex items-center">
-                    {/* Free Shipping Badge removed */}
                     <ChevronRight className="w-5 h-5 text-muted-foreground ml-1 flex-shrink-0" />
                   </div>
                 </div>
-                {/* Loyalty Points section removed from here */}
               </CardContent>
             </Card>
             
-            {/* Loyalty Points Card - can be moved to a new separate card if needed or kept elsewhere */}
-            <Card className="shadow-sm">
-              <CardContent className="p-0">
-                <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center">
-                        <CircleDollarSign className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                        <span className="text-sm text-foreground">{t('checkout.loyaltyPointsLabel', { count: LOYALTY_POINTS_TO_REDEEM })}</span>
-                    </div>
-                    <Switch
-                        checked={useLoyaltyPoints}
-                        onCheckedChange={setUseLoyaltyPoints}
-                        aria-label={t('checkout.loyaltyPointsAriaLabel')}
-                    />
-                </div>
-              </CardContent>
-            </Card>
-
-
             <Card className="shadow-sm">
               <CardHeader className="pb-3 pt-4 px-4">
                 <div className="flex items-center justify-between">
@@ -607,9 +581,6 @@ const CheckoutPage = () => {
             {displaySavings > 0 && (
               <p className="text-xs text-green-600">{t('checkout.footer.savings', { amount: formatCurrency(displaySavings) })}</p>
             )}
-             {useLoyaltyPoints && (
-              <p className="text-xs text-green-600">{t('checkout.footer.usedLoyaltyPointsSavings', { points: LOYALTY_POINTS_TO_REDEEM, amount: formatCurrency(LOYALTY_POINTS_DISCOUNT_VALUE) })}</p>
-            )}
           </div>
           <Button
             size="lg"
@@ -631,3 +602,4 @@ export default CheckoutPage;
     
 
     
+

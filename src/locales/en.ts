@@ -115,15 +115,11 @@ const enTranslations = {
     shippingMethodStandardDeliveryLabel: "Standard Delivery (3-5 days)",
     shippingMethodEstimatedDeliveryTimeLabel: "Estimated delivery time: 5-7 working days",
     totalAmountLabelWithCount: "Total Amount ({count} products)",
-    yourVoucher: "Your Voucher",
-    freeShippingBadge: "Free Shipping",
-    loyaltyPointsLabel: "Use Loyalty Points: {count} Points",
-    loyaltyPointsAriaLabel: "Use Loyalty Points",
+    yourVoucherAvailable: "{count} Vouchers available",
     paymentMethod: "Payment Method",
     footer: {
       totalLabel: "Total:",
       savings: "Save {amount}",
-      usedLoyaltyPointsSavings: "Used {points} points, save {amount}",
       orderButton: "Place Order",
     },
   },
@@ -174,26 +170,26 @@ const enTranslations = {
     addNewButton: "Add New Address",
   },
   selectVoucher: {
-    title: "Select Shopee Voucher", // Old, might be unused
+    title: "Select Shopee Voucher", 
     titleOffers: "Offers",
     typeOfVoucherLabel: "Type of Voucher",
     allVouchersOption: "All vouchers",
     inputPlaceholder: "Enter promo or Gift Code here",
     applyButton: "APPLY",
-    usableVouchersTitle: "Usable Vouchers", // Might be removed if not explicitly needed for a header
+    usableVouchersTitle: "Usable Vouchers", 
     unusableVouchersTitle: "Unusable Vouchers",
     noUsableVouchers: "No usable vouchers available.",
     noUnusableVouchers: "No unusable vouchers.",
     footer: {
-      selectedInfo: "1 Voucher selected. Shipping discount applied.", // Old, might be unused
+      selectedInfo: "1 Voucher selected. Shipping discount applied.", 
       notSelectedInfo: "No voucher selected.",
       vouchersSelected: "{count} Vouchers Selected",
-      confirmButton: "CONFIRM", // Old, replaced by useVoucherButton
+      confirmButton: "CONFIRM", 
       useVoucherButton: "Use Voucher",
     },
     voucherCard: {
-        bestChoice: "Best Choice", // Old, unused in new design
-        typeFreeShipping: "FREE SHIPPING", // Old, unused in new design
+        bestChoice: "Best Choice", 
+        typeFreeShipping: "FREE SHIPPING", 
         unavailableReasonMinOrder: "Minimum order value not met.",
     },
   },

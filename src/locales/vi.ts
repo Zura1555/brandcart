@@ -115,15 +115,11 @@ const viTranslations = {
     shippingMethodStandardDeliveryLabel: "Giao hàng tiêu chuẩn (3-5 ngày)",
     shippingMethodEstimatedDeliveryTimeLabel: "Thời gian giao hàng dự kiến: 5-7 ngày làm việc",
     totalAmountLabelWithCount: "Tổng số tiền ({count} sản phẩm)",
-    yourVoucher: "Voucher của bạn",
-    freeShippingBadge: "Miễn Phí Vận Chuyển",
-    loyaltyPointsLabel: "Dùng Điểm Thưởng: {count} Điểm",
-    loyaltyPointsAriaLabel: "Dùng Điểm Thưởng",
+    yourVoucherAvailable: "Có {count} voucher",
     paymentMethod: "Phương thức thanh toán",
     footer: {
       totalLabel: "Tổng cộng:",
       savings: "Tiết kiệm {amount}",
-      usedLoyaltyPointsSavings: "Đã dùng {points} điểm, tiết kiệm {amount}",
       orderButton: "Đặt hàng",
     },
   },
@@ -174,26 +170,26 @@ const viTranslations = {
     addNewButton: "Thêm Địa Chỉ Mới",
   },
   selectVoucher: {
-    title: "Chọn Shopee Voucher", // Old, might be unused
+    title: "Chọn Shopee Voucher", 
     titleOffers: "Ưu đãi",
     typeOfVoucherLabel: "Loại Voucher",
     allVouchersOption: "Tất cả voucher",
     inputPlaceholder: "Nhập mã khuyến mãi hoặc Gift Code",
     applyButton: "ÁP DỤNG",
-    usableVouchersTitle: "Voucher có thể dùng", // Might be removed
+    usableVouchersTitle: "Voucher có thể dùng", 
     unusableVouchersTitle: "Voucher không thể dùng",
     noUsableVouchers: "Không có voucher nào có thể dùng.",
     noUnusableVouchers: "Không có voucher nào không thể dùng.",
     footer: {
-      selectedInfo: "Đã chọn 1 Voucher. Ưu đãi phí vận chuyển đã được áp dụng.", // Old, might be unused
+      selectedInfo: "Đã chọn 1 Voucher. Ưu đãi phí vận chuyển đã được áp dụng.", 
       notSelectedInfo: "Chưa chọn voucher nào.",
       vouchersSelected: "Đã chọn {count} Voucher",
-      confirmButton: "ĐỒNG Ý", // Old, replaced by useVoucherButton
+      confirmButton: "ĐỒNG Ý", 
       useVoucherButton: "Dùng Voucher",
     },
     voucherCard: {
-        bestChoice: "Tốt nhất", // Old, unused
-        typeFreeShipping: "MIỄN PHÍ VẬN CHUYỂN", // Old, unused
+        bestChoice: "Tốt nhất", 
+        typeFreeShipping: "MIỄN PHÍ VẬN CHUYỂN", 
         unavailableReasonMinOrder: "Chưa đạt GTĐH tối thiểu.",
     },
   },
