@@ -129,7 +129,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
                         <MinusCircle className="w-5 h-5 text-white group-data-[state=open]:block group-data-[state=closed]:hidden" />
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="p-3 bg-white border-t border-border">
+                    <AccordionContent className="p-4 bg-muted/50 border-t border-border">
                        <p className="text-sm text-muted-foreground mb-3">
                          {t('cart.completeLook.dialogTitle', { productName: item.name })}
                        </p>
@@ -139,7 +139,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
                             .filter(relevantItem => relevantItem.id !== item.id) 
                             .slice(0, 3) 
                             .map(relevantItem => (
-                            <div key={relevantItem.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50">
+                            <div key={relevantItem.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted">
                               <Image
                                 src={relevantItem.imageUrl}
                                 alt={relevantItem.name}
