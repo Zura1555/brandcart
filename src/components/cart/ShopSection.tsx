@@ -12,7 +12,7 @@ import type { CartItem, Shop, SimpleVariant, Product } from '@/interfaces';
 import ProductItem from './ProductItem';
 import BrandOfferBanner from './BrandOfferBanner'; 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronRight, Gift, PlusCircle, MinusCircle, ShoppingBag, ChevronDown, Minus, Plus as PlusIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -457,3 +457,4 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
 };
 
 export default ShopSection;
+
