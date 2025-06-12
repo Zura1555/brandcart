@@ -15,7 +15,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ChevronRight, Gift, PlusCircle, MinusCircle, ShoppingBag } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
-import { mockRelevantProducts } from '@/lib/mockData'; // Assuming this exists or will be created
+import { mockRelevantProducts } from '@/lib/mockData'; 
 
 interface ShopSectionProps {
   shop: Shop; 
@@ -37,10 +37,8 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
   const [showCylFlags, setShowCylFlags] = useState<boolean[]>([]);
 
   useEffect(() => {
-    // Determine randomly which items get the CYL banner
-    // Show for ~33% of items for a more sparse "random" feel
     setShowCylFlags(items.map(() => Math.random() < 0.33)); 
-  }, [items]); // Recalculate if items array instance changes (e.g., item added/deleted)
+  }, [items]);
 
 
   const handleShopNowClick = () => {
@@ -113,7 +111,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
       <CardContent className="p-0">
         <div className="divide-y divide-border">
           {items.map((item, index) => (
-            <div key={item.cartItemId} className="group/shop-item-wrapper"> {/* Wrapper for ProductItem + its CYL */}
+            <div key={item.cartItemId} className="group/shop-item-wrapper">
               <ProductItem
                 item={item}
                 onSelectToggle={onItemSelectToggle}
@@ -124,11 +122,11 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
               {showCylFlags[index] && (
                 <Accordion type="single" collapsible className="w-full bg-stone-100">
                   <AccordionItem value={`cyl-${item.cartItemId}`} className="border-t border-border">
-                    <AccordionTrigger className="!py-3 !px-4 hover:no-underline text-stone-700 hover:bg-stone-200 group">
+                    <AccordionTrigger className="!py-2 !px-3 hover:no-underline bg-black text-white hover:bg-neutral-800 group [&>.lucide-chevron-down]:hidden">
                       <div className="flex justify-between items-center w-full">
                         <span className="uppercase font-semibold text-xs tracking-wider">{t('cart.completeLook.bannerText')}</span>
-                        <PlusCircle className="w-5 h-5 text-stone-700 group-data-[state=closed]:block group-data-[state=open]:hidden" />
-                        <MinusCircle className="w-5 h-5 text-stone-700 group-data-[state=open]:block group-data-[state=closed]:hidden" />
+                        <PlusCircle className="w-5 h-5 text-white group-data-[state=closed]:block group-data-[state=open]:hidden" />
+                        <MinusCircle className="w-5 h-5 text-white group-data-[state=open]:block group-data-[state=closed]:hidden" />
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="p-3 bg-white border-t border-border">
@@ -138,8 +136,8 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
                        {mockRelevantProducts && mockRelevantProducts.length > 0 ? (
                          <div className="space-y-3">
                            {mockRelevantProducts
-                            .filter(relevantItem => relevantItem.id !== item.id) // Exclude the parent item itself
-                            .slice(0, 3) // Show max 3 relevant items
+                            .filter(relevantItem => relevantItem.id !== item.id) 
+                            .slice(0, 3) 
                             .map(relevantItem => (
                             <div key={relevantItem.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50">
                               <Image
