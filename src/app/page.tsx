@@ -522,7 +522,7 @@ const BrandCartPage = () => {
   };
 
   const handleAddToCart = (itemToAdd: Product) => {
-    const existingCartItem = cartItems.find(ci => ci.id === itemToAdd.id && ci.variant === itemToAdd.variant); // Check for variant too
+    const existingCartItem = cartItems.find(ci => ci.id === itemToAdd.id && ci.variant === itemToAdd.variant);
 
     if (existingCartItem) {
       handleQuantityChange(existingCartItem.cartItemId, existingCartItem.quantity + 1);
@@ -535,9 +535,22 @@ const BrandCartPage = () => {
         ...itemToAdd,
         cartItemId: `${itemToAdd.id}-${itemToAdd.variant || 'base'}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         quantity: 1,
-        selected: false, // New items from CYL are not selected by default
+        selected: false, 
       };
-      setCartItems(prevItems => [...prevItems, newCartItem]);
+      
+      setCartItems(prevItems => {
+        const updatedItems = [...prevItems];
+        const brandOfNewItem = newCartItem.brand;
+        const indexToInsert = updatedItems.findIndex(item => item.brand === brandOfNewItem);
+
+        if (indexToInsert !== -1) {
+          updatedItems.splice(indexToInsert, 0, newCartItem);
+        } else {
+          updatedItems.push(newCartItem);
+        }
+        return updatedItems;
+      });
+
       toast({
         title: t('toast.itemAddedToCart.title', { itemName: itemToAdd.name }),
         description: t('toast.itemAddedToCart.description')
