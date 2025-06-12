@@ -1,5 +1,5 @@
 
-import type { Shop, ShippingAddress, SimpleVariant } from '@/interfaces';
+import type { Shop, ShippingAddress, SimpleVariant, Product } from '@/interfaces';
 
 export const mockShops: Shop[] = [
   {
@@ -141,3 +141,55 @@ export const mockShops: Shop[] = [
 
 export const mockShippingAddresses: ShippingAddress[] = [];
 
+export const mockRelevantProducts: Product[] = [
+  {
+    id: 'relevant1',
+    name: 'Stylish Sunglasses',
+    price: 450000,
+    brand: 'PUMA',
+    imageUrl: 'https://placehold.co/150x150.png',
+    dataAiHint: 'sunglasses fashion',
+    productCode: 'REL001',
+    stock: 10,
+  },
+  {
+    id: 'relevant2',
+    name: 'Leather Belt - Classic Black',
+    price: 750000,
+    brand: 'MLB',
+    imageUrl: 'https://placehold.co/150x150.png',
+    dataAiHint: 'leather belt',
+    productCode: 'REL002',
+    stock: 5,
+  },
+  {
+    id: 'relevant3',
+    name: 'Cotton Socks (3-pack) - Assorted',
+    price: 250000,
+    brand: 'HAVAIANAS',
+    imageUrl: 'https://placehold.co/150x150.png',
+    dataAiHint: 'socks pack',
+    productCode: 'REL003',
+    stock: 20,
+  },
+  {
+    id: 'relevant4',
+    name: 'Sporty Water Bottle - 750ml',
+    price: 320000,
+    brand: 'PUMA',
+    imageUrl: 'https://placehold.co/150x150.png',
+    dataAiHint: 'water bottle sport',
+    productCode: 'REL004',
+    stock: 15,
+  },
+   {
+    id: 'relevant5',
+    name: 'Canvas Tote Bag - Natural',
+    price: 390000,
+    brand: 'MLB',
+    imageUrl: 'https://placehold.co/150x150.png',
+    dataAiHint: 'tote bag canvas',
+    productCode: 'REL005',
+    stock: 12,
+  },
+];
