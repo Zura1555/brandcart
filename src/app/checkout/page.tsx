@@ -495,7 +495,7 @@ const CheckoutPage = () => {
                         <span className="text-sm text-foreground">{t('checkout.eInvoice.title')}</span>
                       </div>
                       <div className="flex items-center">
-                        <span className="text-sm text-muted-foreground mr-1">
+                         <span className="text-sm text-muted-foreground mr-1">
                           {eInvoiceSummary || ""}
                         </span>
                       </div>
@@ -685,8 +685,8 @@ const CheckoutPage = () => {
             />
           </div>
 
-          <div className="pt-2 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="mb-2 sm:mb-0 sm:text-left"> {/* Removed text-center, sm:text-left will apply for sm and up */}
+          <div className="pt-2 pb-3 flex flex-row items-center justify-between">
+            <div className=""> 
               <p className="text-xs sm:text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
               <p className="text-lg sm:text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
               {displaySavings > 0 && (
@@ -698,7 +698,7 @@ const CheckoutPage = () => {
             
             <Button
               size="lg"
-              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold w-full sm:w-auto sm:min-w-[140px] flex-shrink-0"
+              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[120px] sm:min-w-[140px] flex-shrink-0"
               onClick={() => router.push('/payment')}
               disabled={!currentShippingAddress}
             >
@@ -728,6 +728,7 @@ export default CheckoutPage;
 
 
     
+
 
 
 
