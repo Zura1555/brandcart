@@ -140,7 +140,7 @@ const enTranslations = {
     item: {
       quantityLabel: "Quantity: {count}"
     },
-    messageToShop: "Message to Shop",
+    messageToShop: "Note",
     messageToShopPlaceholder: "Leave a message",
     shippingMethod: "Shipping Method",
     shippingMethodFree: "Free",

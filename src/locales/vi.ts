@@ -120,7 +120,7 @@ const viTranslations = {
         issueInvoice: "Xuất hóa đơn điện tử"
       },
       status: {
-        requestNow: "Nhập thông tin",
+        requestNow: "Nhập thông tin", 
         detailsSaved: "{summary}",
         enterDetails: "Nhập thông tin"
       },
@@ -140,7 +140,7 @@ const viTranslations = {
     item: {
       quantityLabel: "Số lượng: {count}"
     },
-    messageToShop: "Lời nhắn cho Shop",
+    messageToShop: "Ghi chú",
     messageToShopPlaceholder: "Để lại lời nhắn",
     shippingMethod: "Phương thức vận chuyển",
     shippingMethodFree: "Miễn Phí",
