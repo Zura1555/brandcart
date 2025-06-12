@@ -2,7 +2,7 @@
 // @ts-nocheck
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -12,10 +12,304 @@ import type { CartItem, Shop, SimpleVariant, Product } from '@/interfaces';
 import ProductItem from './ProductItem';
 import BrandOfferBanner from './BrandOfferBanner'; 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ChevronRight, Gift, PlusCircle, MinusCircle, ShoppingBag } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ChevronRight, Gift, PlusCircle, MinusCircle, ShoppingBag, ChevronDown, Minus, Plus as PlusIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { mockRelevantProducts } from '@/lib/mockData'; 
+import { cn } from "@/lib/utils";
+
+
+interface RelevantProductCardProps {
+  item: Product;
+  onAddToCartParent: (item: Product) => void;
+}
+
+const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddToCartParent }) => {
+  const { t } = useLanguage();
+  const formatCurrency = (amount: number) => `${amount.toLocaleString('vi-VN')}₫`;
+  
+  const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
+
+  const cleanVariantName = useCallback((name: string | undefined): string => {
+    if (!name) return '';
+    return name.replace(/\s*\(\+\d+\)\s*$/, '');
+  }, []);
+
+  const parseVariantName = useCallback((name: string | undefined): { color: string | null, size: string | null } => {
+    if (!name) return { color: null, size: null };
+    const cleanedName = cleanVariantName(name);
+    const parts = cleanedName.split(',').map(p => p.trim());
+    if (parts.length === 2) return { color: parts[0] || null, size: parts[1] || null };
+    const commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', 'Freesize'];
+    if (parts[0] && commonSizes.some(s => parts[0].toUpperCase() === s.toUpperCase())) return { color: null, size: parts[0]};
+    return { color: parts[0] || null, size: null };
+  }, [cleanVariantName]);
+
+  const [selectedCylVariantDetails, setSelectedCylVariantDetails] = useState<Partial<Product>>({
+    ...item,
+    name: item.name, // Ensure name is part of the details
+    variant: item.variant,
+    price: item.price,
+    originalPrice: item.originalPrice,
+    imageUrl: item.imageUrl,
+    dataAiHint: item.dataAiHint,
+    stock: item.stock,
+  });
+
+  const [tempSelectedColorName, setTempSelectedColorName] = useState<string | null>(parseVariantName(item.variant).color);
+  const [tempSelectedSizeValue, setTempSelectedSizeValue] = useState<string | null>(parseVariantName(item.variant).size);
+
+  useEffect(() => {
+    if (isVariantSheetOpen) {
+      const currentParsed = parseVariantName(selectedCylVariantDetails.variant);
+      setTempSelectedColorName(currentParsed.color);
+      setTempSelectedSizeValue(currentParsed.size);
+    }
+  }, [isVariantSheetOpen, selectedCylVariantDetails.variant, parseVariantName]);
+
+  const uniqueColors = useMemo(() => {
+    if (!item.availableVariants) return [];
+    const colors = new Set<string>();
+    item.availableVariants.forEach(v => {
+      const parsed = parseVariantName(v.name);
+      if (parsed.color) colors.add(parsed.color);
+    });
+    return Array.from(colors);
+  }, [item.availableVariants, parseVariantName]);
+
+  const allPossibleSizes = useMemo(() => {
+    if (!item.availableVariants) return [];
+    const sizes = new Set<string>();
+    item.availableVariants.forEach(v => {
+      const parsed = parseVariantName(v.name);
+      if (parsed.size) sizes.add(parsed.size);
+    });
+    return Array.from(sizes).sort((a, b) => {
+        const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Freesize'];
+        const aIndex = sizeOrder.indexOf(a.toUpperCase());
+        const bIndex = sizeOrder.indexOf(b.toUpperCase());
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+        try { const aNum = parseInt(a); const bNum = parseInt(b); if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum; } catch (e) {}
+        return a.localeCompare(b);
+    });
+  }, [item.availableVariants, parseVariantName]);
+
+  const getVariantFromSelection = useCallback((color: string | null, size: string | null): SimpleVariant | undefined => {
+    if (!item.availableVariants) return undefined;
+    return item.availableVariants.find(v => {
+      const parsedV = parseVariantName(v.name);
+      const colorMatch = (uniqueColors.length === 0 || !color) || parsedV.color === color;
+      const sizeMatch = (allPossibleSizes.length === 0 || !size) || parsedV.size === size;
+      if (uniqueColors.length > 0 && allPossibleSizes.length > 0) return parsedV.color === color && parsedV.size === size;
+      else if (uniqueColors.length > 0) return parsedV.color === color;
+      else if (allPossibleSizes.length > 0) return parsedV.size === size;
+      if (uniqueColors.length === 0 && allPossibleSizes.length === 0 && item.availableVariants?.length === 1) return true;
+      return false;
+    });
+  }, [item.availableVariants, parseVariantName, uniqueColors.length, allPossibleSizes.length]);
+
+  const selectedVariantInSheet = useMemo(() => getVariantFromSelection(tempSelectedColorName, tempSelectedSizeValue), [tempSelectedColorName, tempSelectedSizeValue, getVariantFromSelection]);
+
+  const currentDisplayDetailsInSheet = useMemo(() => ({
+    price: selectedVariantInSheet?.price ?? selectedCylVariantDetails.price,
+    imageUrl: selectedVariantInSheet?.imageUrl ?? selectedCylVariantDetails.imageUrl,
+    stock: selectedVariantInSheet?.stock,
+    originalPrice: selectedVariantInSheet?.originalPrice ?? selectedCylVariantDetails.originalPrice,
+    dataAiHint: selectedVariantInSheet?.dataAiHint ?? selectedCylVariantDetails.dataAiHint,
+  }), [selectedVariantInSheet, selectedCylVariantDetails]);
+
+  const availableSizesForSelectedColor = useMemo(() => {
+    if (!item.availableVariants) return new Set<string>();
+    if (uniqueColors.length === 0 || !tempSelectedColorName) {
+      const sizes = new Set<string>(); item.availableVariants.forEach(v => { const parsed = parseVariantName(v.name); if (parsed.size) sizes.add(parsed.size); }); return sizes;
+    }
+    const sizes = new Set<string>();
+    item.availableVariants.forEach(v => { const parsed = parseVariantName(v.name); if (parsed.color === tempSelectedColorName && parsed.size) sizes.add(parsed.size); });
+    return sizes;
+  }, [tempSelectedColorName, item.availableVariants, parseVariantName, uniqueColors.length]);
+
+  const handleConfirmCylVariant = () => {
+    if (selectedVariantInSheet) {
+      setSelectedCylVariantDetails(prev => ({
+        ...prev,
+        ...selectedVariantInSheet,
+        name: item.name, // keep original product name
+        variant: selectedVariantInSheet.name, // update variant name
+      }));
+    }
+    setIsVariantSheetOpen(false);
+  };
+
+  const { color: parsedColorFromItem, size: parsedSizeFromItem } = parseVariantName(selectedCylVariantDetails.variant);
+  let displayColor = parsedColorFromItem || "N/A";
+  let displaySize = parsedSizeFromItem;
+  if (!displaySize && allPossibleSizes.length > 0) displaySize = allPossibleSizes[0];
+  else if (!displaySize) displaySize = "M"; // Fallback if no sizes defined
+  
+  const cylBadgeDisplayString = [displayColor, displaySize, selectedCylVariantDetails.productCode || "N/A"]
+    .filter(part => part !== "N/A" || (displayColor !== "N/A" || displaySize !== "M" || (selectedCylVariantDetails.productCode && selectedCylVariantDetails.productCode !== "N/A")))
+    .join(" / ");
+  
+  const hasCylVariants = item.availableVariants && item.availableVariants.length > 0;
+  const isCylItemOutOfStock = selectedCylVariantDetails.stock === 0;
+  const showCylSelectVariantPlaceholder = hasCylVariants && !parsedColorFromItem && !parsedSizeFromItem && !selectedCylVariantDetails.productCode;
+  const canConfirmCylSelection = !!selectedVariantInSheet && (selectedVariantInSheet.stock === undefined || selectedVariantInSheet.stock > 0);
+
+  let stockStatusTextInSheet = '';
+  let stockStatusClassesInSheet = 'text-sm font-medium ';
+  if (currentDisplayDetailsInSheet.stock !== undefined) {
+    if (currentDisplayDetailsInSheet.stock > 10) { stockStatusTextInSheet = t('cart.sheet.stock.inStock'); stockStatusClassesInSheet += 'text-green-600'; }
+    else if (currentDisplayDetailsInSheet.stock > 0) { stockStatusTextInSheet = t('cart.sheet.stock.remaining', { count: currentDisplayDetailsInSheet.stock }); stockStatusClassesInSheet += 'text-orange-600'; }
+    else { stockStatusTextInSheet = t('cart.sheet.stock.outOfStock'); stockStatusClassesInSheet += 'text-destructive'; }
+  }
+
+  const handleRelevantItemAddToCart = () => {
+    const itemToAdd: Product = {
+      id: item.id,
+      name: selectedCylVariantDetails.name || item.name,
+      price: selectedCylVariantDetails.price || item.price,
+      originalPrice: selectedCylVariantDetails.originalPrice,
+      brand: item.brand,
+      imageUrl: selectedCylVariantDetails.imageUrl || item.imageUrl,
+      dataAiHint: selectedCylVariantDetails.dataAiHint || item.dataAiHint,
+      productCode: selectedCylVariantDetails.productCode || item.productCode,
+      variant: selectedCylVariantDetails.variant,
+      stock: selectedCylVariantDetails.stock,
+      availableVariants: item.availableVariants, // Pass full variants list
+      discountDescription: item.discountDescription,
+    };
+    onAddToCartParent(itemToAdd);
+  };
+
+  return (
+    <div className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted">
+      <Image
+        src={selectedCylVariantDetails.imageUrl || item.imageUrl}
+        alt={selectedCylVariantDetails.name || item.name}
+        width={60}
+        height={60}
+        className="w-14 h-14 sm:w-16 sm:h-16 rounded object-cover border"
+        data-ai-hint={selectedCylVariantDetails.dataAiHint || item.dataAiHint || "product image"}
+      />
+      <div className="flex-grow min-w-0">
+        <p className="text-sm font-medium text-foreground line-clamp-2">{selectedCylVariantDetails.name || item.name}</p>
+        
+        {hasCylVariants ? (
+          <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
+            <SheetTrigger asChild disabled={isCylItemOutOfStock}>
+              <button
+                type="button"
+                className={cn(
+                  "text-left block focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
+                  (isCylItemOutOfStock) && "cursor-not-allowed opacity-70"
+                )}
+                disabled={isCylItemOutOfStock}
+              >
+                <Badge
+                  className={cn(
+                    "text-xs mt-1 px-1.5 py-0.5 inline-flex items-center bg-black text-white hover:bg-neutral-800",
+                    (isCylItemOutOfStock) ? "cursor-not-allowed" : "cursor-pointer"
+                  )}
+                >
+                  {showCylSelectVariantPlaceholder ? (
+                     <span className="italic text-white/80 truncate">{t('cart.sheet.selectVariantPlaceholder')}</span>
+                  ) : (
+                     cylBadgeDisplayString && <span className="truncate">{cylBadgeDisplayString}</span>
+                  )}
+                  <ChevronDown className="w-3 h-3 ml-1 text-white/80 flex-shrink-0" />
+                </Badge>
+              </button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-lg p-0 flex flex-col max-h-[85vh] sm:max-h-[80vh]">
+              <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10">
+                <SheetTitle className="text-lg text-center font-semibold">{t('cart.sheet.productInfoTitle')}</SheetTitle>
+              </SheetHeader>
+              <ScrollArea className="flex-grow">
+                <div className="p-4 space-y-5">
+                  <div className="flex items-start space-x-3">
+                    <Image
+                      src={currentDisplayDetailsInSheet.imageUrl}
+                      alt={item.name}
+                      width={88}
+                      height={88}
+                      className="rounded-md object-cover w-20 h-20 sm:w-24 sm:h-24 border flex-shrink-0"
+                      data-ai-hint={currentDisplayDetailsInSheet.dataAiHint || "product image"}
+                    />
+                    <div className="flex-grow min-w-0">
+                      {item.brand && <p className="text-sm font-semibold text-foreground">{item.brand}</p>}
+                      <p className="text-sm text-foreground mt-0.5 line-clamp-2">{item.name}</p>
+                      <div className="flex items-baseline space-x-2 mt-1">
+                          <p className="text-lg font-bold text-foreground">{formatCurrency(currentDisplayDetailsInSheet.price || 0)}</p>
+                          {stockStatusTextInSheet && (<> <span className="text-sm text-muted-foreground">|</span> <span className={stockStatusClassesInSheet}>{stockStatusTextInSheet}</span> </>)}
+                      </div>
+                       <div className="flex items-center space-x-2 text-lg text-foreground mt-2 opacity-50">
+                          <Button variant="outline" size="icon" className="h-7 w-7" disabled><Minus className="h-4 w-4" /></Button>
+                          <span className="font-semibold tabular-nums">1</span>
+                          <Button variant="outline" size="icon" className="h-7 w-7" disabled><PlusIcon className="h-4 w-4" /></Button>
+                        </div>
+                    </div>
+                  </div>
+                  {uniqueColors.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
+                      <div className="flex space-x-2 overflow-x-auto pb-2 -mb-2">
+                        {uniqueColors.map(color => (
+                          <button key={color} type="button" onClick={() => { setTempSelectedColorName(color); if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null); }}
+                            className={cn("rounded border p-0.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background", tempSelectedColorName === color ? "border-foreground border-2" : "border-muted hover:border-muted-foreground")}
+                            aria-label={color}
+                          ><Image src={`https://placehold.co/56x56.png`} alt={color} width={56} height={56} className="rounded-sm object-cover" data-ai-hint={color.toLowerCase()} /></button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {allPossibleSizes.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {allPossibleSizes.map(size => {
+                          const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
+                          const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
+                          const isSizeInStock = variantForThisSize ? (variantForThisSize.stock === undefined || variantForThisSize.stock > 0) : true;
+                          const isSizeDisabled = !isSizeAvailableForColor || !isSizeInStock;
+                          return (<Button key={size} type="button" variant={tempSelectedSizeValue === size && !isSizeDisabled ? "default" : "outline"} size="sm" onClick={() => { if (!isSizeDisabled) setTempSelectedSizeValue(size); }} disabled={isSizeDisabled}
+                            className={cn("px-4 py-2 h-auto text-sm rounded", tempSelectedSizeValue === size && !isSizeDisabled ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted", isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50")}
+                          >{size}</Button>);
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  {(!item.availableVariants || item.availableVariants.length === 0 || (item.availableVariants.length === 1 && !uniqueColors.length && !allPossibleSizes.length)) && (<p className="text-sm text-muted-foreground">{t('cart.sheet.noOtherVariants')}</p>)}
+                </div>
+              </ScrollArea>
+              <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
+                <Button onClick={handleConfirmCylVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmCylSelection}>{t('cart.sheet.updateButton')}</Button>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
+        ) : (
+          selectedCylVariantDetails.variant && <Badge className="bg-black text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center"><span className="truncate">{selectedCylVariantDetails.variant}</span></Badge>
+        )}
+
+        <p className="text-sm text-foreground font-semibold mt-0.5">{formatCurrency(selectedCylVariantDetails.price || item.price)}</p>
+      </div>
+      <Button
+        size="sm"
+        variant="outline"
+        className="text-foreground hover:bg-primary hover:text-primary-foreground border-foreground/50 hover:border-primary ml-auto"
+        onClick={handleRelevantItemAddToCart}
+        disabled={isCylItemOutOfStock}
+      >
+        <ShoppingBag className="w-4 h-4 mr-2" />
+        {t('cart.completeLook.addToCartButton')}
+      </Button>
+    </div>
+  );
+};
+
 
 interface ShopSectionProps {
   shop: Shop; 
@@ -37,8 +331,9 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
   const [showCylFlags, setShowCylFlags] = useState<boolean[]>([]);
 
   useEffect(() => {
+    // Only set random flags if items change length, to avoid re-randomizing on every render
     setShowCylFlags(items.map(() => Math.random() < 0.33)); 
-  }, [items]);
+  }, [items.length]);
 
 
   const handleShopNowClick = () => {
@@ -139,29 +434,11 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
                             .filter(relevantItem => relevantItem.id !== item.id) 
                             .slice(0, 3) 
                             .map(relevantItem => (
-                            <div key={relevantItem.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted">
-                              <Image
-                                src={relevantItem.imageUrl}
-                                alt={relevantItem.name}
-                                width={60}
-                                height={60}
-                                className="w-14 h-14 sm:w-16 sm:h-16 rounded object-cover border"
-                                data-ai-hint={relevantItem.dataAiHint || "product image"}
+                              <RelevantProductCard 
+                                key={relevantItem.id} 
+                                item={relevantItem} 
+                                onAddToCartParent={onAddToCart} 
                               />
-                              <div className="flex-grow">
-                                <p className="text-sm font-medium text-foreground line-clamp-2">{relevantItem.name}</p>
-                                <p className="text-sm text-foreground font-semibold">{formatCurrency(relevantItem.price)}</p>
-                              </div>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-foreground hover:bg-primary hover:text-primary-foreground border-foreground/50 hover:border-primary"
-                                onClick={() => onAddToCart(relevantItem)}
-                              >
-                                <ShoppingBag className="w-4 h-4 mr-2" />
-                                {t('cart.completeLook.addToCartButton')}
-                              </Button>
-                            </div>
                            ))}
                          </div>
                        ) : (
@@ -180,4 +457,3 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
 };
 
 export default ShopSection;
-

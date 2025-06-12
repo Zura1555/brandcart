@@ -146,11 +146,18 @@ export const mockRelevantProducts: Product[] = [
     id: 'relevant1',
     name: 'Stylish Sunglasses',
     price: 450000,
-    brand: 'PUMA',
-    imageUrl: 'https://placehold.co/150x150.png',
-    dataAiHint: 'sunglasses fashion',
-    productCode: 'REL001',
+    brand: 'PUMA', // Example brand
+    imageUrl: 'https://placehold.co/150x150/000000/FFFFFF.png', // Black sunglasses placeholder
+    dataAiHint: 'sunglasses fashion black',
+    productCode: 'SG001',
+    variant: 'Black Frame', // Default display variant
     stock: 10,
+    availableVariants: [
+      { id: 'sg-black', name: 'Black Frame', stock: 5, price: 450000, imageUrl: 'https://placehold.co/150x150/000000/FFFFFF.png', dataAiHint: 'sunglasses black' },
+      { id: 'sg-tortoise', name: 'Tortoise Shell', stock: 3, price: 470000, imageUrl: 'https://placehold.co/150x150/A52A2A/FFFFFF.png', dataAiHint: 'sunglasses tortoise' },
+      { id: 'sg-blue', name: 'Blue Frame', stock: 0, price: 450000, imageUrl: 'https://placehold.co/150x150/0000FF/FFFFFF.png', dataAiHint: 'sunglasses blue' },
+      { id: 'sg-clear-m', name: 'Clear, M', stock: 7, price: 460000, imageUrl: 'https://placehold.co/150x150/FFFFFF/000000.png', dataAiHint: 'sunglasses clear' },
+    ]
   },
   {
     id: 'relevant2',
@@ -161,6 +168,11 @@ export const mockRelevantProducts: Product[] = [
     dataAiHint: 'leather belt',
     productCode: 'REL002',
     stock: 5,
+    variant: 'Size M',
+    availableVariants: [
+        { id: 'belt-m', name: 'Size M', stock: 3, price: 750000},
+        { id: 'belt-l', name: 'Size L', stock: 2, price: 750000},
+    ]
   },
   {
     id: 'relevant3',
@@ -171,6 +183,7 @@ export const mockRelevantProducts: Product[] = [
     dataAiHint: 'socks pack',
     productCode: 'REL003',
     stock: 20,
+    // No specific variants, will just show name
   },
   {
     id: 'relevant4',
@@ -181,6 +194,11 @@ export const mockRelevantProducts: Product[] = [
     dataAiHint: 'water bottle sport',
     productCode: 'REL004',
     stock: 15,
+    variant: 'Red',
+    availableVariants: [
+        {id: 'bottle-red', name: 'Red', stock: 8},
+        {id: 'bottle-blue', name: 'Blue', stock: 7},
+    ]
   },
    {
     id: 'relevant5',
@@ -191,5 +209,6 @@ export const mockRelevantProducts: Product[] = [
     dataAiHint: 'tote bag canvas',
     productCode: 'REL005',
     stock: 12,
+     // No specific variants
   },
 ];
