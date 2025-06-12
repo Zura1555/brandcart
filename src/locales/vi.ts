@@ -8,18 +8,10 @@ const viTranslations = {
     checkoutButton: "Mua hàng ({count})",
     emptyCartTitle: "Giỏ hàng của bạn trống.",
     emptyCartMessage: "Thêm sản phẩm để bắt đầu mua sắm!",
-    unneededItemsTitle: "Các sản phẩm bạn có thể chưa cần",
-    removeButton: "Xóa bớt",
     recentlyViewedTitle: "Xem Gần Đây",
     addToCartLabel: "Thêm {itemName} vào giỏ",
     brandOffer: {
       shopNowButton: "Mua ngay"
-    },
-    dialog: {
-      removeUnneededTitle: "Xóa sản phẩm không cần thiết",
-      removeUnneededDescription: "Chọn các sản phẩm bạn muốn xóa khỏi giỏ hàng. Nhấn \"Xóa đã chọn\" khi hoàn tất.",
-      cancelButton: "Hủy",
-      removeSelectedButton: "Xóa đã chọn ({count})",
     },
     vouchersAndShipping: {
       voucherLabel: "Voucher giảm đến {amount}₫",
@@ -41,13 +33,18 @@ const viTranslations = {
         outOfStock: "Hết hàng"
       },
       selectVariantPlaceholder: "Chọn phân loại"
+    },
+    completeLook: {
+      bannerText: "HOÀN THIỆN SET ĐỒ",
+      dialogTitle: "Phối cùng {productName}",
+      addToCartButton: "Thêm vào giỏ",
+      noSuggestions: "Hiện không có gợi ý nào.",
+      relevantItemLabel: "Sản phẩm liên quan"
     }
   },
   toast: {
     noItemsSelectedTitle: "Chưa chọn sản phẩm",
     noItemsSelectedDescription: "Vui lòng chọn ít nhất một sản phẩm để tiếp tục thanh toán.",
-    itemsRemovedTitle: "Đã xóa sản phẩm",
-    itemsRemovedDescription: "Đã xóa {count} sản phẩm khỏi giỏ hàng của bạn.",
     itemRemovedTitleSingle: "Đã xóa {itemName}",
     limitReachedTitle: "Đạt giới hạn",
     limitReachedDescription: "Số lượng tối đa cho mỗi sản phẩm là 99.",
@@ -134,7 +131,6 @@ const viTranslations = {
       taxCodePlaceholder: "Nhập mã số thuế",
       emailPlaceholder: "Nhập email",
       addressPlaceholder: "Nhập địa chỉ",
-      saveButton: "Lưu",
       doNotIssueButton: "Không xuất hoá đơn",
     },
     item: {

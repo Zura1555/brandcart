@@ -15,9 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight, XCircle, CheckCircle2, Clock, AlertTriangle, ShoppingBag } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight, XCircle, CheckCircle2, Clock, AlertTriangle, ShoppingBag, PlusCircle } from 'lucide-react';
 import type { CartItem, Shop, SimpleVariant, Product } from '@/interfaces';
-import { mockShops } from '@/lib/mockData';
+import { mockShops, mockRelevantProducts } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
 import RecentlyViewedItemCard from '@/components/cart/RecentlyViewedItemCard';
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { cn } from "@/lib/utils";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 
@@ -227,9 +229,6 @@ const BrandCartPage = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  const [isCleanupDialogOpen, setIsCleanupDialogOpen] = useState(false);
-  const [itemsSelectedForCleanup, setItemsSelectedForCleanup] = useState<Set<string>>(new Set());
-
   const [isVoucherSheetOpen, setIsVoucherSheetOpen] = useState(false);
   const [voucherCodeInput, setVoucherCodeInput] = useState('');
   
@@ -429,40 +428,6 @@ const BrandCartPage = () => {
       };
     }).filter(shopGroup => shopGroup.products.length > 0); 
   }, [cartItems]);
-
-  const openCleanupDialog = () => {
-    setItemsSelectedForCleanup(new Set()); 
-    setIsCleanupDialogOpen(true);
-  };
-
-  const closeCleanupDialog = () => {
-    setIsCleanupDialogOpen(false);
-    setItemsSelectedForCleanup(new Set());
-  };
-
-  const toggleItemForCleanup = (cartItemId: string) => {
-    setItemsSelectedForCleanup(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(cartItemId)) {
-        newSet.delete(cartItemId);
-      } else {
-        newSet.add(cartItemId);
-      }
-      return newSet;
-    });
-  };
-
-  const confirmCleanup = () => {
-    const itemsToRemoveCount = itemsSelectedForCleanup.size;
-    setCartItems(prevItems => prevItems.filter(item => !itemsSelectedForCleanup.has(item.cartItemId)));
-    closeCleanupDialog();
-    if (itemsToRemoveCount > 0) {
-      toast({
-        title: t('toast.itemsRemovedTitle'),
-        description: t('toast.itemsRemovedDescription', { count: itemsToRemoveCount }),
-      });
-    }
-  };
   
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')}₫`;
@@ -556,8 +521,8 @@ const BrandCartPage = () => {
     setIsVoucherSheetOpen(false);
   };
 
-  const handleAddToCartRecentlyViewed = (itemToAdd: Product) => {
-    const existingCartItem = cartItems.find(ci => ci.id === itemToAdd.id);
+  const handleAddToCart = (itemToAdd: Product) => {
+    const existingCartItem = cartItems.find(ci => ci.id === itemToAdd.id && ci.variant === itemToAdd.variant); // Check for variant too
 
     if (existingCartItem) {
       handleQuantityChange(existingCartItem.cartItemId, existingCartItem.quantity + 1);
@@ -568,9 +533,9 @@ const BrandCartPage = () => {
     } else {
       const newCartItem: CartItem = {
         ...itemToAdd,
-        cartItemId: `${itemToAdd.id}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        cartItemId: `${itemToAdd.id}-${itemToAdd.variant || 'base'}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         quantity: 1,
-        selected: false, 
+        selected: false, // New items from CYL are not selected by default
       };
       setCartItems(prevItems => [...prevItems, newCartItem]);
       toast({
@@ -636,41 +601,7 @@ const BrandCartPage = () => {
             </div>
           ) : (
             <>
-              {itemsByShop.length > 0 && itemsByShop[0] && (
-                <ShopSection
-                  key={itemsByShop[0].name}
-                  shop={itemsByShop[0]}
-                  items={itemsByShop[0].products}
-                  isShopSelected={itemsByShop[0].isShopSelected}
-                  onShopSelectToggle={(checked) => handleToggleShopSelect(itemsByShop[0].name, checked)}
-                  onItemSelectToggle={handleToggleItemSelect}
-                  onQuantityChange={handleQuantityChange}
-                  onDeleteItem={handleDeleteItem}
-                  onVariantChange={handleVariantChange}
-                />
-              )}
-
-              {cartItems.length > 0 && (
-                <Card className="bg-card p-4 rounded-lg shadow mx-2 sm:mx-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Trash2 className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
-                      <span className="text-sm text-foreground">{t('cart.unneededItemsTitle')}</span>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-foreground border-foreground hover:bg-muted hover:text-foreground"
-                      onClick={openCleanupDialog}
-                      disabled={cartItems.length === 0}
-                    >
-                      {t('cart.removeButton')}
-                    </Button>
-                  </div>
-                </Card>
-              )}
-
-              {itemsByShop.slice(1).map(shopGroup => (
+              {itemsByShop.map(shopGroup => (
                 <ShopSection
                   key={shopGroup.name}
                   shop={shopGroup}
@@ -681,6 +612,7 @@ const BrandCartPage = () => {
                   onQuantityChange={handleQuantityChange}
                   onDeleteItem={handleDeleteItem}
                   onVariantChange={handleVariantChange}
+                  onAddToCart={handleAddToCart}
                 />
               ))}
             </>
@@ -803,7 +735,7 @@ const BrandCartPage = () => {
               <ScrollArea className="w-full whitespace-nowrap" orientation="horizontal">
                 <div className="flex space-x-3 sm:space-x-4 pb-3">
                   {recentlyViewedItems.map(item => (
-                    <RecentlyViewedItemCard key={`recent-${item.id}`} item={item} onAddToCart={handleAddToCartRecentlyViewed} />
+                    <RecentlyViewedItemCard key={`recent-${item.id}`} item={item} onAddToCart={handleAddToCart} />
                   ))}
                 </div>
                 <ScrollBar orientation="horizontal" />
@@ -845,64 +777,8 @@ const BrandCartPage = () => {
           </div>
         </div>
       </footer>
-
-      <Dialog open={isCleanupDialogOpen} onOpenChange={setIsCleanupDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>{t('cart.dialog.removeUnneededTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('cart.dialog.removeUnneededDescription')}
-            </DialogDescription>
-          </DialogHeader>
-          <ScrollArea className="max-h-[60vh] pr-1">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 py-4">
-              {cartItems.length > 0 ? cartItems.map(item => (
-                <div key={`cleanup-${item.cartItemId}`} className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 border border-transparent has-[:checked]:border-destructive/50 has-[:checked]:bg-destructive/5">
-                  <Checkbox
-                    id={`cleanup-cb-${item.cartItemId}`}
-                    checked={itemsSelectedForCleanup.has(item.cartItemId)}
-                    onCheckedChange={() => toggleItemForCleanup(item.cartItemId)}
-                    className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive self-end mb-1"
-                  />
-                  <label htmlFor={`cleanup-cb-${item.cartItemId}`} className="flex flex-col items-center space-y-1 cursor-pointer w-full">
-                    <Image 
-                      src={item.imageUrl} 
-                      alt={item.name} 
-                      width={64} 
-                      height={64} 
-                      className="rounded-md object-cover w-16 h-16 shrink-0 border"
-                      data-ai-hint={item.dataAiHint}
-                    />
-                    <div className="text-center w-full">
-                      <p className="text-xs font-medium leading-tight truncate" title={item.name}>
-                        {item.name}
-                      </p>
-                      {item.variant && <p className="text-xxs text-muted-foreground mt-0.5 truncate">{item.variant.replace(/\s*\(\+\d+\)\s*$/, '')}</p>}
-                       <p className="text-xs font-semibold text-foreground mt-0.5">{formatCurrency(item.price)}</p>
-                    </div>
-                  </label>
-                </div>
-              )) : (
-                <p className="text-sm text-muted-foreground text-center py-4">{t('cart.emptyCartTitle')}</p>
-              )}
-            </div>
-          </ScrollArea>
-          <DialogFooter>
-            <Button variant="outline" onClick={closeCleanupDialog}>{t('cart.dialog.cancelButton')}</Button>
-            <Button 
-              onClick={confirmCleanup} 
-              disabled={itemsSelectedForCleanup.size === 0 || cartItems.length === 0}
-              variant="destructive"
-            >
-              {t('cart.dialog.removeSelectedButton', { count: itemsSelectedForCleanup.size })}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
     </div>
   );
 };
 
 export default BrandCartPage;
-

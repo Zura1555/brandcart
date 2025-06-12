@@ -8,18 +8,10 @@ const enTranslations = {
     checkoutButton: "Checkout ({count})",
     emptyCartTitle: "Your cart is empty.",
     emptyCartMessage: "Add some products to get started!",
-    unneededItemsTitle: "Items you might not need",
-    removeButton: "Remove",
     recentlyViewedTitle: "Recently Viewed",
     addToCartLabel: "Add {itemName} to cart",
     brandOffer: {
       shopNowButton: "Shop Now"
-    },
-    dialog: {
-      removeUnneededTitle: "Remove Unneeded Items",
-      removeUnneededDescription: "Select the items you want to remove from your cart. Click \"Remove Selected\" when you're done.",
-      cancelButton: "Cancel",
-      removeSelectedButton: "Remove Selected ({count})",
     },
     vouchersAndShipping: {
       voucherLabel: "Voucher up to {amount}₫",
@@ -41,13 +33,18 @@ const enTranslations = {
         outOfStock: "Out of stock"
       },
       selectVariantPlaceholder: "Select variant"
+    },
+    completeLook: {
+      bannerText: "COMPLETE YOUR LOOK",
+      dialogTitle: "Pairs well with {productName}",
+      addToCartButton: "Add to Cart",
+      noSuggestions: "No specific suggestions right now.",
+      relevantItemLabel: "Relevant Item"
     }
   },
   toast: {
     noItemsSelectedTitle: "No items selected",
     noItemsSelectedDescription: "Please select at least one item to proceed to checkout.",
-    itemsRemovedTitle: "Items Removed",
-    itemsRemovedDescription: "{count} item(s) have been removed from your cart.",
     itemRemovedTitleSingle: "{itemName} removed",
     limitReachedTitle: "Limit Reached",
     limitReachedDescription: "Maximum quantity per item is 99.",
@@ -134,7 +131,6 @@ const enTranslations = {
       taxCodePlaceholder: "Enter tax code",
       emailPlaceholder: "Enter email",
       addressPlaceholder: "Enter address",
-      saveButton: "Save",
       doNotIssueButton: "Don't issue invoice",
     },
     item: {
