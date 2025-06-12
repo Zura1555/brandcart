@@ -254,23 +254,24 @@ const CheckoutPage = () => {
     return staticProductPlaceholder.price * staticProductPlaceholder.quantity;
   }, [dynamicDisplayShops]);
 
-  const handleEInvoiceDetailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEInvoiceDetailChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEInvoiceDetails(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSaveEInvoice = () => {
-    if (eInvoiceType === 'personal' && (!eInvoiceDetails.fullName || !eInvoiceDetails.idCard || !eInvoiceDetails.email || !eInvoiceDetails.address)) {
-      toast({ title: t('toast.eInvoice.validationError.title'), description: t('toast.eInvoice.validationError.personal'), variant: "destructive"});
-      return;
+     // Auto-save logic
+    const detailsToSave = { ...eInvoiceDetails, [name]: value };
+    if (eInvoiceType === 'personal') {
+      if (detailsToSave.fullName && detailsToSave.idCard && detailsToSave.email && detailsToSave.address) {
+        setEInvoiceSummary(detailsToSave.fullName);
+      } else {
+        setEInvoiceSummary(null);
+      }
+    } else if (eInvoiceType === 'company') {
+      if (detailsToSave.companyName && detailsToSave.taxCode && detailsToSave.email && detailsToSave.address) {
+        setEInvoiceSummary(detailsToSave.companyName);
+      } else {
+        setEInvoiceSummary(null);
+      }
     }
-    if (eInvoiceType === 'company' && (!eInvoiceDetails.companyName || !eInvoiceDetails.taxCode || !eInvoiceDetails.email || !eInvoiceDetails.address)) {
-      toast({ title: t('toast.eInvoice.validationError.title'), description: t('toast.eInvoice.validationError.company'), variant: "destructive"});
-      return;
-    }
-    console.log("E-Invoice Details Saved:", eInvoiceDetails);
-    setEInvoiceSummary(eInvoiceType === 'personal' ? eInvoiceDetails.fullName : eInvoiceDetails.companyName);
-    toast({ title: t('toast.eInvoice.saved.title'), description: t('toast.eInvoice.saved.description')});
   };
   
   const handleWantEInvoiceChange = (value: string) => {
@@ -563,11 +564,6 @@ const CheckoutPage = () => {
                       <Input type="email" placeholder={t('checkout.eInvoice.emailPlaceholder')} name="email" value={eInvoiceDetails.email} onChange={handleEInvoiceDetailChange} />
                       <Input placeholder={t('checkout.eInvoice.addressPlaceholder')} name="address" value={eInvoiceDetails.address} onChange={handleEInvoiceDetailChange} />
                       
-                      <div className="flex space-x-3 pt-2">
-                        <Button onClick={handleSaveEInvoice} className="flex-1 bg-foreground hover:bg-foreground/90 text-accent-foreground">
-                          {t('checkout.eInvoice.saveButton')}
-                        </Button>
-                      </div>
                     </div>
                   )}
                 </div>
@@ -711,8 +707,8 @@ const CheckoutPage = () => {
             />
           </div>
           
-          <div className="pt-3 pb-3 flex flex-row items-center justify-between gap-3">
-            <div className="">
+           <div className="flex flex-row items-center justify-between flex-grow gap-3">
+            <div className="text-left">
               <p className="text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
               <p className="text-lg sm:text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
               {displaySavings > 0 && (
@@ -738,6 +734,4 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-
-
     
