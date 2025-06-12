@@ -827,8 +827,8 @@ const BrandCartPage = () => {
               {t('cart.selectAll')}
             </label>
           </div>
-          <div className="flex flex-col items-stretch space-y-2 xs:flex-row xs:items-center xs:space-y-0 xs:space-x-3">
-            <div className="text-right xs:text-right">
+          <div className="flex flex-row items-center space-x-3">
+            <div className="text-left">
               <p className="text-xs text-muted-foreground">{t('cart.totalAmountLabel')}</p>
               <p className="text-md font-bold text-foreground">
                 {formatCurrency(totalAmount)}
@@ -838,7 +838,7 @@ const BrandCartPage = () => {
               onClick={handleCheckout}
               disabled={!isAnythingSelected}
               size="default" 
-              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold px-3 text-xs w-full xs:w-auto xs:min-w-[110px] sm:px-4 sm:text-sm sm:min-w-[120px]"
+              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold px-3 text-xs w-auto min-w-[100px] sm:px-4 sm:text-sm sm:min-w-[120px]"
             >
               {t('cart.checkoutButton', { count: selectedItemsCount })}
             </Button>
