@@ -91,6 +91,25 @@ const mockAvailableVouchersSheet: VoucherInterface[] = [
     isSelected: false,
     isAvailable: true,
   },
+  {
+    id: 'v_generic_20k_sheet',
+    title: 'Voucher giảm 20.000₫ toàn sàn',
+    imageUrl: 'https://placehold.co/40x40/FF9800/FFFFFF.png',
+    imageAiHint: 'generic voucher',
+    expiryInfo: '10/10/2024',
+    isSelected: false,
+    isAvailable: true,
+  },
+  {
+    id: 'v_partner_deal_sheet',
+    title: 'Ưu đãi đối tác 15%',
+    imageUrl: 'https://placehold.co/40x40/795548/FFFFFF.png',
+    imageAiHint: 'partner deal',
+    expiryInfo: '05/11/2024',
+    conditionText: 'Áp dụng cho đơn hàng từ 500.000₫',
+    isSelected: false,
+    isAvailable: true,
+  },
 ];
 
 const mockUnavailableVouchersSheet: VoucherInterface[] = [
@@ -136,6 +155,28 @@ const mockUnavailableVouchersSheet: VoucherInterface[] = [
     isSelected: false,
     isAvailable: false,
     unavailableReason: 'Cần chọn phương thức thanh toán ShopeePay.',
+  },
+  {
+    id: 'v_brand_specific_expired_sheet',
+    title: 'Giảm 5% cho Nike (Hết hạn)',
+    imageUrl: 'https://placehold.co/40x40/607D8B/FFFFFF.png',
+    imageAiHint: 'Nike logo',
+    expiryInfo: '15/02/2024 - Hết hạn',
+    restrictionText: 'Chỉ áp dụng cho sản phẩm Nike',
+    isSelected: false,
+    isAvailable: false,
+    unavailableReason: 'Voucher đã hết hạn và chỉ dành cho Nike.',
+  },
+  {
+    id: 'v_min_spend_high_sheet',
+    title: 'Giảm 500.000₫ cho đơn từ 10.000.000₫',
+    imageUrl: 'https://placehold.co/40x40/4A148C/FFFFFF.png',
+    imageAiHint: 'premium voucher',
+    expiryInfo: '31/12/2024',
+    conditionText: 'Chi tiêu thêm 9.500.000₫ để sử dụng',
+    isSelected: false,
+    isAvailable: false,
+    unavailableReason: 'selectVoucher.voucherCard.unavailableReasonMinOrder',
   },
 ];
 
@@ -786,18 +827,18 @@ const BrandCartPage = () => {
               {t('cart.selectAll')}
             </label>
           </div>
-          <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">{t('cart.totalAmountLabel')}</p>
-              <p className="text-lg font-bold text-foreground">
+          <div className="flex flex-col items-stretch space-y-2 xs:flex-row xs:items-center xs:space-y-0 xs:space-x-3">
+            <div className="text-right xs:text-right">
+              <p className="text-xs text-muted-foreground">{t('cart.totalAmountLabel')}</p>
+              <p className="text-md font-bold text-foreground">
                 {formatCurrency(totalAmount)}
               </p>
             </div>
             <Button
               onClick={handleCheckout}
               disabled={!isAnythingSelected}
-              size="lg"
-              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold px-4 py-2 text-sm min-w-[120px]"
+              size="default" 
+              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold px-3 text-xs w-full xs:w-auto xs:min-w-[110px] sm:px-4 sm:text-sm sm:min-w-[120px]"
             >
               {t('cart.checkoutButton', { count: selectedItemsCount })}
             </Button>

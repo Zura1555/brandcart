@@ -45,7 +45,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
     <Card className="shadow-md rounded-lg overflow-hidden bg-card">
       <CardHeader className="border-b bg-card py-3 px-4 sm:px-6">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 min-w-0"> {/* Added min-w-0 for flex child truncation */}
             <Checkbox
               id={`select-all-${shop.name.replace(/\s+/g, '-')}`}
               checked={isShopSelected}
@@ -53,7 +53,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
               aria-label={`Select all items from ${shop.name}`}
             />
             
-            <CardTitle className="font-semibold text-base text-foreground flex items-center cursor-pointer">
+            <CardTitle className="font-semibold text-base text-foreground flex items-center cursor-pointer min-w-0"> {/* Added min-w-0 */}
               {shop.logoUrl && (
                 <div className="mr-2 flex-shrink-0">
                   <Image
@@ -67,12 +67,12 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
                   />
                 </div>
               )}
-              {shop.name}
-              <ChevronRight className="w-4 h-4 text-muted-foreground ml-1" />
+              <span className="truncate">{shop.name}</span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground ml-1 flex-shrink-0" /> {/* Added flex-shrink-0 */}
             </CardTitle>
           </div>
           {shop.editLinkText && (
-            <Button variant="link" className="text-sm text-muted-foreground p-0 h-auto hover:text-accent">
+            <Button variant="link" className="text-sm text-muted-foreground p-0 h-auto hover:text-accent flex-shrink-0"> {/* Added flex-shrink-0 */}
               {shop.editLinkText}
             </Button>
           )}
@@ -115,3 +115,4 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
 };
 
 export default ShopSection;
+

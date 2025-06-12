@@ -685,9 +685,9 @@ const CheckoutPage = () => {
             />
           </div>
 
-          <div className="pt-2 pb-3 flex flex-row items-center justify-between">
-            <div className=""> 
-              <p className="text-xs sm:text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
+          <div className="pt-3 pb-3 flex flex-row items-center justify-between gap-3">
+            <div className="flex-shrink text-left">
+              <p className="text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
               <p className="text-lg sm:text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
               {displaySavings > 0 && (
                 <p className="text-xs text-green-600">
@@ -712,29 +712,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-    
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
