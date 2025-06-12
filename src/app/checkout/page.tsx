@@ -81,7 +81,6 @@ const CheckoutPage = () => {
   const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
 
   // E-Invoice state
-  const [wantEInvoice, setWantEInvoice] = useState(false);
   const [eInvoiceType, setEInvoiceType] = useState<'personal' | 'company'>('personal');
   const [eInvoiceDetails, setEInvoiceDetails] = useState({
     fullName: '',
@@ -273,16 +272,6 @@ const CheckoutPage = () => {
     toast({ title: t('toast.eInvoice.saved.title'), description: t('toast.eInvoice.saved.description')});
   };
   
-  const handleWantEInvoiceChange = (value: string) => {
-    const wants = value === 'true';
-    setWantEInvoice(wants);
-    if (!wants) {
-      setEInvoiceDetails({ fullName: '', companyName: '', idCard: '', taxCode: '', email: '', address: '' });
-      setEInvoiceSummary(null);
-      // Optional: Toast for cancellation
-      // toast({ title: t('toast.eInvoice.cancelled.title') });
-    }
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
@@ -507,75 +496,51 @@ const CheckoutPage = () => {
                       </div>
                       <div className="flex items-center">
                         <span className="text-sm text-muted-foreground mr-1">
-                          {!wantEInvoice
-                            ? t('checkout.eInvoice.option.noInvoice')
-                            : eInvoiceSummary || t('checkout.eInvoice.status.enterDetails')}
+                          {eInvoiceSummary || ""}
                         </span>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="p-4">
                       <div className="space-y-4">
+                        <p className="text-xs text-muted-foreground">{t('checkout.eInvoice.vatNote')}</p>
                         <div>
-                          <Label className="text-sm font-medium mb-2 block">{t('checkout.eInvoice.requestLabel')}</Label>
+                          <p className="text-sm font-medium mb-2">{t('checkout.eInvoice.invoiceTypeLabel')}</p>
                           <RadioGroup
-                            value={String(wantEInvoice)}
-                            onValueChange={handleWantEInvoiceChange}
-                            className="flex space-x-6 mb-4"
+                            value={eInvoiceType}
+                            onValueChange={(value: 'personal' | 'company') => setEInvoiceType(value)}
+                            className="flex space-x-6"
                           >
                             <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="false" id="no-e-invoice" />
-                              <Label htmlFor="no-e-invoice" className="font-normal">{t('checkout.eInvoice.option.noInvoice')}</Label>
+                              <RadioGroupItem value="personal" id="personal-invoice" />
+                              <Label htmlFor="personal-invoice" className="font-normal">{t('checkout.eInvoice.typePersonal')}</Label>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="true" id="issue-e-invoice" />
-                              <Label htmlFor="issue-e-invoice" className="font-normal">{t('checkout.eInvoice.option.issueInvoice')}</Label>
+                              <RadioGroupItem value="company" id="company-invoice" />
+                              <Label htmlFor="company-invoice" className="font-normal">{t('checkout.eInvoice.typeCompany')}</Label>
                             </div>
                           </RadioGroup>
                         </div>
-
-                        {wantEInvoice && (
+                        
+                        {eInvoiceType === 'personal' && (
                           <>
-                            <p className="text-xs text-muted-foreground">{t('checkout.eInvoice.vatNote')}</p>
-                            <div>
-                              <p className="text-sm font-medium mb-2">{t('checkout.eInvoice.invoiceTypeLabel')}</p>
-                              <RadioGroup
-                                value={eInvoiceType}
-                                onValueChange={(value: 'personal' | 'company') => setEInvoiceType(value)}
-                                className="flex space-x-6"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="personal" id="personal-invoice" />
-                                  <Label htmlFor="personal-invoice" className="font-normal">{t('checkout.eInvoice.typePersonal')}</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="company" id="company-invoice" />
-                                  <Label htmlFor="company-invoice" className="font-normal">{t('checkout.eInvoice.typeCompany')}</Label>
-                                </div>
-                              </RadioGroup>
-                            </div>
-                            
-                            {eInvoiceType === 'personal' && (
-                              <>
-                                <Input placeholder={t('checkout.eInvoice.fullNamePlaceholder')} name="fullName" value={eInvoiceDetails.fullName} onChange={handleEInvoiceDetailChange} />
-                                <Input placeholder={t('checkout.eInvoice.idCardPlaceholder')} name="idCard" value={eInvoiceDetails.idCard} onChange={handleEInvoiceDetailChange} />
-                              </>
-                            )}
-                            {eInvoiceType === 'company' && (
-                              <>
-                                <Input placeholder={t('checkout.eInvoice.companyNamePlaceholder')} name="companyName" value={eInvoiceDetails.companyName} onChange={handleEInvoiceDetailChange} />
-                                <Input placeholder={t('checkout.eInvoice.taxCodePlaceholder')} name="taxCode" value={eInvoiceDetails.taxCode} onChange={handleEInvoiceDetailChange} />
-                              </>
-                            )}
-                            <Input type="email" placeholder={t('checkout.eInvoice.emailPlaceholder')} name="email" value={eInvoiceDetails.email} onChange={handleEInvoiceDetailChange} />
-                            <Input placeholder={t('checkout.eInvoice.addressPlaceholder')} name="address" value={eInvoiceDetails.address} onChange={handleEInvoiceDetailChange} />
-                            
-                            <div className="flex space-x-3 pt-2">
-                              <Button onClick={handleSaveEInvoice} className="flex-1 bg-foreground hover:bg-foreground/90 text-accent-foreground">
-                                {t('checkout.eInvoice.saveButton')}
-                              </Button>
-                            </div>
+                            <Input placeholder={t('checkout.eInvoice.fullNamePlaceholder')} name="fullName" value={eInvoiceDetails.fullName} onChange={handleEInvoiceDetailChange} />
+                            <Input placeholder={t('checkout.eInvoice.idCardPlaceholder')} name="idCard" value={eInvoiceDetails.idCard} onChange={handleEInvoiceDetailChange} />
                           </>
                         )}
+                        {eInvoiceType === 'company' && (
+                          <>
+                            <Input placeholder={t('checkout.eInvoice.companyNamePlaceholder')} name="companyName" value={eInvoiceDetails.companyName} onChange={handleEInvoiceDetailChange} />
+                            <Input placeholder={t('checkout.eInvoice.taxCodePlaceholder')} name="taxCode" value={eInvoiceDetails.taxCode} onChange={handleEInvoiceDetailChange} />
+                          </>
+                        )}
+                        <Input type="email" placeholder={t('checkout.eInvoice.emailPlaceholder')} name="email" value={eInvoiceDetails.email} onChange={handleEInvoiceDetailChange} />
+                        <Input placeholder={t('checkout.eInvoice.addressPlaceholder')} name="address" value={eInvoiceDetails.address} onChange={handleEInvoiceDetailChange} />
+                        
+                        <div className="flex space-x-3 pt-2">
+                          <Button onClick={handleSaveEInvoice} className="flex-1 bg-foreground hover:bg-foreground/90 text-accent-foreground">
+                            {t('checkout.eInvoice.saveButton')}
+                          </Button>
+                        </div>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -720,8 +685,8 @@ const CheckoutPage = () => {
             />
           </div>
 
-          <div className="pt-2 pb-3 flex flex-col xs:flex-row justify-between items-center">
-            <div className="flex-shrink text-center xs:text-left mb-2 xs:mb-0">
+          <div className="pt-2 pb-3 flex flex-col xs:flex-row items-center">
+            <div className="xs:flex-grow text-center xs:text-left mb-2 xs:mb-0">
               <p className="text-xs xs:text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
               <p className="text-lg xs:text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
               {displaySavings > 0 && (
@@ -763,6 +728,7 @@ export default CheckoutPage;
 
 
     
+
 
 
 
