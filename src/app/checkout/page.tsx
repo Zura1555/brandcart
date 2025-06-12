@@ -489,7 +489,7 @@ const CheckoutPage = () => {
               <CardContent className="p-0 divide-y divide-border">
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="e-invoice">
-                    <AccordionTrigger className="p-4 flex items-center justify-between hover:bg-muted/50 hover:no-underline w-full text-sm data-[state=open]:border-b">
+                  <AccordionTrigger className="p-4 flex items-center justify-between hover:bg-muted/50 hover:no-underline w-full text-sm data-[state=open]:border-b">
                       <div className="flex items-center">
                         <FileText className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                         <span className="text-sm text-foreground">{t('checkout.eInvoice.title')}</span>
@@ -686,7 +686,7 @@ const CheckoutPage = () => {
           </div>
 
           <div className="pt-2 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-center sm:text-left mb-2 sm:mb-0">
+            <div className="mb-2 sm:mb-0 sm:text-left"> {/* Removed text-center, sm:text-left will apply for sm and up */}
               <p className="text-xs sm:text-sm text-muted-foreground">{t('checkout.footer.totalLabel')}</p>
               <p className="text-lg sm:text-xl font-bold text-foreground">{formatCurrency(displayTotalAmount)}</p>
               {displaySavings > 0 && (
@@ -728,6 +728,7 @@ export default CheckoutPage;
 
 
     
+
 
 
 
