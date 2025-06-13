@@ -398,9 +398,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
       <CardContent className="p-0">
         <div className="divide-y divide-border">
           {items.map((item) => {
-            const showCylAccordion =
-              (item.id === 'mlb1' && item.brand === 'MLB') ||
-              (item.id === 'puma2' && item.brand === 'PUMA');
+            const showCylAccordion = (item.id === 'mlb1' && item.brand === 'MLB');
 
             return (
               <div key={item.cartItemId} className="group/shop-item-wrapper">
