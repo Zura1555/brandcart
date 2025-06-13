@@ -78,7 +78,7 @@ const CheckoutPage = () => {
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
   const [shopMessage, setShopMessage] = useState<string>('');
-  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
+  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(true);
 
   // E-Invoice state
   const [wantEInvoice, setWantEInvoice] = useState<boolean>(false); // Default to 'Không xuất hóa đơn'
