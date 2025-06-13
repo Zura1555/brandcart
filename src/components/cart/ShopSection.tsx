@@ -297,14 +297,14 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
         <p className="text-sm text-foreground font-semibold mt-0.5">{formatCurrency(selectedCylVariantDetails.price || item.price)}</p>
       </div>
       <Button
-        size="sm"
+        size="icon"
         variant="outline"
         className="text-foreground hover:bg-primary hover:text-primary-foreground border-foreground/50 hover:border-primary ml-auto"
         onClick={handleRelevantItemAddToCart}
         disabled={isCylItemOutOfStock}
+        aria-label={t('cart.addToCartLabel', { itemName: selectedCylVariantDetails.name || item.name })}
       >
-        <ShoppingBag className="w-4 h-4 mr-2" />
-        {t('cart.completeLook.addToCartButton')}
+        <ShoppingBag className="w-4 h-4" />
       </Button>
     </div>
   );
