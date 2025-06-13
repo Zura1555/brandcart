@@ -397,53 +397,61 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
 
       <CardContent className="p-0">
         <div className="divide-y divide-border">
-          {items.map((item) => (
-            <div key={item.cartItemId} className="group/shop-item-wrapper">
-              <ProductItem
-                item={item}
-                onSelectToggle={onItemSelectToggle}
-                onQuantityChange={onQuantityChange}
-                onDeleteItem={onDeleteItem}
-                onVariantChange={onVariantChange}
-              />
-              <Accordion type="single" collapsible className="w-full bg-stone-100">
-                <AccordionItem value={`cyl-${item.cartItemId}`} className="border-t border-border">
-                  <AccordionTrigger className={cn(
-                    "!py-2 !px-3 hover:no-underline group", 
-                    "bg-black text-white hover:bg-neutral-800",
-                    "[&>.lucide-chevron-down]:hidden" 
-                  )}>
-                    <div className="flex justify-between items-center w-full">
-                      <span className="uppercase font-semibold text-xs tracking-wider">{t('cart.completeLook.bannerText')}</span>
-                      <PlusCircle className="w-5 h-5 text-white group-data-[state=closed]:block group-data-[state=open]:hidden" />
-                      <MinusCircle className="w-5 h-5 text-white group-data-[state=open]:block group-data-[state=closed]:hidden" />
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="p-4 bg-muted/50 border-t border-border">
-                     <p className="text-sm text-muted-foreground mb-3">
-                       {t('cart.completeLook.dialogTitle', { productName: item.name })}
-                     </p>
-                     {mockRelevantProducts && mockRelevantProducts.length > 0 ? (
-                       <div className="space-y-3">
-                         {mockRelevantProducts
-                          .filter(relevantItem => relevantItem.id !== item.id) 
-                          .slice(0, 3) 
-                          .map(relevantItem => (
-                            <RelevantProductCard 
-                              key={relevantItem.id} 
-                              item={relevantItem} 
-                              onAddToCartParent={onAddToCart} 
-                            />
-                         ))}
-                       </div>
-                     ) : (
-                       <p className="text-sm text-muted-foreground">{t('cart.completeLook.noSuggestions')}</p>
-                     )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          ))}
+          {items.map((item) => {
+            const showCylAccordion =
+              (item.id === 'mlb1' && item.brand === 'MLB') ||
+              (item.id === 'puma2' && item.brand === 'PUMA');
+
+            return (
+              <div key={item.cartItemId} className="group/shop-item-wrapper">
+                <ProductItem
+                  item={item}
+                  onSelectToggle={onItemSelectToggle}
+                  onQuantityChange={onQuantityChange}
+                  onDeleteItem={onDeleteItem}
+                  onVariantChange={onVariantChange}
+                />
+                {showCylAccordion && (
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value={`cyl-${item.cartItemId}`} className="border-t border-border">
+                      <AccordionTrigger className={cn(
+                        "!py-2 !px-3 hover:no-underline group", 
+                        "bg-black text-white hover:bg-neutral-800",
+                        "[&>.lucide-chevron-down]:hidden" 
+                      )}>
+                        <div className="flex justify-between items-center w-full">
+                          <span className="uppercase font-semibold text-xs tracking-wider">{t('cart.completeLook.bannerText')}</span>
+                          <PlusCircle className="w-5 h-5 text-white group-data-[state=closed]:block group-data-[state=open]:hidden" />
+                          <MinusCircle className="w-5 h-5 text-white group-data-[state=open]:block group-data-[state=closed]:hidden" />
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="p-4 bg-muted/50 border-t border-border">
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {t('cart.completeLook.dialogTitle', { productName: item.name })}
+                        </p>
+                        {mockRelevantProducts && mockRelevantProducts.length > 0 ? (
+                          <div className="space-y-3">
+                            {mockRelevantProducts
+                              .filter(relevantItem => relevantItem.id !== item.id) 
+                              .slice(0, 3) 
+                              .map(relevantItem => (
+                                <RelevantProductCard 
+                                  key={relevantItem.id} 
+                                  item={relevantItem} 
+                                  onAddToCartParent={onAddToCart} 
+                                />
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">{t('cart.completeLook.noSuggestions')}</p>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
+              </div>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
