@@ -77,7 +77,7 @@ const PaymentSuccessPage = () => {
 
 
   useEffect(() => {
-    if (orderDetails) { // Prevent re-processing if orderDetails are already set
+    if (orderDetails) { 
       setIsLoading(false);
       return;
     }
@@ -120,13 +120,10 @@ const PaymentSuccessPage = () => {
       if (router.pathname === '/payment') router.replace('/');
     }
     setIsLoading(false);
-  }, [orderDetails, locale, t, toast, router]); // Added orderDetails to dependency array
+  }, [orderDetails, locale, t, toast, router]); 
 
   useEffect(() => {
     if (!isLoading && !orderDetails) {
-      // This condition implies that useEffect either didn't find data or failed parsing,
-      // and router.replace('/') should have already been called by the first effect.
-      // This is a safeguard.
       if (router.pathname === '/payment') { 
           // router.replace('/'); // Redirection is handled in the first effect.
       }
@@ -190,9 +187,6 @@ const PaymentSuccessPage = () => {
   }
   
   if (!orderDetails) {
-    // This state should ideally be brief as the useEffect handles redirection.
-    // If redirection hasn't happened, it implies an issue caught by the second useEffect,
-    // or the first one is about to redirect.
     return (
         <div className="flex flex-col min-h-screen bg-background justify-center items-center">
             <p>{t('paymentSuccess.loadingOrder')}</p> 
@@ -289,13 +283,13 @@ const PaymentSuccessPage = () => {
                 <span>{t('paymentSuccess.orderSummary.shippingLabel')}</span>
                 <span>{formatCurrency(orderDetails.shippingCost)}</span>
               </div>
-               {orderDetails.loyaltyPointsDiscount && orderDetails.loyaltyPointsDiscount > 0 && (
+               {orderDetails.loyaltyPointsDiscount > 0 && (
                 <div className="flex justify-between text-sm text-muted-foreground">
                     <span>{t('paymentSuccess.orderSummary.loyaltyPointsDiscountLabel')}</span>
                     <span className="text-destructive">{formatCurrency(orderDetails.loyaltyPointsDiscount)}</span>
                 </div>
               )}
-              {orderDetails.voucherDiscountTotal && orderDetails.voucherDiscountTotal > 0 && (
+              {orderDetails.voucherDiscountTotal > 0 && (
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>{t('paymentSuccess.orderSummary.voucherDiscountLabel')}</span>
                   <span className="text-destructive">-{formatCurrency(orderDetails.voucherDiscountTotal)}</span>
@@ -361,3 +355,4 @@ const PaymentSuccessPage = () => {
 };
 
 export default PaymentSuccessPage;
+
