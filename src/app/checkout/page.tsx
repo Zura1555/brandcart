@@ -663,28 +663,7 @@ const CheckoutPage = () => {
                 </div>
               </CardContent>
             </Card>
-
-            <Card className="shadow-sm">
-              <CardContent className="p-4 space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-foreground">
-                    {t('checkout.totalAmountLabelWithCount', { count: numberOfProductTypes })}
-                  </span>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(merchandiseSubtotal)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-foreground">{t('checkout.shippingMethod')}</span>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(shippingMethod.price)}</span>
-                </div>
-                 {totalVoucherDiscount > 0 && (
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-foreground">{t('checkout.voucherDiscountLabel')}</span>
-                        <span className="text-sm font-semibold text-destructive">-{formatCurrency(totalVoucherDiscount)}</span>
-                    </div>
-                )}
-              </CardContent>
-            </Card>
-
+            
             <Card className="shadow-sm">
               <CardContent className="p-0"> 
                 <div
@@ -742,6 +721,27 @@ const CheckoutPage = () => {
               </CardContent>
             </Card>
 
+            <Card className="shadow-sm">
+              <CardContent className="p-4 space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-foreground">
+                    {t('checkout.totalAmountLabelWithCount', { count: numberOfProductTypes })}
+                  </span>
+                  <span className="text-sm font-semibold text-foreground">{formatCurrency(merchandiseSubtotal)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-foreground">{t('checkout.shippingMethod')}</span>
+                  <span className="text-sm font-semibold text-foreground">{formatCurrency(shippingMethod.price)}</span>
+                </div>
+                 {totalVoucherDiscount > 0 && (
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm text-foreground">{t('checkout.voucherDiscountLabel')}</span>
+                        <span className="text-sm font-semibold text-destructive">-{formatCurrency(totalVoucherDiscount)}</span>
+                    </div>
+                )}
+              </CardContent>
+            </Card>
+
           </div>
         </ScrollArea>
       </main>
@@ -791,3 +791,4 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
