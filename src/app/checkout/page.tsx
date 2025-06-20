@@ -274,7 +274,12 @@ const CheckoutPage = () => {
     { id: 'vnpay', name: 'VNPay', iconUrl: 'https://file.hstatic.net/1000284478/file/vnpay-40_5dbcecd2b4eb4245a4527d357a0459fc.svg', iconAiHint: 'VNPay QR logo', details: null },
     { id: 'momo', name: 'Momo', iconUrl: 'https://file.hstatic.net/1000284478/file/momo-45_eee48d6f0f9e41f1bd2c5f06ab4214a2.svg', iconAiHint: 'Momo logo', details: null },
     { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg', iconAiHint: 'Apple Pay logo', details: null },
-  ];
+  ].sort((a, b) => {
+    if (a.id === 'cod') return -1;
+    if (b.id === 'cod') return 1;
+    return 0;
+  });
+
 
   const currentAddressNamePhone = currentShippingAddress ? t('checkout.address.namePhone', { name: currentShippingAddress.name, phone: currentShippingAddress.phone }) : '';
 
@@ -727,7 +732,7 @@ const CheckoutPage = () => {
               </CardHeader>
               <CardContent className="p-4 space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-foreground">{t('checkout.summaryCard.merchandiseSubtotal')}</span>
+                  <span className="text-sm text-foreground">{t('checkout.summaryCard.subtotal')}</span>
                   <span className="text-sm font-semibold text-foreground">{formatCurrency(merchandiseSubtotal)}</span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -752,6 +757,11 @@ const CheckoutPage = () => {
                         <span className="text-sm font-semibold text-foreground">{formatCurrency(estimatedVatValue)}</span>
                     </div>
                 )}
+                <Separator className="my-2" />
+                <div className="flex justify-between items-center text-base font-semibold">
+                  <span className="text-foreground">{t('checkout.summaryCard.totalLabel')}</span>
+                  <span className="text-foreground">{formatCurrency(displayTotalAmount)}</span>
+                </div>
               </CardContent>
             </Card>
 

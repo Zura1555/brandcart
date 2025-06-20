@@ -153,7 +153,7 @@ const viTranslations = {
     shippingMethodInspectionAllowed: "Được đồng kiểm",
     shippingMethodStandardDeliveryLabel: "Giao hàng tiêu chuẩn (3-5 ngày)",
     shippingMethodEstimatedDeliveryTimeLabel: "Thời gian giao hàng dự kiến: 5-7 ngày làm việc",
-    totalAmountLabelWithCount: "Tổng số tiền ({count} sản phẩm)", // Kept
+    totalAmountLabelWithCount: "Tổng số tiền ({count} sản phẩm)",
     voucherDiscountLabel: "Giảm giá Voucher",
     yourVoucherAvailable: "Có {count} voucher",
     yourVoucherSelected: "Đã chọn {count} Voucher",
@@ -161,10 +161,12 @@ const viTranslations = {
     summaryCard: {
       title: "Tóm tắt đơn hàng",
       merchandiseSubtotal: "Tiền hàng",
+      subtotal: "Tạm tính",
       shippingFee: "Phí vận chuyển",
       voucherDiscount: "Giảm giá Voucher",
       coinUsed: "Xu đã dùng",
       estimatedVat: "VAT ước tính ({rate}%)",
+      totalLabel: "Tổng cộng",
     },
     footer: {
       totalLabel: "Tổng cộng:",

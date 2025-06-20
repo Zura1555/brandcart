@@ -153,7 +153,7 @@ const enTranslations = {
     shippingMethodInspectionAllowed: "Inspection Allowed",
     shippingMethodStandardDeliveryLabel: "Standard Delivery (3-5 days)",
     shippingMethodEstimatedDeliveryTimeLabel: "Estimated delivery time: 5-7 working days",
-    totalAmountLabelWithCount: "Total Amount ({count} products)", // Kept for other potential uses, but summary card has new title
+    totalAmountLabelWithCount: "Total Amount ({count} products)", 
     voucherDiscountLabel: "Voucher Discount",
     yourVoucherAvailable: "{count} Vouchers available",
     yourVoucherSelected: "{count} Vouchers Selected",
@@ -161,10 +161,12 @@ const enTranslations = {
     summaryCard: {
       title: "Order Summary",
       merchandiseSubtotal: "Merchandise Subtotal",
+      subtotal: "Subtotal",
       shippingFee: "Shipping Fee",
       voucherDiscount: "Voucher Discount",
       coinUsed: "Coin Used",
       estimatedVat: "Estimated VAT ({rate}%)",
+      totalLabel: "Total",
     },
     footer: {
       totalLabel: "Total:",
