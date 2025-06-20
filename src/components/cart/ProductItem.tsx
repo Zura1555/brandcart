@@ -27,7 +27,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTrigger,
-  DialogClose,
+  // DialogClose, // No longer explicitly used from here for the main dialog
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -58,6 +58,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const swipeableContentRef = useRef<HTMLDivElement>(null);
 
   const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
+  
   const [isSizingModalOpen, setIsSizingModalOpen] = useState(false);
   const [sizingModalView, setSizingModalView] = useState<'options' | 'staticGuide' | 'quiz'>('options');
 
@@ -245,8 +246,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const handleSizingModalOpenChange = (open: boolean) => {
     setIsSizingModalOpen(open);
     if (!open) {
-      // Reset to options view when modal is closed
-      setTimeout(() => setSizingModalView('options'), 150); // Delay to allow animation
+      setTimeout(() => setSizingModalView('options'), 150); 
     }
   };
 
@@ -361,6 +361,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
             className="rounded-md object-cover w-24 h-24 shrink-0 border"
             data-ai-hint={item.dataAiHint}
             priority={false}
+            sizes="96px"
           />
           <div className="flex-grow min-w-0">
             <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
@@ -533,112 +534,95 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                 <p className="text-xs text-muted-foreground line-through">{item.originalPrice.toLocaleString('vi-VN')}₫</p>
               )}
             </div>
+            
+            <div className="mt-1.5">
+                {hasAvailableVariants && !isOutOfStock && (
+                <Dialog open={isSizingModalOpen} onOpenChange={handleSizingModalOpenChange}>
+                    <DialogTrigger asChild>
+                    <Button
+                        variant="link"
+                        size="sm"
+                        className="text-xs text-muted-foreground hover:text-foreground p-0 h-auto mt-1 flex items-center gap-1"
+                    >
+                        <Ruler className="w-3.5 h-3.5" />
+                        {t('cart.sheet.findMySize.buttonLabel')}
+                    </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[480px] p-0 flex flex-col max-h-[90vh]">
+                        <DialogHeader className="p-4 border-b flex-shrink-0">
+                            <DialogTitle className="text-center text-lg">
+                            {sizingModalView === 'options' && t('cart.sheet.findMySize.optionsTitle')}
+                            {sizingModalView === 'staticGuide' && t('cart.sheet.findMySize.staticGuideTitle')}
+                            {sizingModalView === 'quiz' && t('cart.sheet.findMySize.quizTitle')}
+                            </DialogTitle>
+                        </DialogHeader>
+                        
+                        <ScrollArea className="flex-grow overflow-y-auto">
+                            <div className="p-4 space-y-4">
+                                {sizingModalView === 'options' && (
+                                <>
+                                    <Button variant="outline" className="w-full h-12 text-base" onClick={() => setSizingModalView('staticGuide')}>
+                                    {t('cart.sheet.findMySize.viewSizeGuideButton')}
+                                    </Button>
+                                    <Button variant="default" className="w-full h-12 text-base bg-foreground hover:bg-foreground/90 text-accent-foreground" onClick={() => {
+                                        toast({ title: t('cart.sheet.findMySize.quizComingSoon'), variant: "default" });
+                                        // setSizingModalView('quiz'); // Keep commented until quiz is ready
+                                    }}>
+                                    {t('cart.sheet.findMySize.startQuizButton')}
+                                    </Button>
+                                </>
+                                )}
 
-            {hasAvailableVariants && !isOutOfStock && (
-              <Dialog open={isSizingModalOpen} onOpenChange={handleSizingModalOpenChange}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="link"
-                    size="sm"
-                    className="text-xs text-muted-foreground hover:text-foreground p-0 h-auto mt-1.5 flex items-center gap-1"
-                  >
-                    <Ruler className="w-3.5 h-3.5" />
-                    {t('cart.sheet.findMySize.buttonLabel')}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[480px] p-0">
-                  <DialogHeader className="p-4 border-b">
-                    <DialogTitle className="text-center text-lg">
-                      {sizingModalView === 'options' && t('cart.sheet.findMySize.optionsTitle')}
-                      {sizingModalView === 'staticGuide' && t('cart.sheet.findMySize.staticGuideTitle')}
-                      {sizingModalView === 'quiz' && t('cart.sheet.findMySize.quizTitle')}
-                    </DialogTitle>
-                     <DialogClose className="absolute right-3 top-3 p-1">
-                        <X className="h-5 w-5" />
-                        <span className="sr-only">Close</span>
-                    </DialogClose>
-                  </DialogHeader>
-                  
-                  <div className="p-6 space-y-4">
-                    {sizingModalView === 'options' && (
-                      <>
-                        <Button variant="outline" className="w-full h-12 text-base" onClick={() => setSizingModalView('staticGuide')}>
-                          {t('cart.sheet.findMySize.viewSizeGuideButton')}
-                        </Button>
-                        <Button variant="default" className="w-full h-12 text-base bg-foreground hover:bg-foreground/90 text-accent-foreground" onClick={() => setSizingModalView('quiz')}>
-                          {t('cart.sheet.findMySize.startQuizButton')}
-                        </Button>
-                      </>
-                    )}
+                                {sizingModalView === 'staticGuide' && (
+                                <div>
+                                    <DialogDescription className="mb-4 text-center">
+                                    {t('cart.sheet.findMySize.staticGuideDescription')}
+                                    </DialogDescription>
+                                    <div className="flex justify-center mb-4">
+                                    <Image src="https://placehold.co/300x200.png" alt={t('cart.sheet.findMySize.measurementsAlt')} width={300} height={200} className="rounded border" data-ai-hint="body measurements guide" />
+                                    </div>
+                                    <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                        <TableHead className="w-[80px]">{t('cart.sheet.findMySize.sizeHeader')}</TableHead>
+                                        <TableHead>{t('cart.sheet.findMySize.chestHeader')}</TableHead>
+                                        <TableHead>{t('cart.sheet.findMySize.lengthHeader')}</TableHead>
+                                        <TableHead>{t('cart.sheet.findMySize.sleeveHeader')}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        <TableRow><TableCell>S</TableCell><TableCell>90-95 cm</TableCell><TableCell>68 cm</TableCell><TableCell>20 cm</TableCell></TableRow>
+                                        <TableRow><TableCell>M</TableCell><TableCell>96-101 cm</TableCell><TableCell>70 cm</TableCell><TableCell>21 cm</TableCell></TableRow>
+                                        <TableRow><TableCell>L</TableCell><TableCell>102-107 cm</TableCell><TableCell>72 cm</TableCell><TableCell>22 cm</TableCell></TableRow>
+                                        <TableRow><TableCell>XL</TableCell><TableCell>108-113 cm</TableCell><TableCell>74 cm</TableCell><TableCell>23 cm</TableCell></TableRow>
+                                    </TableBody>
+                                    </Table>
+                                    <Button variant="outline" className="mt-6 w-full" onClick={() => setSizingModalView('options')}>
+                                    {t('general.back')}
+                                    </Button>
+                                </div>
+                                )}
 
-                    {sizingModalView === 'staticGuide' && (
-                      <div>
-                        <DialogDescription className="mb-4 text-center">
-                          {t('cart.sheet.findMySize.staticGuideDescription')}
-                        </DialogDescription>
-                        <div className="flex justify-center mb-4">
-                           <Image src="https://placehold.co/300x200.png" alt={t('cart.sheet.findMySize.measurementsAlt')} width={300} height={200} className="rounded border" data-ai-hint="body measurements guide" />
-                        </div>
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="w-[80px]">{t('cart.sheet.findMySize.sizeHeader')}</TableHead>
-                              <TableHead>{t('cart.sheet.findMySize.chestHeader')}</TableHead>
-                              <TableHead>{t('cart.sheet.findMySize.lengthHeader')}</TableHead>
-                              <TableHead>{t('cart.sheet.findMySize.sleeveHeader')}</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>S</TableCell>
-                              <TableCell>90-95 cm</TableCell>
-                              <TableCell>68 cm</TableCell>
-                              <TableCell>20 cm</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>M</TableCell>
-                              <TableCell>96-101 cm</TableCell>
-                              <TableCell>70 cm</TableCell>
-                              <TableCell>21 cm</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>L</TableCell>
-                              <TableCell>102-107 cm</TableCell>
-                              <TableCell>72 cm</TableCell>
-                              <TableCell>22 cm</TableCell>
-                            </TableRow>
-                             <TableRow>
-                              <TableCell>XL</TableCell>
-                              <TableCell>108-113 cm</TableCell>
-                              <TableCell>74 cm</TableCell>
-                              <TableCell>23 cm</TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                        <Button variant="outline" className="mt-6 w-full" onClick={() => setSizingModalView('options')}>
-                           {t('general.back')}
-                        </Button>
-                      </div>
-                    )}
-
-                    {sizingModalView === 'quiz' && (
-                       <div>
-                        <p className="text-center text-muted-foreground mb-4">{t('cart.sheet.findMySize.quizComingSoon')}</p>
-                         <Button variant="outline" className="mt-6 w-full" onClick={() => setSizingModalView('options')}>
-                           {t('general.back')}
-                        </Button>
-                       </div>
-                    )}
-                  </div>
-                  
-                  <DialogFooter className="p-4 border-t text-center justify-center">
-                     <p className="text-xs text-muted-foreground">
-                        <a href="#" className="underline hover:text-foreground">{t('cart.sheet.findMySize.privacyPolicyLink')}</a>
-                    </p>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            )}
+                                {sizingModalView === 'quiz' && ( // This view is currently not reachable via UI
+                                <div>
+                                    <p className="text-center text-muted-foreground mb-4">{t('cart.sheet.findMySize.quizComingSoon')}</p>
+                                    <Button variant="outline" className="mt-6 w-full" onClick={() => setSizingModalView('options')}>
+                                    {t('general.back')}
+                                    </Button>
+                                </div>
+                                )}
+                            </div>
+                        </ScrollArea>
+                        
+                        <DialogFooter className="p-4 border-t text-center justify-center flex-shrink-0">
+                            <p className="text-xs text-muted-foreground">
+                                <a href="#" className="underline hover:text-foreground">{t('cart.sheet.findMySize.privacyPolicyLink')}</a>
+                            </p>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                )}
+            </div>
 
 
             {item.discountDescription && (
