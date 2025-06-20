@@ -14,15 +14,15 @@ export const mockShops: Shop[] = [
         name: 'Áo thun unisex tay ngắn Summer Monotive',
         price: 1890000,
         brand: 'MLB',
-        imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_medium.jpg',
+        imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_1_974abdeabd9641a3b8ceb06b2ce9bc32_large.jpg',
         dataAiHint: 'tshirt white',
         productCode: 'MLB001X',
         variant: 'Light Blue (+2)', // This is the name of the currently selected variant.
         stock: 15, // Base product stock
         availableVariants: [
-          { id: 'mlb1-lb-s', name: 'Light Blue, S', stock: 5, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_medium.jpg', dataAiHint: 'tshirt white'},
-          { id: 'mlb1-lb-m', name: 'Light Blue, M (+2)', stock: 12, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_medium.jpg', dataAiHint: 'tshirt white'},
-          { id: 'mlb1-lb-l', name: 'Light Blue, L (+5)', stock: 0, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_medium.jpg', dataAiHint: 'tshirt white'},
+          { id: 'mlb1-lb-s', name: 'Light Blue, S', stock: 5, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_1_974abdeabd9641a3b8ceb06b2ce9bc32_large.jpg', dataAiHint: 'tshirt white'},
+          { id: 'mlb1-lb-m', name: 'Light Blue, M (+2)', stock: 12, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_1_974abdeabd9641a3b8ceb06b2ce9bc32_large.jpg', dataAiHint: 'tshirt white'},
+          { id: 'mlb1-lb-l', name: 'Light Blue, L (+5)', stock: 0, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_1_974abdeabd9641a3b8ceb06b2ce9bc32_large.jpg', dataAiHint: 'tshirt white'},
           { id: 'mlb1-bk-m', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_medium.jpg', dataAiHint: 'tshirt black'},
         ],
       },
