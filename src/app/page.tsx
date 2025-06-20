@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight, XCircle, CheckCircle2, Clock, AlertTriangle, ShoppingBag, PlusCircle } from 'lucide-react';
 import type { CartItem, Shop, SimpleVariant, Product } from '@/interfaces';
-import { mockShops, mockRelevantProducts } from '@/lib/mockData';
+import { mockShops, mockRelevantProducts, newRecentlyViewedProducts } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
 import RecentlyViewedItemCard from '@/components/cart/RecentlyViewedItemCard';
 import { useToast } from "@/hooks/use-toast";
@@ -258,19 +258,9 @@ const BrandCartPage = () => {
       shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random().toString(36).substring(2,7)}`, quantity: 1, selected: false }))
     );
     setCartItems(initialCartItems);
-
-    // Simulate fetching recently viewed items.
-    const allProducts = mockShops.flatMap(shop => shop.products);
-    const sampleRecentItems: Product[] = [
-      allProducts.find(p => p.id === 'puma1'), // Balo
-      allProducts.find(p => p.id === 'havaianas2'), // Sandals
-      allProducts.find(p => p.id === 'mlb1'), // Shirt
-      allProducts.find(p => p.id === 'puma3'), // Cap
-      allProducts.find(p => p.id === 'havaianas1'), // Flipflops
-      allProducts.find(p => p.id === 'mlb2'), // Shorts
-    ].filter(Boolean) as Product[];
-
-    setRecentlyViewedItems(sampleRecentItems.slice(0, 6));
+    
+    // Set recently viewed items from the new mock data
+    setRecentlyViewedItems(newRecentlyViewedProducts.slice(0, 6));
   }, []);
 
 

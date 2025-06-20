@@ -20,10 +20,10 @@ export const mockShops: Shop[] = [
         variant: 'Light Blue (+2)', // This is the name of the currently selected variant.
         stock: 15, // Base product stock
         availableVariants: [
-          { id: 'mlb1-lb-s', name: 'Light Blue, S', stock: 5 },
-          { id: 'mlb1-lb-m', name: 'Light Blue, M (+2)', stock: 12 },
-          { id: 'mlb1-lb-l', name: 'Light Blue, L (+5)', stock: 0 },
-          { id: 'mlb1-bk-m', name: 'Black, M', stock: 20 },
+          { id: 'mlb1-lb-s', name: 'Light Blue, S', stock: 5, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_large.jpg', dataAiHint: 'tshirt lightblue'},
+          { id: 'mlb1-lb-m', name: 'Light Blue, M (+2)', stock: 12, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_large.jpg', dataAiHint: 'tshirt lightblue'},
+          { id: 'mlb1-lb-l', name: 'Light Blue, L (+5)', stock: 0, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_large.jpg', dataAiHint: 'tshirt lightblue'},
+          { id: 'mlb1-bk-m', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_large.jpg', dataAiHint: 'tshirt black'},
         ],
       },
       {
@@ -37,9 +37,9 @@ export const mockShops: Shop[] = [
         variant: 'Black',
         stock: 30,
         availableVariants: [
-          { id: 'mlb2-bk-xs', name: 'Black, XS', stock: 8 },
-          { id: 'mlb2-bk-s', name: 'Black, S', stock: 15 },
-          { id: 'mlb2-bk-m', name: 'Black, M', stock: 3 },
+          { id: 'mlb2-bk-xs', name: 'Black, XS', stock: 8, price: 1690000 },
+          { id: 'mlb2-bk-s', name: 'Black, S', stock: 15, price: 1690000 },
+          { id: 'mlb2-bk-m', name: 'Black, M', stock: 3, price: 1690000 },
         ],
       },
     ],
@@ -75,10 +75,10 @@ export const mockShops: Shop[] = [
         discountDescription: '-30%',
         stock: 5,
         availableVariants: [
-          { id: 'puma2-wb-36', name: 'White/Black, 36', stock: 2 },
-          { id: 'puma2-wb-37', name: 'White/Black, 37', stock: 0 },
-          { id: 'puma2-wb-38', name: 'White/Black, 38', stock: 3 },
-          { id: 'puma2-pink-37', name: 'Pink, 37', stock: 11 },
+          { id: 'puma2-wb-36', name: 'White/Black, 36', stock: 2, price: 2029000 },
+          { id: 'puma2-wb-37', name: 'White/Black, 37', stock: 0, price: 2029000 },
+          { id: 'puma2-wb-38', name: 'White/Black, 38', stock: 3, price: 2029000 },
+          { id: 'puma2-pink-37', name: 'Pink, 37', stock: 11, price: 2129000, imageUrl: 'https://placehold.co/80x80.png', dataAiHint: 'sneakers pink' },
         ],
       },
       {
@@ -94,9 +94,9 @@ export const mockShops: Shop[] = [
         discountDescription: '-50%',
         stock: 0,
         availableVariants: [
-            {id: 'puma3-og', name: 'Olive Green (+14)', stock: 0},
-            {id: 'puma3-bk', name: 'Black', stock: 18},
-            {id: 'puma3-wh', name: 'White', stock: 6},
+            {id: 'puma3-og', name: 'Olive Green (+14)', stock: 0, price: 299000},
+            {id: 'puma3-bk', name: 'Black', stock: 18, price: 299000},
+            {id: 'puma3-wh', name: 'White', stock: 6, price: 299000},
         ]
       },
     ],
@@ -118,9 +118,9 @@ export const mockShops: Shop[] = [
         variant: 'Disney print (+12)',
         stock: 30,
         availableVariants: [
-            {id: 'havaianas1-disney-38', name: 'Disney print, 38 (+12)', stock: 10},
-            {id: 'havaianas1-disney-39', name: 'Disney print, 39 (+12)', stock: 12},
-            {id: 'havaianas1-blue-38', name: 'Blue, 38', stock: 0},
+            {id: 'havaianas1-disney-38', name: 'Disney print, 38 (+12)', stock: 10, price: 599000},
+            {id: 'havaianas1-disney-39', name: 'Disney print, 39 (+12)', stock: 12, price: 599000},
+            {id: 'havaianas1-blue-38', name: 'Blue, 38', stock: 0, price: 550000},
         ]
       },
       {
@@ -196,8 +196,8 @@ export const mockRelevantProducts: Product[] = [
     stock: 15,
     variant: 'Red',
     availableVariants: [
-        {id: 'bottle-red', name: 'Red', stock: 8},
-        {id: 'bottle-blue', name: 'Blue', stock: 7},
+        {id: 'bottle-red', name: 'Red', stock: 8, price: 320000},
+        {id: 'bottle-blue', name: 'Blue', stock: 7, price: 320000},
     ]
   },
    {
@@ -210,5 +210,103 @@ export const mockRelevantProducts: Product[] = [
     productCode: 'REL005',
     stock: 12,
      // No specific variants
+  },
+];
+
+export const newRecentlyViewedProducts: Product[] = [
+  {
+    id: 'maxco1',
+    name: 'Áo thun nữ cổ tròn tay ngắn Sanmauro',
+    price: 4590000,
+    brand: 'MAX&Co.',
+    imageUrl: 'https://placehold.co/150x200.png',
+    dataAiHint: 'tshirt white',
+    productCode: 'MAXCO001',
+    variant: 'White, M',
+    stock: 15,
+    availableVariants: [
+      { id: 'maxco1-wh-s', name: 'White, S', stock: 10, price: 4590000, imageUrl: 'https://placehold.co/150x200.png', dataAiHint: 'tshirt white' },
+      { id: 'maxco1-wh-m', name: 'White, M', stock: 15, price: 4590000, imageUrl: 'https://placehold.co/150x200.png', dataAiHint: 'tshirt white' },
+      { id: 'maxco1-bk-m', name: 'Black, M', stock: 5, price: 4590000, imageUrl: 'https://placehold.co/150x200.png', dataAiHint: 'tshirt black' },
+    ],
+    discountDescription: 'New Arrival',
+  },
+  {
+    id: 'fila1',
+    name: 'Áo polo unisex tay ngắn Origin',
+    price: 1495000,
+    brand: 'FILA',
+    imageUrl: 'https://placehold.co/150x200.png',
+    dataAiHint: 'polo shirt blue',
+    productCode: 'FILA001',
+    variant: 'Blue, L',
+    stock: 20,
+    availableVariants: [
+      { id: 'fila1-bl-l', name: 'Blue, L', stock: 10, price: 1495000, imageUrl: 'https://placehold.co/150x200.png', dataAiHint: 'polo shirt blue' },
+      { id: 'fila1-bl-xl', name: 'Blue, XL', stock: 10, price: 1495000, imageUrl: 'https://placehold.co/150x200.png', dataAiHint: 'polo shirt blue' },
+      { id: 'fila1-rd-l', name: 'Red, L', stock: 10, price: 1495000, imageUrl: 'https://placehold.co/150x200.png', dataAiHint: 'polo shirt red' },
+    ],
+  },
+  {
+    id: 'dsquared1',
+    name: 'Giày sandals cao gót nữ Lock Yourself',
+    price: 29000000,
+    brand: 'DSQUARED2',
+    imageUrl: 'https://placehold.co/150x150.png',
+    dataAiHint: 'heels gold',
+    productCode: 'DSQ001',
+    variant: 'Gold, 38',
+    stock: 3,
+    availableVariants: [
+      { id: 'dsquared1-gd-37', name: 'Gold, 37', stock: 2, price: 29000000, imageUrl: 'https://placehold.co/150x150.png', dataAiHint: 'heels gold' },
+      { id: 'dsquared1-gd-38', name: 'Gold, 38', stock: 3, price: 29000000, imageUrl: 'https://placehold.co/150x150.png', dataAiHint: 'heels gold' },
+      { id: 'dsquared1-sl-38', name: 'Silver, 38', stock: 0, price: 29000000, imageUrl: 'https://placehold.co/150x150.png', dataAiHint: 'heels silver' },
+    ],
+    discountDescription: 'Limited Edition',
+  },
+  {
+    id: 'lesilla1',
+    name: 'Túi xách nữ thời trang Borsa Gilda',
+    price: 25700000,
+    brand: 'LE SILLA',
+    imageUrl: 'https://placehold.co/150x150.png',
+    dataAiHint: 'handbag pink',
+    productCode: 'LESI001',
+    variant: 'Pink',
+    stock: 5,
+    availableVariants: [
+      { id: 'lesilla1-pk', name: 'Pink', stock: 5, price: 25700000, imageUrl: 'https://placehold.co/150x150.png', dataAiHint: 'handbag pink' },
+      { id: 'lesilla1-bk', name: 'Black', stock: 3, price: 25700000, imageUrl: 'https://placehold.co/150x150.png', dataAiHint: 'handbag black' },
+    ],
+  },
+  {
+    id: 'recent_extra1',
+    name: 'Classic Watch Silver',
+    price: 7800000,
+    brand: 'TIMEPIECE Co.',
+    imageUrl: 'https://placehold.co/150x150.png',
+    dataAiHint: 'watch classic silver',
+    productCode: 'TW001',
+    variant: 'Silver Mesh',
+    stock: 10,
+    availableVariants: [
+        { id: 'tw001-sm', name: 'Silver Mesh', stock: 5, price: 7800000, imageUrl: 'https://placehold.co/150x150.png', dataAiHint: 'watch silver'},
+        { id: 'tw001-gl', name: 'Gold Leather', stock: 5, price: 8200000, imageUrl: 'https://placehold.co/150x150.png', dataAiHint: 'watch gold'},
+    ]
+  },
+  {
+    id: 'recent_extra2',
+    name: 'Silk Scarf Floral',
+    price: 1200000,
+    brand: 'LUXURY SILKS',
+    imageUrl: 'https://placehold.co/150x150.png',
+    dataAiHint: 'scarf silk floral',
+    productCode: 'LS001',
+    variant: 'Floral Print',
+    stock: 15,
+    availableVariants: [
+      { id: 'ls001-floral', name: 'Floral Print', stock: 10, price: 1200000, imageUrl: 'https://placehold.co/150x150.png', dataAiHint: 'scarf floral'},
+      { id: 'ls001-plain', name: 'Plain Red', stock: 5, price: 1100000, imageUrl: 'https://placehold.co/150x150.png', dataAiHint: 'scarf red'},
+    ]
   },
 ];
