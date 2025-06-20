@@ -153,11 +153,19 @@ const viTranslations = {
     shippingMethodInspectionAllowed: "Được đồng kiểm",
     shippingMethodStandardDeliveryLabel: "Giao hàng tiêu chuẩn (3-5 ngày)",
     shippingMethodEstimatedDeliveryTimeLabel: "Thời gian giao hàng dự kiến: 5-7 ngày làm việc",
-    totalAmountLabelWithCount: "Tổng số tiền ({count} sản phẩm)",
+    totalAmountLabelWithCount: "Tổng số tiền ({count} sản phẩm)", // Kept
     voucherDiscountLabel: "Giảm giá Voucher",
     yourVoucherAvailable: "Có {count} voucher",
     yourVoucherSelected: "Đã chọn {count} Voucher",
     paymentMethod: "Phương thức thanh toán",
+    summaryCard: {
+      title: "Tóm tắt đơn hàng",
+      merchandiseSubtotal: "Tiền hàng",
+      shippingFee: "Phí vận chuyển",
+      voucherDiscount: "Giảm giá Voucher",
+      coinUsed: "Xu đã dùng",
+      estimatedVat: "VAT ước tính ({rate}%)",
+    },
     footer: {
       totalLabel: "Tổng cộng:",
       savings: "Tiết kiệm {amount}",
@@ -249,6 +257,7 @@ const viTranslations = {
       shippingLabel: "Vận chuyển",
       loyaltyPointsDiscountLabel: "Điểm Thưởng Đã Dùng",
       voucherDiscountLabel: "Giảm giá Voucher",
+      estimatedVatLabel: "VAT ước tính",
       totalLabel: "Tổng cộng",
     },
     feedback: {
@@ -267,7 +276,8 @@ const viTranslations = {
             description: "Không thể xử lý chi tiết đơn hàng. Vui lòng thử lại hoặc liên hệ hỗ trợ."
         },
         missingOrderData: {
-            description: "Chi tiết đơn hàng bị thiếu. Vui lòng thử lại quy trình thanh toán."
+            title: "Không tìm thấy đơn hàng",
+            description: "Chi tiết đơn hàng bị thiếu. Vui lòng thử lại quy trình thanh toán hoặc kiểm tra lịch sử đơn hàng."
         },
         feedbackReceived: {
             title: "Đã nhận phản hồi",

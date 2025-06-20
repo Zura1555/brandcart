@@ -153,11 +153,19 @@ const enTranslations = {
     shippingMethodInspectionAllowed: "Inspection Allowed",
     shippingMethodStandardDeliveryLabel: "Standard Delivery (3-5 days)",
     shippingMethodEstimatedDeliveryTimeLabel: "Estimated delivery time: 5-7 working days",
-    totalAmountLabelWithCount: "Total Amount ({count} products)",
+    totalAmountLabelWithCount: "Total Amount ({count} products)", // Kept for other potential uses, but summary card has new title
     voucherDiscountLabel: "Voucher Discount",
     yourVoucherAvailable: "{count} Vouchers available",
     yourVoucherSelected: "{count} Vouchers Selected",
     paymentMethod: "Payment Method",
+    summaryCard: {
+      title: "Order Summary",
+      merchandiseSubtotal: "Merchandise Subtotal",
+      shippingFee: "Shipping Fee",
+      voucherDiscount: "Voucher Discount",
+      coinUsed: "Coin Used",
+      estimatedVat: "Estimated VAT ({rate}%)",
+    },
     footer: {
       totalLabel: "Total:",
       savings: "Save {amount}",
@@ -249,6 +257,7 @@ const enTranslations = {
       shippingLabel: "Shipping",
       loyaltyPointsDiscountLabel: "Loyalty Points",
       voucherDiscountLabel: "Voucher Discount",
+      estimatedVatLabel: "Estimated VAT",
       totalLabel: "Total",
     },
     feedback: {
@@ -267,7 +276,8 @@ const enTranslations = {
             description: "Could not process order details. Please try again or contact support."
         },
         missingOrderData: {
-            description: "Order details are missing. Please try the checkout process again."
+            title: "Order Not Found",
+            description: "Order details are missing. Please try the checkout process again or check your order history."
         },
         feedbackReceived: {
             title: "Feedback Received",

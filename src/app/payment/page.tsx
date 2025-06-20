@@ -19,9 +19,9 @@ import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { useToast } from '@/hooks/use-toast';
 
 const HEADER_HEIGHT = 'h-14';
-const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems'; // To be cleared
-const SELECTED_VOUCHERS_DETAILS_KEY = 'selectedVouchersDetails'; // To be cleared
-const FINAL_ORDER_DETAILS_KEY = 'finalOrderDetailsForPayment'; // To be read and cleared
+const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems'; 
+const SELECTED_VOUCHERS_DETAILS_KEY = 'selectedVouchersDetails'; 
+const FINAL_ORDER_DETAILS_KEY = 'finalOrderDetailsForPayment'; 
 
 
 interface OrderDetails {
@@ -32,7 +32,8 @@ interface OrderDetails {
   shippingCost: number;
   loyaltyPointsDiscount?: number;
   voucherDiscountTotal?: number;
-  totalAmount: number; // This should be the final, paid amount
+  estimatedVat?: number;
+  totalAmount: number; 
 }
 
 const PaymentSuccessPage = () => {
@@ -124,8 +125,10 @@ const PaymentSuccessPage = () => {
 
   useEffect(() => {
     if (!isLoading && !orderDetails) {
-      if (router.pathname === '/payment') { 
-          // router.replace('/'); // Redirection is handled in the first effect.
+      // Redirection is handled in the first effect if data is truly missing on initial load.
+      // This effect is a safeguard.
+      if (router.pathname === '/payment' && !localStorage.getItem(FINAL_ORDER_DETAILS_KEY) && !orderDetails) {
+          // router.replace('/'); // Already handled, this might cause a loop if not careful
       }
     }
   }, [isLoading, orderDetails, router]);
@@ -189,7 +192,7 @@ const PaymentSuccessPage = () => {
   if (!orderDetails) {
     return (
         <div className="flex flex-col min-h-screen bg-background justify-center items-center">
-            <p>{t('paymentSuccess.loadingOrder')}</p> 
+             <p>{t('paymentSuccess.toast.missingOrderData.description')}</p> 
         </div>
     ); 
   }
@@ -283,16 +286,22 @@ const PaymentSuccessPage = () => {
                 <span>{t('paymentSuccess.orderSummary.shippingLabel')}</span>
                 <span>{formatCurrency(orderDetails.shippingCost)}</span>
               </div>
-               {orderDetails.loyaltyPointsDiscount > 0 && (
+               {(orderDetails.loyaltyPointsDiscount ?? 0) > 0 && (
                 <div className="flex justify-between text-sm text-muted-foreground">
                     <span>{t('paymentSuccess.orderSummary.loyaltyPointsDiscountLabel')}</span>
-                    <span className="text-destructive">{formatCurrency(orderDetails.loyaltyPointsDiscount)}</span>
+                    <span className="text-destructive">-{formatCurrency(orderDetails.loyaltyPointsDiscount!)}</span>
                 </div>
               )}
-              {orderDetails.voucherDiscountTotal > 0 && (
+              {(orderDetails.voucherDiscountTotal ?? 0) > 0 && (
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>{t('paymentSuccess.orderSummary.voucherDiscountLabel')}</span>
-                  <span className="text-destructive">-{formatCurrency(orderDetails.voucherDiscountTotal)}</span>
+                  <span className="text-destructive">-{formatCurrency(orderDetails.voucherDiscountTotal!)}</span>
+                </div>
+              )}
+              {(orderDetails.estimatedVat ?? 0) > 0 && (
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>{t('paymentSuccess.orderSummary.estimatedVatLabel')}</span>
+                  <span>{formatCurrency(orderDetails.estimatedVat!)}</span>
                 </div>
               )}
               <Separator className="my-2" />

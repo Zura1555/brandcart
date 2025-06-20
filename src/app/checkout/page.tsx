@@ -38,6 +38,7 @@ const FINAL_ORDER_DETAILS_KEY = 'finalOrderDetailsForPayment';
 const AVAILABLE_LOYALTY_POINTS = 200;
 const LOYALTY_POINTS_TO_REDEEM = 200;
 const LOYALTY_POINTS_DISCOUNT_VALUE = 20000;
+const VAT_RATE = 0.08; // 8% VAT
 
 
 interface DisplayShop {
@@ -70,7 +71,7 @@ const staticShippingMethod = {
   subLabelKey: 'checkout.shippingMethodEstimatedDeliveryTimeLabel',
 };
 
-type SelectedPaymentMethod = 'payoo' | 'vnpay' | 'momo' | 'applepay' | 'cod';
+type SelectedPaymentMethod = 'cod' | 'payoo' | 'vnpay' | 'momo' | 'applepay';
 
 const CheckoutPage = () => {
   const router = useRouter();
@@ -221,10 +222,6 @@ const CheckoutPage = () => {
   }), [t]);
 
 
-  const numberOfProductTypes = useMemo(() => {
-    return checkoutItems.length;
-  }, [checkoutItems]);
-
   const merchandiseSubtotal = useMemo(() => {
     return checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }, [checkoutItems]);
@@ -241,17 +238,24 @@ const CheckoutPage = () => {
       }
     }
     return 0;
-  }, [voucherTriggerText]); // Re-evaluate if voucherTriggerText changes (indirectly indicates selection change)
+  }, [voucherTriggerText]); 
 
+  const loyaltyDiscountValue = useMemo(() => {
+    return useLoyaltyPoints ? LOYALTY_POINTS_DISCOUNT_VALUE : 0;
+  }, [useLoyaltyPoints]);
+
+  const subtotalForVat = useMemo(() => {
+    return merchandiseSubtotal + shippingMethod.price;
+  }, [merchandiseSubtotal, shippingMethod.price]);
+
+  const estimatedVatValue = useMemo(() => {
+    return subtotalForVat * VAT_RATE;
+  }, [subtotalForVat]);
 
   const displayTotalAmount = useMemo(() => {
-    let total = merchandiseSubtotal + shippingMethod.price;
-    if (useLoyaltyPoints) {
-      total -= LOYALTY_POINTS_DISCOUNT_VALUE;
-    }
-    total -= totalVoucherDiscount;
+    let total = subtotalForVat + estimatedVatValue - loyaltyDiscountValue - totalVoucherDiscount;
     return Math.max(0, total); 
-  }, [merchandiseSubtotal, shippingMethod.price, useLoyaltyPoints, totalVoucherDiscount]);
+  }, [subtotalForVat, estimatedVatValue, loyaltyDiscountValue, totalVoucherDiscount]);
   
   const displaySavings = useMemo(() => {
     return checkoutItems.reduce((sum, item) => {
@@ -265,12 +269,12 @@ const CheckoutPage = () => {
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
   const paymentMethods = [
+    { id: 'cod', name: 'COD', iconUrl: 'https://file.hstatic.net/1000284478/file/cod_icon-47_a8768752c1a445da90d600ca0a94675c.svg', iconAiHint: 'cash on delivery icon', details: null },
     { id: 'payoo', name: 'Payoo', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
     { id: 'vnpay', name: 'VNPay', iconUrl: 'https://file.hstatic.net/1000284478/file/vnpay-40_5dbcecd2b4eb4245a4527d357a0459fc.svg', iconAiHint: 'VNPay QR logo', details: null },
     { id: 'momo', name: 'Momo', iconUrl: 'https://file.hstatic.net/1000284478/file/momo-45_eee48d6f0f9e41f1bd2c5f06ab4214a2.svg', iconAiHint: 'Momo logo', details: null },
     { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg', iconAiHint: 'Apple Pay logo', details: null },
-    { id: 'cod', name: 'COD', iconUrl: 'https://file.hstatic.net/1000284478/file/cod_icon-47_a8768752c1a445da90d600ca0a94675c.svg', iconAiHint: 'cash on delivery icon', details: null },
-  ].sort((a, b) => (a.id === 'cod' ? -1 : b.id === 'cod' ? 1 : 0));
+  ];
 
   const currentAddressNamePhone = currentShippingAddress ? t('checkout.address.namePhone', { name: currentShippingAddress.name, phone: currentShippingAddress.phone }) : '';
 
@@ -287,17 +291,13 @@ const CheckoutPage = () => {
       items: checkoutItems,
       merchandiseSubtotal: merchandiseSubtotal,
       shippingCost: shippingMethod.price,
-      loyaltyPointsDiscount: useLoyaltyPoints ? LOYALTY_POINTS_DISCOUNT_VALUE : 0,
+      loyaltyPointsDiscount: loyaltyDiscountValue,
       voucherDiscountTotal: totalVoucherDiscount,
+      estimatedVat: estimatedVatValue,
       totalAmount: displayTotalAmount,
     };
     localStorage.setItem(FINAL_ORDER_DETAILS_KEY, JSON.stringify(finalOrderDetails));
     
-    // Clean up keys that are now consolidated into finalOrderDetailsForPayment
-    // CHECKOUT_ITEMS_STORAGE_KEY will be cleared on payment page after use.
-    // SELECTED_VOUCHERS_DETAILS_KEY can be cleared here or on payment page.
-    // For simplicity, let payment page clear all temporary checkout-related keys.
-
     router.push('/payment');
   };
 
@@ -722,21 +722,34 @@ const CheckoutPage = () => {
             </Card>
 
             <Card className="shadow-sm">
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-sm font-medium text-foreground">{t('checkout.summaryCard.title')}</CardTitle>
+              </CardHeader>
               <CardContent className="p-4 space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-foreground">
-                    {t('checkout.totalAmountLabelWithCount', { count: numberOfProductTypes })}
-                  </span>
+                  <span className="text-sm text-foreground">{t('checkout.summaryCard.merchandiseSubtotal')}</span>
                   <span className="text-sm font-semibold text-foreground">{formatCurrency(merchandiseSubtotal)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-foreground">{t('checkout.shippingMethod')}</span>
+                  <span className="text-sm text-foreground">{t('checkout.summaryCard.shippingFee')}</span>
                   <span className="text-sm font-semibold text-foreground">{formatCurrency(shippingMethod.price)}</span>
                 </div>
-                 {totalVoucherDiscount > 0 && (
+                {totalVoucherDiscount > 0 && (
                     <div className="flex justify-between items-center">
-                        <span className="text-sm text-foreground">{t('checkout.voucherDiscountLabel')}</span>
+                        <span className="text-sm text-foreground">{t('checkout.summaryCard.voucherDiscount')}</span>
                         <span className="text-sm font-semibold text-destructive">-{formatCurrency(totalVoucherDiscount)}</span>
+                    </div>
+                )}
+                {loyaltyDiscountValue > 0 && (
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm text-foreground">{t('checkout.summaryCard.coinUsed')}</span>
+                        <span className="text-sm font-semibold text-destructive">-{formatCurrency(loyaltyDiscountValue)}</span>
+                    </div>
+                )}
+                {estimatedVatValue > 0 && (
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm text-foreground">{t('checkout.summaryCard.estimatedVat', { rate: VAT_RATE * 100 })}</span>
+                        <span className="text-sm font-semibold text-foreground">{formatCurrency(estimatedVatValue)}</span>
                     </div>
                 )}
               </CardContent>
