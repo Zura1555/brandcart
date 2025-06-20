@@ -250,6 +250,7 @@ const BrandCartPage = () => {
 
   const [itemPendingDeletion, setItemPendingDeletion] = useState<CartItem | null>(null);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
+  const [lastAddedBrand, setLastAddedBrand] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -433,23 +434,11 @@ const BrandCartPage = () => {
 
   const itemsByShop = useMemo(() => {
     const allBrandsInCartSet = new Set(cartItems.map(item => item.brand));
-    const allBrandsInCart = Array.from(allBrandsInCartSet);
-    
     const shopOrderFromMocks = mockShops.map(s => s.name);
 
-    allBrandsInCart.sort((a, b) => {
-        const indexA = shopOrderFromMocks.indexOf(a);
-        const indexB = shopOrderFromMocks.indexOf(b);
-
-        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-        if (indexA !== -1) return -1; 
-        if (indexB !== -1) return 1;  
-        return a.localeCompare(b); 
-    });
-
-    return allBrandsInCart.map(brandName => {
+    const allShopDataObjects = Array.from(allBrandsInCartSet).map(brandName => {
         const productsInThisBrand = cartItems.filter(item => item.brand === brandName);
-        if (productsInThisBrand.length === 0) return null;
+        // No need to filter if productsInThisBrand.length === 0 here, as filter happens later
 
         const mockShopData = mockShops.find(s => s.name === brandName);
         const inStockProductsInShop = productsInThisBrand.filter(item => item.stock !== 0);
@@ -468,21 +457,37 @@ const BrandCartPage = () => {
 
         if (mockShopData) {
             shopDataForSection = {
-                 // Spread mockShopData first to get all its properties
                 ...mockShopData,
-                // Then override/ensure specific properties for the display section
-                name: brandName, // Ensure name is correct
-                products: productsInThisBrand, // Crucially, use CartItems from the cart
+                name: brandName, 
+                products: productsInThisBrand, 
                 isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
-                // Ensure logo and hint are taken from mock if available, otherwise keep default
                 logoUrl: mockShopData.logoUrl || shopDataForSection.logoUrl,
                 logoDataAiHint: mockShopData.logoDataAiHint || shopDataForSection.logoDataAiHint,
             };
         }
-        
         return shopDataForSection;
     }).filter(shopGroup => shopGroup && shopGroup.products.length > 0) as (Shop & { products: CartItem[], isShopSelected: boolean })[];
-  }, [cartItems]);
+
+    allShopDataObjects.sort((shopA, shopB) => {
+       const brandA = shopA.name;
+       const brandB = shopB.name;
+
+       if (lastAddedBrand) {
+           if (brandA === lastAddedBrand && brandB !== lastAddedBrand) return -1;
+           if (brandB === lastAddedBrand && brandA !== lastAddedBrand) return 1;
+       }
+
+       const indexA = shopOrderFromMocks.indexOf(brandA);
+       const indexB = shopOrderFromMocks.indexOf(brandB);
+
+       if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+       if (indexA !== -1) return -1; 
+       if (indexB !== -1) return 1;  
+       return brandA.localeCompare(brandB); 
+    });
+
+    return allShopDataObjects;
+  }, [cartItems, lastAddedBrand]);
 
 
   const formatCurrency = (amount: number) => {
@@ -643,6 +648,8 @@ const BrandCartPage = () => {
         }
         return updatedItems;
       });
+      
+      setLastAddedBrand(itemToAdd.brand);
 
       toast({
         title: t('toast.itemAddedToCart.title', { itemName: itemToAdd.name }),
@@ -826,7 +833,7 @@ const BrandCartPage = () => {
               </Sheet>
 
              <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
-                <div className="flex items-center min-w-0">
+                <div className="flex items-center min-w-0"> {/* Added min-w-0 here */}
                   <Truck className={`w-5 h-5 mr-3 flex-shrink-0 ${truckIconClass}`} />
                   <span className={cn("text-sm truncate", truckIconClass === 'text-green-500' ? 'text-green-600' : 'text-muted-foreground')}>
                     {displayShippingMessage}
