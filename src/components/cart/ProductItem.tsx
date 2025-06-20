@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import type { CartItem, SimpleVariant } from '@/interfaces';
 import QuantitySelector from './QuantitySelector';
-import { Check, Trash2, ChevronDown, Minus, Plus, X } from 'lucide-react';
+import { Check, Trash2, ChevronDown, Minus, Plus, X, Ruler, Shirt } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import {
   Sheet,
@@ -19,9 +19,21 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 
 
 interface ProductItemProps {
@@ -37,6 +49,7 @@ const SWIPE_THRESHOLD_RATIO = 0.3;
 
 const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuantityChange, onDeleteItem, onVariantChange }) => {
   const { t } = useLanguage();
+  const { toast } = useToast();
 
   const [translateX, setTranslateX] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
@@ -45,6 +58,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const swipeableContentRef = useRef<HTMLDivElement>(null);
 
   const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
+  const [isSizingModalOpen, setIsSizingModalOpen] = useState(false);
+  const [sizingModalView, setSizingModalView] = useState<'options' | 'staticGuide' | 'quiz'>('options');
+
 
   const cleanVariantName = useCallback((name: string | undefined): string => {
     if (!name) return '';
@@ -224,6 +240,14 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       onVariantChange(item.cartItemId, selectedVariantInSheet);
     }
     setIsVariantSheetOpen(false);
+  };
+
+  const handleSizingModalOpenChange = (open: boolean) => {
+    setIsSizingModalOpen(open);
+    if (!open) {
+      // Reset to options view when modal is closed
+      setTimeout(() => setSizingModalView('options'), 150); // Delay to allow animation
+    }
   };
 
   const hasAvailableVariants = item.availableVariants && item.availableVariants.length > 0;
@@ -503,13 +527,119 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                 )}
             </div>
 
-
             <div className="flex items-baseline space-x-2 mt-1">
               <p className="text-sm font-bold text-foreground">{item.price.toLocaleString('vi-VN')}₫</p>
               {item.originalPrice && (
                 <p className="text-xs text-muted-foreground line-through">{item.originalPrice.toLocaleString('vi-VN')}₫</p>
               )}
             </div>
+
+            {hasAvailableVariants && !isOutOfStock && (
+              <Dialog open={isSizingModalOpen} onOpenChange={handleSizingModalOpenChange}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="text-xs text-muted-foreground hover:text-foreground p-0 h-auto mt-1.5 flex items-center gap-1"
+                  >
+                    <Ruler className="w-3.5 h-3.5" />
+                    {t('cart.sheet.findMySize.buttonLabel')}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[480px] p-0">
+                  <DialogHeader className="p-4 border-b">
+                    <DialogTitle className="text-center text-lg">
+                      {sizingModalView === 'options' && t('cart.sheet.findMySize.optionsTitle')}
+                      {sizingModalView === 'staticGuide' && t('cart.sheet.findMySize.staticGuideTitle')}
+                      {sizingModalView === 'quiz' && t('cart.sheet.findMySize.quizTitle')}
+                    </DialogTitle>
+                     <DialogClose className="absolute right-3 top-3 p-1">
+                        <X className="h-5 w-5" />
+                        <span className="sr-only">Close</span>
+                    </DialogClose>
+                  </DialogHeader>
+                  
+                  <div className="p-6 space-y-4">
+                    {sizingModalView === 'options' && (
+                      <>
+                        <Button variant="outline" className="w-full h-12 text-base" onClick={() => setSizingModalView('staticGuide')}>
+                          {t('cart.sheet.findMySize.viewSizeGuideButton')}
+                        </Button>
+                        <Button variant="default" className="w-full h-12 text-base bg-foreground hover:bg-foreground/90 text-accent-foreground" onClick={() => setSizingModalView('quiz')}>
+                          {t('cart.sheet.findMySize.startQuizButton')}
+                        </Button>
+                      </>
+                    )}
+
+                    {sizingModalView === 'staticGuide' && (
+                      <div>
+                        <DialogDescription className="mb-4 text-center">
+                          {t('cart.sheet.findMySize.staticGuideDescription')}
+                        </DialogDescription>
+                        <div className="flex justify-center mb-4">
+                           <Image src="https://placehold.co/300x200.png" alt={t('cart.sheet.findMySize.measurementsAlt')} width={300} height={200} className="rounded border" data-ai-hint="body measurements guide" />
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[80px]">{t('cart.sheet.findMySize.sizeHeader')}</TableHead>
+                              <TableHead>{t('cart.sheet.findMySize.chestHeader')}</TableHead>
+                              <TableHead>{t('cart.sheet.findMySize.lengthHeader')}</TableHead>
+                              <TableHead>{t('cart.sheet.findMySize.sleeveHeader')}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell>S</TableCell>
+                              <TableCell>90-95 cm</TableCell>
+                              <TableCell>68 cm</TableCell>
+                              <TableCell>20 cm</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>M</TableCell>
+                              <TableCell>96-101 cm</TableCell>
+                              <TableCell>70 cm</TableCell>
+                              <TableCell>21 cm</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>L</TableCell>
+                              <TableCell>102-107 cm</TableCell>
+                              <TableCell>72 cm</TableCell>
+                              <TableCell>22 cm</TableCell>
+                            </TableRow>
+                             <TableRow>
+                              <TableCell>XL</TableCell>
+                              <TableCell>108-113 cm</TableCell>
+                              <TableCell>74 cm</TableCell>
+                              <TableCell>23 cm</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                        <Button variant="outline" className="mt-6 w-full" onClick={() => setSizingModalView('options')}>
+                           {t('general.back')}
+                        </Button>
+                      </div>
+                    )}
+
+                    {sizingModalView === 'quiz' && (
+                       <div>
+                        <p className="text-center text-muted-foreground mb-4">{t('cart.sheet.findMySize.quizComingSoon')}</p>
+                         <Button variant="outline" className="mt-6 w-full" onClick={() => setSizingModalView('options')}>
+                           {t('general.back')}
+                        </Button>
+                       </div>
+                    )}
+                  </div>
+                  
+                  <DialogFooter className="p-4 border-t text-center justify-center">
+                     <p className="text-xs text-muted-foreground">
+                        <a href="#" className="underline hover:text-foreground">{t('cart.sheet.findMySize.privacyPolicyLink')}</a>
+                    </p>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+
 
             {item.discountDescription && (
               <div className="mt-1 flex items-center text-xs text-green-600">
@@ -538,3 +668,4 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
+
