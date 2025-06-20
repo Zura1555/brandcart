@@ -804,7 +804,7 @@ const BrandCartPage = () => {
           </div>
           <div className="flex flex-row items-center space-x-3">
             <div className="text-left">
-              <p className="text-xs text-muted-foreground">{t('cart.totalAmountLabel')}</p>
+              <p className="text-xs text-muted-foreground">{t('cart.subtotalAmountLabel')}</p>
               <p className="text-md font-bold text-foreground">
                 {formatCurrency(totalAmount)}
               </p>

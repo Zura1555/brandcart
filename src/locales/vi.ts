@@ -5,6 +5,7 @@ const viTranslations = {
     totalItems: "({count} sản phẩm)",
     selectAll: "Tất cả",
     totalAmountLabel: "Tổng cộng:",
+    subtotalAmountLabel: "Tạm tính:",
     checkoutButton: "Mua hàng ({count})",
     emptyCartTitle: "Giỏ hàng của bạn trống.",
     emptyCartMessage: "Thêm sản phẩm để bắt đầu mua sắm!",

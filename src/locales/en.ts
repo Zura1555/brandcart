@@ -5,6 +5,7 @@ const enTranslations = {
     totalItems: "({count} items)",
     selectAll: "Select All",
     totalAmountLabel: "Total:",
+    subtotalAmountLabel: "Subtotal:",
     checkoutButton: "Checkout ({count})",
     emptyCartTitle: "Your cart is empty.",
     emptyCartMessage: "Add some products to get started!",
