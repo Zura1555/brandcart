@@ -6,9 +6,9 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import type { CartItem, SimpleVariant } from '@/interfaces';
+import type { CartItem, SimpleVariant, Product } from '@/interfaces';
 import QuantitySelector from './QuantitySelector';
-import { Check, Trash2, ChevronDown, Minus, Plus, X, Ruler, ChevronLeft } from 'lucide-react';
+import { Check, Trash2, ChevronDown, Minus, Plus, X, Ruler, ChevronLeft, Shirt } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import {
   Sheet,
@@ -539,7 +539,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                       </Button>
                     </SheetTrigger>
                     <SheetContent side="bottom" className="p-0 flex flex-col max-h-[90vh]">
-                        <SheetHeader className="p-4 border-b flex-shrink-0 relative">
+                        <SheetHeader className="p-4 border-b flex-shrink-0 relative flex items-center justify-center">
                             {sizingSheetView !== 'options' && (
                               <Button
                                 variant="ghost"
@@ -551,15 +551,11 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                 <span className="sr-only">{t('general.back')}</span>
                               </Button>
                             )}
-                            <SheetTitle className="text-center text-lg font-semibold">
+                            <SheetTitle className="text-lg font-semibold">
                               {sizingSheetView === 'options' && t('cart.sheet.findMySize.optionsTitle')}
                               {sizingSheetView === 'staticGuide' && t('cart.sheet.findMySize.staticGuideTitle')}
                               {sizingSheetView === 'quiz' && t('cart.sheet.findMySize.quizTitle')}
                             </SheetTitle>
-                             <SheetClose className="absolute right-2 top-1/2 -translate-y-1/2 p-2">
-                                <X className="h-5 w-5" />
-                                <span className="sr-only">Close</span>
-                            </SheetClose>
                         </SheetHeader>
                         
                         <ScrollArea className="flex-grow overflow-y-auto">
@@ -571,7 +567,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                     </Button>
                                     <Button variant="default" className="w-full h-12 text-base bg-foreground hover:bg-foreground/90 text-accent-foreground" onClick={() => {
                                         toast({ title: t('cart.sheet.findMySize.quizComingSoon'), variant: "default" });
-                                        // setSizingSheetView('quiz'); // Keep for future
                                     }}>
                                     {t('cart.sheet.findMySize.startQuizButton')}
                                     </Button>
