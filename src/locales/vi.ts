@@ -7,7 +7,6 @@ const viTranslations = {
     totalAmountLabel: "Tổng cộng:",
     subtotalAmountLabel: "Tạm tính:",
     finalTotalAmountLabel: "Tổng cộng",
-    voucherDiscountLabel: "Giảm giá Voucher",
     checkoutButton: "Mua hàng ({count})",
     emptyCartTitle: "Giỏ hàng của bạn trống.",
     emptyCartMessage: "Thêm sản phẩm để bắt đầu mua sắm!",
@@ -37,6 +36,20 @@ const viTranslations = {
         outOfStock: "Hết hàng"
       },
       selectVariantPlaceholder: "Chọn phân loại"
+    },
+    productItem: {
+      sizeGuideButtonLabel: "Bảng kích cỡ",
+      findMySizeButtonLabel: "Tìm cỡ của bạn",
+    },
+    sizeGuide: {
+      dialogTitle: "Bảng kích cỡ",
+      dialogDescription: "Số đo là ước tính. Vui lòng tham khảo hướng dẫn của thương hiệu nếu có.",
+      table: {
+        size: "Cỡ",
+        chest: "Ngực (cm)",
+        length: "Dài áo (cm)",
+        close: "Đóng"
+      }
     },
     completeLook: {
       bannerText: "HOÀN THIỆN SET ĐỒ",
@@ -153,14 +166,11 @@ const viTranslations = {
     shippingMethodInspectionAllowed: "Được đồng kiểm",
     shippingMethodStandardDeliveryLabel: "Giao hàng tiêu chuẩn (3-5 ngày)",
     shippingMethodEstimatedDeliveryTimeLabel: "Thời gian giao hàng dự kiến: 5-7 ngày làm việc",
-    totalAmountLabelWithCount: "Tổng số tiền ({count} sản phẩm)",
-    voucherDiscountLabel: "Giảm giá Voucher",
     yourVoucherAvailable: "Có {count} voucher",
     yourVoucherSelected: "Đã chọn {count} Voucher",
     paymentMethod: "Phương thức thanh toán",
     summaryCard: {
       title: "Tóm tắt đơn hàng",
-      merchandiseSubtotal: "Tiền hàng",
       subtotal: "Tạm tính",
       shippingFee: "Phí vận chuyển",
       voucherDiscount: "Giảm giá Voucher",

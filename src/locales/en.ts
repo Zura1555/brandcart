@@ -7,7 +7,6 @@ const enTranslations = {
     totalAmountLabel: "Total:",
     subtotalAmountLabel: "Subtotal:",
     finalTotalAmountLabel: "Total",
-    voucherDiscountLabel: "Voucher Discount",
     checkoutButton: "Checkout ({count})",
     emptyCartTitle: "Your cart is empty.",
     emptyCartMessage: "Add some products to get started!",
@@ -37,6 +36,20 @@ const enTranslations = {
         outOfStock: "Out of stock"
       },
       selectVariantPlaceholder: "Select variant"
+    },
+    productItem: {
+      sizeGuideButtonLabel: "Size Guide",
+      findMySizeButtonLabel: "Find My Size",
+    },
+    sizeGuide: {
+      dialogTitle: "Size Guide",
+      dialogDescription: "Measurements are approximate. Please refer to specific brand guidelines if available.",
+      table: {
+        size: "Size",
+        chest: "Chest (cm)",
+        length: "Length (cm)",
+        close: "Close"
+      }
     },
     completeLook: {
       bannerText: "COMPLETE YOUR LOOK",
@@ -153,14 +166,11 @@ const enTranslations = {
     shippingMethodInspectionAllowed: "Inspection Allowed",
     shippingMethodStandardDeliveryLabel: "Standard Delivery (3-5 days)",
     shippingMethodEstimatedDeliveryTimeLabel: "Estimated delivery time: 5-7 working days",
-    totalAmountLabelWithCount: "Total Amount ({count} products)", 
-    voucherDiscountLabel: "Voucher Discount",
     yourVoucherAvailable: "{count} Vouchers available",
     yourVoucherSelected: "{count} Vouchers Selected",
     paymentMethod: "Payment Method",
     summaryCard: {
       title: "Order Summary",
-      merchandiseSubtotal: "Merchandise Subtotal",
       subtotal: "Subtotal",
       shippingFee: "Shipping Fee",
       voucherDiscount: "Voucher Discount",
