@@ -432,16 +432,58 @@ const BrandCartPage = () => {
   };
 
   const itemsByShop = useMemo(() => {
-    return mockShops.map(shopData => {
-      const productsInShop = cartItems.filter(item => item.brand === shopData.name);
-      const inStockProductsInShop = productsInShop.filter(item => item.stock !== 0);
-      return {
-        ...shopData,
-        products: productsInShop,
-        isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
-      };
-    }).filter(shopGroup => shopGroup.products.length > 0);
+    const allBrandsInCartSet = new Set(cartItems.map(item => item.brand));
+    const allBrandsInCart = Array.from(allBrandsInCartSet);
+    
+    const shopOrderFromMocks = mockShops.map(s => s.name);
+
+    allBrandsInCart.sort((a, b) => {
+        const indexA = shopOrderFromMocks.indexOf(a);
+        const indexB = shopOrderFromMocks.indexOf(b);
+
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1; 
+        if (indexB !== -1) return 1;  
+        return a.localeCompare(b); 
+    });
+
+    return allBrandsInCart.map(brandName => {
+        const productsInThisBrand = cartItems.filter(item => item.brand === brandName);
+        if (productsInThisBrand.length === 0) return null;
+
+        const mockShopData = mockShops.find(s => s.name === brandName);
+        const inStockProductsInShop = productsInThisBrand.filter(item => item.stock !== 0);
+
+        let shopDataForSection: Omit<Shop, 'products'> & { products: CartItem[], isShopSelected: boolean } = {
+            name: brandName,
+            logoUrl: 'https://placehold.co/60x24.png', 
+            logoDataAiHint: `${brandName.toLowerCase()} logo`,
+            products: productsInThisBrand,
+            isFavorite: false,
+            promotionText: undefined,
+            specialOfferText: undefined,
+            editLinkText: undefined,
+            isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
+        };
+
+        if (mockShopData) {
+            shopDataForSection = {
+                 // Spread mockShopData first to get all its properties
+                ...mockShopData,
+                // Then override/ensure specific properties for the display section
+                name: brandName, // Ensure name is correct
+                products: productsInThisBrand, // Crucially, use CartItems from the cart
+                isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
+                // Ensure logo and hint are taken from mock if available, otherwise keep default
+                logoUrl: mockShopData.logoUrl || shopDataForSection.logoUrl,
+                logoDataAiHint: mockShopData.logoDataAiHint || shopDataForSection.logoDataAiHint,
+            };
+        }
+        
+        return shopDataForSection;
+    }).filter(shopGroup => shopGroup && shopGroup.products.length > 0) as (Shop & { products: CartItem[], isShopSelected: boolean })[];
   }, [cartItems]);
+
 
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')}₫`;
@@ -561,7 +603,6 @@ const BrandCartPage = () => {
         let insertAtIndex = -1;
         for(let i=0; i < updatedItems.length; i++){
             if(updatedItems[i].brand === brandOfNewItem){
-                // Try to insert after the last item of the same brand
                 let lastIndexOfBrand = i;
                 for (let j = i + 1; j < updatedItems.length; j++) {
                     if (updatedItems[j].brand === brandOfNewItem) {
@@ -578,7 +619,6 @@ const BrandCartPage = () => {
         if (insertAtIndex !== -1) {
           updatedItems.splice(insertAtIndex, 0, newCartItem);
         } else {
-          // If brand not found or it's the first item of this brand, add to end or find appropriate shop order
           const shopOrder = mockShops.map(s => s.name);
           const brandIndexInMock = shopOrder.indexOf(brandOfNewItem);
           
@@ -595,10 +635,10 @@ const BrandCartPage = () => {
             if (foundHigherBrand && insertAtIndex !== -1) {
                updatedItems.splice(insertAtIndex, 0, newCartItem);
             } else {
-               updatedItems.push(newCartItem); // Add to end if no higher brand or list is empty
+               updatedItems.push(newCartItem); 
             }
           } else {
-             updatedItems.push(newCartItem); // Add to end if brand not in mockShops (fallback)
+             updatedItems.push(newCartItem); 
           }
         }
         return updatedItems;
