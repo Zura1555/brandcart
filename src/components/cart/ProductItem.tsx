@@ -49,9 +49,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 
   const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
   
-  const [isSizingSheetOpen, setIsSizingSheetOpen] = useState(false);
-  const [sizingSheetView, setSizingSheetView] = useState<'options' | 'staticGuide' | 'quiz'>('options');
-
 
   const cleanVariantName = useCallback((name: string | undefined): string => {
     if (!name) return '';
@@ -231,13 +228,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       onVariantChange(item.cartItemId, selectedVariantInSheet);
     }
     setIsVariantSheetOpen(false);
-  };
-
-  const handleSizingSheetOpenChange = (open: boolean) => {
-    setIsSizingSheetOpen(open);
-    if (!open) {
-      setTimeout(() => setSizingSheetView('options'), 150); 
-    }
   };
 
   const hasAvailableVariants = item.availableVariants && item.availableVariants.length > 0;
@@ -525,102 +515,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
               )}
             </div>
             
-            <div className="mt-1.5">
-                {hasAvailableVariants && !isOutOfStock && (
-                  <Sheet open={isSizingSheetOpen} onOpenChange={handleSizingSheetOpenChange}>
-                    <SheetTrigger asChild>
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="text-xs text-muted-foreground hover:text-foreground p-0 h-auto mt-1 flex items-center gap-1"
-                      >
-                        <Ruler className="w-3.5 h-3.5" />
-                        {t('cart.sheet.findMySize.buttonLabel')}
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="bottom" className="p-0 flex flex-col max-h-[90vh]">
-                        <SheetHeader className="p-4 border-b flex-shrink-0 relative flex items-center justify-center">
-                            {sizingSheetView !== 'options' && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setSizingSheetView('options')}
-                                className="absolute left-2 top-1/2 -translate-y-1/2 p-2"
-                              >
-                                <ChevronLeft className="h-5 w-5" />
-                                <span className="sr-only">{t('general.back')}</span>
-                              </Button>
-                            )}
-                            <SheetTitle className="text-lg font-semibold">
-                              {sizingSheetView === 'options' && t('cart.sheet.findMySize.optionsTitle')}
-                              {sizingSheetView === 'staticGuide' && t('cart.sheet.findMySize.staticGuideTitle')}
-                              {sizingSheetView === 'quiz' && t('cart.sheet.findMySize.quizTitle')}
-                            </SheetTitle>
-                             {/* The default close button of SheetContent is used */}
-                        </SheetHeader>
-                        
-                        <ScrollArea className="flex-grow overflow-y-auto">
-                            <div className="p-4 space-y-4">
-                                {sizingSheetView === 'options' && (
-                                <>
-                                    <Button variant="outline" className="w-full h-12 text-base" onClick={() => setSizingSheetView('staticGuide')}>
-                                    {t('cart.sheet.findMySize.viewSizeGuideButton')}
-                                    </Button>
-                                    <Button variant="default" className="w-full h-12 text-base bg-foreground hover:bg-foreground/90 text-accent-foreground" onClick={() => {
-                                        toast({ title: t('cart.sheet.findMySize.quizComingSoon'), variant: "default" });
-                                         setSizingSheetView('quiz');
-                                    }}>
-                                    {t('cart.sheet.findMySize.startQuizButton')}
-                                    </Button>
-                                </>
-                                )}
-
-                                {sizingSheetView === 'staticGuide' && (
-                                <div>
-                                    <p className="text-sm text-muted-foreground mb-4 text-center">
-                                    {t('cart.sheet.findMySize.staticGuideDescription')}
-                                    </p>
-                                    <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                        <TableHead className="w-[80px]">{t('cart.sheet.findMySize.sizeHeader')}</TableHead>
-                                        <TableHead>{t('cart.sheet.findMySize.chestHeader')}</TableHead>
-                                        <TableHead>{t('cart.sheet.findMySize.lengthHeader')}</TableHead>
-                                        <TableHead>{t('cart.sheet.findMySize.sleeveHeader')}</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        <TableRow><TableCell>S</TableCell><TableCell>90-95 cm</TableCell><TableCell>68 cm</TableCell><TableCell>20 cm</TableCell></TableRow>
-                                        <TableRow><TableCell>M</TableCell><TableCell>96-101 cm</TableCell><TableCell>70 cm</TableCell><TableCell>21 cm</TableCell></TableRow>
-                                        <TableRow><TableCell>L</TableCell><TableCell>102-107 cm</TableCell><TableCell>72 cm</TableCell><TableCell>22 cm</TableCell></TableRow>
-                                        <TableRow><TableCell>XL</TableCell><TableCell>108-113 cm</TableCell><TableCell>74 cm</TableCell><TableCell>23 cm</TableCell></TableRow>
-                                    </TableBody>
-                                    </Table>
-                                    <div className="flex justify-center mt-4">
-                                      <Image src="https://placehold.co/300x200.png" alt={t('cart.sheet.findMySize.measurementsAlt')} width={300} height={200} className="rounded border" data-ai-hint="body measurements guide" />
-                                    </div>
-                                </div>
-                                )}
-
-                                {sizingSheetView === 'quiz' && ( 
-                                <div>
-                                    <p className="text-center text-muted-foreground mb-4">{t('cart.sheet.findMySize.quizComingSoon')}</p>
-                                </div>
-                                )}
-                            </div>
-                        </ScrollArea>
-                        
-                        <SheetFooter className="p-4 border-t text-center justify-center flex-shrink-0">
-                            <p className="text-xs text-muted-foreground">
-                                <a href="#" className="underline hover:text-foreground">{t('cart.sheet.findMySize.privacyPolicyLink')}</a>
-                            </p>
-                        </SheetFooter>
-                    </SheetContent>
-                  </Sheet>
-                )}
-            </div>
-
-
             {item.discountDescription && (
               <div className="mt-1 flex items-center text-xs text-green-600">
                 <Check className="w-3 h-3 mr-1 flex-shrink-0" />
@@ -648,5 +542,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
+
 
 

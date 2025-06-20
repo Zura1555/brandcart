@@ -36,22 +36,6 @@ const viTranslations = {
         outOfStock: "Hết hàng"
       },
       selectVariantPlaceholder: "Chọn phân loại",
-      findMySize: {
-        buttonLabel: "Tìm kích cỡ của tôi",
-        optionsTitle: "Hỗ trợ kích cỡ",
-        viewSizeGuideButton: "Xem Bảng Kích Cỡ",
-        startQuizButton: "Tìm Kích Cỡ Của Tôi (Quiz)",
-        staticGuideTitle: "Bảng Kích Cỡ",
-        staticGuideDescription: "Vui lòng tham khảo bảng dưới đây để biết số đo. Tất cả số đo đều tính bằng centimet (cm).",
-        quizTitle: "Tìm Kích Cỡ Phù Hợp",
-        quizComingSoon: "Tính năng 'Tìm Kích Cỡ Của Tôi' dạng trắc nghiệm sắp ra mắt!",
-        privacyPolicyLink: "Chính sách Bảo mật",
-        measurementsAlt: "Hình minh họa cách đo các số đo cơ thể",
-        sizeHeader: "Kích cỡ",
-        chestHeader: "Ngực (cm)",
-        lengthHeader: "Dài (cm)",
-        sleeveHeader: "Tay áo (cm)"
-      }
     },
     completeLook: {
       bannerText: "HOÀN THIỆN SET ĐỒ",

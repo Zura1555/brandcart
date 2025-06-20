@@ -36,22 +36,6 @@ const enTranslations = {
         outOfStock: "Out of stock"
       },
       selectVariantPlaceholder: "Select variant",
-      findMySize: {
-        buttonLabel: "Find my size",
-        optionsTitle: "Sizing Help",
-        viewSizeGuideButton: "View Size Guide",
-        startQuizButton: "Find My Size (Quiz)",
-        staticGuideTitle: "Size Guide",
-        staticGuideDescription: "Please refer to the chart below for measurements. All measurements are in centimeters (cm).",
-        quizTitle: "Find Your Fit",
-        quizComingSoon: "The interactive 'Find My Size' quiz is coming soon!",
-        privacyPolicyLink: "Privacy Policy",
-        measurementsAlt: "Illustration showing how to take body measurements",
-        sizeHeader: "Size",
-        chestHeader: "Chest (cm)",
-        lengthHeader: "Length (cm)",
-        sleeveHeader: "Sleeve (cm)"
-      }
     },
     completeLook: {
       bannerText: "COMPLETE YOUR LOOK",
