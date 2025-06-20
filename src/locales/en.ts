@@ -266,6 +266,9 @@ const enTranslations = {
             title: "Error",
             description: "Could not process order details. Please try again or contact support."
         },
+        missingOrderData: {
+            description: "Order details are missing. Please try the checkout process again."
+        },
         feedbackReceived: {
             title: "Feedback Received",
             description: "Thanks for your feedback! You rated {rating} out of 5."

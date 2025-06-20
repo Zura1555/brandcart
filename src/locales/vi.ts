@@ -266,6 +266,9 @@ const viTranslations = {
             title: "Lỗi",
             description: "Không thể xử lý chi tiết đơn hàng. Vui lòng thử lại hoặc liên hệ hỗ trợ."
         },
+        missingOrderData: {
+            description: "Chi tiết đơn hàng bị thiếu. Vui lòng thử lại quy trình thanh toán."
+        },
         feedbackReceived: {
             title: "Đã nhận phản hồi",
             description: "Cảm ơn phản hồi của bạn! Bạn đã đánh giá {rating} trên 5."

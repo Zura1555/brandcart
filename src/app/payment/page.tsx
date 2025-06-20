@@ -77,6 +77,11 @@ const PaymentSuccessPage = () => {
 
 
   useEffect(() => {
+    if (orderDetails) {
+      setIsLoading(false); // If details are already loaded, ensure loading is false.
+      return; // Don't re-process if orderDetails are already set.
+    }
+
     const finalOrderDetailsRaw = localStorage.getItem(FINAL_ORDER_DETAILS_KEY);
     if (finalOrderDetailsRaw) {
       try {
@@ -97,7 +102,6 @@ const PaymentSuccessPage = () => {
             date: dateFormatted,
           });
           
-          // Clean up localStorage
           localStorage.removeItem(FINAL_ORDER_DETAILS_KEY);
           localStorage.removeItem(CHECKOUT_ITEMS_STORAGE_KEY);
           localStorage.removeItem(SELECTED_VOUCHERS_DETAILS_KEY);
@@ -108,24 +112,23 @@ const PaymentSuccessPage = () => {
       } catch (error) {
         console.error("Error processing final order details:", error);
         toast({ title: t('paymentSuccess.toast.errorProcessingOrder.title'), description: t('paymentSuccess.toast.errorProcessingOrder.description'), variant: 'destructive' });
-        router.replace('/'); // Redirect if data is corrupt or missing
+        if (router.pathname === '/payment') router.replace('/'); 
       }
     } else {
-      // If no final order details, maybe redirect or show error
       console.warn("No final order details found in localStorage.");
-      toast({ title: t('paymentSuccess.toast.errorProcessingOrder.title'), description: "Missing order data.", variant: 'destructive' });
-      router.replace('/');
+      toast({ title: t('paymentSuccess.toast.errorProcessingOrder.title'), description: t('paymentSuccess.toast.missingOrderData.description'), variant: 'destructive' });
+      if (router.pathname === '/payment') router.replace('/');
     }
     setIsLoading(false);
-  }, [locale, t, toast, router]);
+  }, [orderDetails, locale, t, toast, router]);
 
   useEffect(() => {
     if (!isLoading && !orderDetails) {
       // This condition implies that useEffect either didn't find data or failed parsing,
-      // and router.replace('/') should have already been called.
+      // and router.replace('/') should have already been called by the first effect.
       // This is a safeguard.
-      if (router.pathname === '/payment') { // Avoid redirect loops if already redirecting
-          router.replace('/');
+      if (router.pathname === '/payment') { 
+          // router.replace('/'); // Redirection is handled in the first effect.
       }
     }
   }, [isLoading, orderDetails, router]);
@@ -187,11 +190,12 @@ const PaymentSuccessPage = () => {
   }
   
   if (!orderDetails) {
-    // Fallback, though useEffect should handle redirection.
-    // This can prevent rendering an empty page briefly before redirection.
+    // This state should ideally be brief as the useEffect handles redirection.
+    // If redirection hasn't happened, it implies an issue caught by the second useEffect,
+    // or the first one is about to redirect.
     return (
         <div className="flex flex-col min-h-screen bg-background justify-center items-center">
-            <p>{t('paymentSuccess.loadingOrder')}</p>
+            <p>{t('paymentSuccess.loadingOrder')}</p> 
         </div>
     ); 
   }
