@@ -77,9 +77,9 @@ const PaymentSuccessPage = () => {
 
 
   useEffect(() => {
-    if (orderDetails) {
-      setIsLoading(false); // If details are already loaded, ensure loading is false.
-      return; // Don't re-process if orderDetails are already set.
+    if (orderDetails) { // Prevent re-processing if orderDetails are already set
+      setIsLoading(false);
+      return;
     }
 
     const finalOrderDetailsRaw = localStorage.getItem(FINAL_ORDER_DETAILS_KEY);
@@ -120,7 +120,7 @@ const PaymentSuccessPage = () => {
       if (router.pathname === '/payment') router.replace('/');
     }
     setIsLoading(false);
-  }, [orderDetails, locale, t, toast, router]);
+  }, [orderDetails, locale, t, toast, router]); // Added orderDetails to dependency array
 
   useEffect(() => {
     if (!isLoading && !orderDetails) {
@@ -361,6 +361,3 @@ const PaymentSuccessPage = () => {
 };
 
 export default PaymentSuccessPage;
-
-
-    
