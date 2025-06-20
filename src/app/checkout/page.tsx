@@ -76,7 +76,7 @@ const CheckoutPage = () => {
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
   const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
   const [initialSavings, setInitialSavings] = useState<number>(0);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<SelectedPaymentMethod>('payoo');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<SelectedPaymentMethod>('cod');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
   const [shopMessage, setShopMessage] = useState<string>('');
@@ -216,12 +216,10 @@ const CheckoutPage = () => {
     if (storedVoucherCount > 0) {
       setVoucherTriggerText(t('checkout.yourVoucherSelected', { count: storedVoucherCount }));
     } else {
-      // Count for "available" specific to select-voucher page's mocks
-      // mockPageAvailableVouchers in select-voucher/page.tsx has 5 items.
       setVoucherTriggerText(t('checkout.yourVoucherAvailable', { count: 5 }));
     }
 
-  }, [parseVariantNameForCheckout, t, router]); // Added router to deps to re-run on navigation (e.g., back from select-voucher)
+  }, [parseVariantNameForCheckout, t, router]); 
 
 
   const formatCurrency = (amount: number) => {
@@ -247,7 +245,7 @@ const CheckoutPage = () => {
     if (useLoyaltyPoints) {
       total -= LOYALTY_POINTS_DISCOUNT_VALUE;
     }
-    return Math.max(0, total); // Ensure total doesn't go below zero
+    return Math.max(0, total); 
   }, [initialTotalAmount, useLoyaltyPoints]);
   
   const displaySavings = initialSavings;
@@ -260,7 +258,7 @@ const CheckoutPage = () => {
     { id: 'momo', name: 'Momo', iconUrl: 'https://file.hstatic.net/1000284478/file/momo-45_eee48d6f0f9e41f1bd2c5f06ab4214a2.svg', iconAiHint: 'Momo logo', details: null },
     { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg', iconAiHint: 'Apple Pay logo', details: null },
     { id: 'cod', name: 'COD', iconUrl: 'https://file.hstatic.net/1000284478/file/cod_icon-47_a8768752c1a445da90d600ca0a94675c.svg', iconAiHint: 'cash on delivery icon', details: null },
-  ].sort((a, b) => (a.id === 'cod' ? 1 : b.id === 'cod' ? -1 : 0));
+  ].sort((a, b) => (a.id === 'cod' ? -1 : b.id === 'cod' ? 1 : 0));
 
   const currentAddressNamePhone = currentShippingAddress ? t('checkout.address.namePhone', { name: currentShippingAddress.name, phone: currentShippingAddress.phone }) : '';
 
@@ -276,7 +274,6 @@ const CheckoutPage = () => {
   const handleEInvoiceDetailChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEInvoiceDetails(prev => ({ ...prev, [name]: value }));
-     // Auto-save logic
     const detailsToSave = { ...eInvoiceDetails, [name]: value };
     if (eInvoiceType === 'personal') {
       if (detailsToSave.fullName && detailsToSave.idCard && detailsToSave.email && detailsToSave.address) {
@@ -402,7 +399,7 @@ const CheckoutPage = () => {
                     const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(p.variant);
                     let displayColor = parsedColor || "N/A";
                     let displaySize = parsedSize;
-                    if (!displaySize) displaySize = "M"; // Default to M if no size
+                    if (!displaySize) displaySize = "M"; 
                     let displayCode = p.productCode || "N/A";
                     
                     const badgeParts = [];
