@@ -15,7 +15,8 @@ export interface Product {
   price: number; // Expecting whole numbers like 36000
   originalPrice?: number; // Expecting whole numbers like 50000
   brand: string;
-  imageUrl: string;
+  imageUrl: string; // Main image for product details, cart list
+  thumbnailImageUrl?: string; // Optional smaller/different image for cards like "Recently Viewed"
   dataAiHint?: string;
   productCode?: string;
   variant?: string; // Name of the currently selected variant for display
@@ -63,3 +64,4 @@ export interface SelectedVoucherInfo {
   discountValue: number;
   discountType: 'fixed' | 'percentage'; // For now, we'll primarily use 'fixed'
 }
+

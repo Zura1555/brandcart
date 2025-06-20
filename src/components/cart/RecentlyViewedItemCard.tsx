@@ -25,7 +25,7 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
     <Card className="w-[150px] sm:w-[170px] flex-shrink-0 shadow-sm rounded-lg overflow-hidden bg-card hover:shadow-md transition-shadow">
       <div className="relative aspect-[3/4] w-full bg-muted/20 group">
         <Image
-          src={item.imageUrl}
+          src={item.thumbnailImageUrl || item.imageUrl}
           alt={item.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -55,3 +55,4 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
 };
 
 export default RecentlyViewedItemCard;
+
