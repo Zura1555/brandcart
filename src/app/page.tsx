@@ -235,12 +235,11 @@ const BrandCartPage = () => {
           setVoucherTriggerText(t('cart.vouchersAndShipping.availableVouchersText', { count: mockAvailableVouchersSheet.length }));
       }
 
-      // Calculate total voucher discount
-      const storedVouchersRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
       let discount = 0;
-      if (storedVouchersRaw) {
+      const storedVouchersDetailsRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
+      if (storedVouchersDetailsRaw) {
         try {
-          const selectedVouchers: SelectedVoucherInfo[] = JSON.parse(storedVouchersRaw);
+          const selectedVouchers: SelectedVoucherInfo[] = JSON.parse(storedVouchersDetailsRaw);
           discount = selectedVouchers.reduce((sum, v) => sum + (v.discountValue || 0), 0);
         } catch (e) {
           console.error("Error parsing selectedVouchersData from localStorage on cart page", e);
@@ -595,31 +594,12 @@ const BrandCartPage = () => {
         let updatedItems = [...prevItems];
         const brandOfNewItem = newCartItem.brand;
         
-        // Find if other items of the same brand exist
         const firstItemIndexOfBrand = prevItems.findIndex(item => item.brand === brandOfNewItem);
 
         if (firstItemIndexOfBrand !== -1) {
-          // Insert the new item at the beginning of this brand's group
           updatedItems.splice(firstItemIndexOfBrand, 0, newCartItem);
         } else {
-          // Brand is new, add it according to mockShop order or then alphabetically
-          const shopOrder = mockShops.map(s => s.name);
-          const brandIndexInMock = shopOrder.indexOf(brandOfNewItem);
-          let insertPos = updatedItems.length; 
-
-          if (brandIndexInMock !== -1) { // If brand is in mockShops, find its position
-            for (let i = 0; i < updatedItems.length; i++) {
-              const currentItemBrandIndexInMock = shopOrder.indexOf(updatedItems[i].brand);
-              if (currentItemBrandIndexInMock === -1 || currentItemBrandIndexInMock > brandIndexInMock) {
-                insertPos = i;
-                break;
-              }
-            }
-            updatedItems.splice(insertPos, 0, newCartItem);
-          } else { // New brand not in mockShops, typically add to end or handle custom sort
-             // For simplicity, we add new brands to the top when they are the lastAddedBrand later in itemsByShop
-            updatedItems.unshift(newCartItem); // Add to top, itemsByShop will re-sort
-          }
+          updatedItems.unshift(newCartItem);
         }
         return updatedItems;
       });
@@ -860,15 +840,6 @@ const BrandCartPage = () => {
                     </p>
                 </div>
             </div>
-
-            {actualTotalVoucherDiscount > 0 && (
-                <div className="flex justify-end items-center mb-2">
-                    <p className="text-xs text-muted-foreground">{t('cart.voucherDiscountLabel')}:</p>
-                    <p className="text-md font-semibold text-destructive ml-2">
-                        -{formatCurrency(actualTotalVoucherDiscount)}
-                    </p>
-                </div>
-            )}
             
             <div className="flex justify-between items-center">
                 <div className="text-left">
@@ -907,5 +878,7 @@ const BrandCartPage = () => {
 };
 
 export default BrandCartPage;
+
+    
 
     
