@@ -48,7 +48,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   }, [cleanVariantName]);
 
   const [selectedCylVariantDetails, setSelectedCylVariantDetails] = useState<Partial<Product>>({
-    ...item,
+    ...item, // Initialize with base item details
     name: item.name, 
     variant: item.variant,
     price: item.price,
@@ -135,10 +135,10 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   const handleConfirmCylVariant = () => {
     if (selectedVariantInSheet) {
       setSelectedCylVariantDetails(prev => ({
-        ...prev,
-        ...selectedVariantInSheet,
-        name: item.name, 
-        variant: selectedVariantInSheet.name, 
+        ...prev, // Keep existing product details like ID, brand, etc.
+        ...selectedVariantInSheet, // Overwrite with selected variant specifics
+        name: item.name, // Ensure base product name is kept
+        variant: selectedVariantInSheet.name, // This IS the variant name
       }));
     }
     setIsVariantSheetOpen(false);
@@ -147,8 +147,8 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   const { color: parsedColorFromItem, size: parsedSizeFromItem } = parseVariantName(selectedCylVariantDetails.variant);
   let displayColor = parsedColorFromItem || "N/A";
   let displaySize = parsedSizeFromItem;
-  if (!displaySize && allPossibleSizes.length > 0) displaySize = allPossibleSizes[0];
-  else if (!displaySize) displaySize = "M"; 
+  if (!displaySize && allPossibleSizes.length > 0) displaySize = allPossibleSizes[0]; // Default to first available size if applicable
+  else if (!displaySize) displaySize = "M"; // Fallback default size
   
   const cylBadgeDisplayString = [displayColor, displaySize, selectedCylVariantDetails.productCode || "N/A"]
     .filter(part => part !== "N/A" || (displayColor !== "N/A" || displaySize !== "M" || (selectedCylVariantDetails.productCode && selectedCylVariantDetails.productCode !== "N/A")))
@@ -168,19 +168,20 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   }
 
   const handleRelevantItemAddToCart = () => {
+    // Construct the Product object based on current selection in selectedCylVariantDetails
     const itemToAdd: Product = {
-      id: item.id,
-      name: selectedCylVariantDetails.name || item.name,
+      id: item.id, // Base item ID
+      name: selectedCylVariantDetails.name || item.name, // Base item name
       price: selectedCylVariantDetails.price || item.price,
-      originalPrice: selectedCylVariantDetails.originalPrice,
-      brand: item.brand,
+      originalPrice: selectedCylVariantDetails.originalPrice, // Can be undefined
+      brand: item.brand, // Base item brand
       imageUrl: selectedCylVariantDetails.imageUrl || item.imageUrl,
       dataAiHint: selectedCylVariantDetails.dataAiHint || item.dataAiHint,
       productCode: selectedCylVariantDetails.productCode || item.productCode,
-      variant: selectedCylVariantDetails.variant,
-      stock: selectedCylVariantDetails.stock,
-      availableVariants: item.availableVariants, 
-      discountDescription: item.discountDescription,
+      variant: selectedCylVariantDetails.variant, // This is the crucial selected variant name
+      stock: selectedCylVariantDetails.stock, // Stock of the selected variant
+      availableVariants: item.availableVariants, // Keep full list for cart item if needed later
+      discountDescription: item.discountDescription, // Base item discount
     };
     onAddToCartParent(itemToAdd);
   };
@@ -320,13 +321,16 @@ interface ShopSectionProps {
   onQuantityChange: (itemId: string, quantity: number) => void;
   onDeleteItem: (itemId: string) => void;
   onVariantChange: (itemId: string, newVariantData: SimpleVariant) => void;
-  onAddToCart: (itemToAdd: Product) => void; 
+  onAddToCart: (itemToAdd: Product) => void; // Main add to cart handler from Page
 }
 
 const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, onShopSelectToggle, onItemSelectToggle, onQuantityChange, onDeleteItem, onVariantChange, onAddToCart }) => {
   if (items.length === 0) return null;
   const { t } = useLanguage();
   const { toast } = useToast();
+
+  // State for "Complete Your Look" items displayed in this section
+  const [displayedRelevantProducts, setDisplayedRelevantProducts] = useState(() => mockRelevantProducts);
 
   const handleShopNowClick = () => {
     toast({
@@ -338,6 +342,13 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
   
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')}₫`;
+  };
+
+  // Handler for adding a "Complete Your Look" item to the main cart
+  const handleCompleteLookItemAddToCart = (itemAdded: Product) => {
+    onAddToCart(itemAdded); // Call the main add to cart function (shows toast, adds to cartItems)
+    // Remove the item from this section's "Complete Your Look" list
+    setDisplayedRelevantProducts(prev => prev.filter(p => !(p.id === itemAdded.id && p.variant === itemAdded.variant)));
   };
 
   return (
@@ -398,7 +409,7 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
       <CardContent className="p-0">
         <div className="divide-y divide-border">
           {items.map((item) => {
-            const showCylAccordion = (item.id === 'mlb1' && item.brand === 'MLB');
+            const showCylAccordion = item.id === 'mlb1' && item.brand === 'MLB';
 
             return (
               <div key={item.cartItemId} className="group/shop-item-wrapper">
@@ -427,16 +438,16 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
                         <p className="text-sm text-muted-foreground mb-3">
                           {t('cart.completeLook.dialogTitle', { productName: item.name })}
                         </p>
-                        {mockRelevantProducts && mockRelevantProducts.length > 0 ? (
+                        {displayedRelevantProducts && displayedRelevantProducts.length > 0 ? (
                           <div className="space-y-3">
-                            {mockRelevantProducts
+                            {displayedRelevantProducts
                               .filter(relevantItem => relevantItem.id !== item.id) 
                               .slice(0, 3) 
                               .map(relevantItem => (
                                 <RelevantProductCard 
-                                  key={relevantItem.id} 
+                                  key={`${relevantItem.id}-${relevantItem.variant || 'defaultRelevant'}`} 
                                   item={relevantItem} 
-                                  onAddToCartParent={onAddToCart} 
+                                  onAddToCartParent={handleCompleteLookItemAddToCart} 
                                 />
                             ))}
                           </div>

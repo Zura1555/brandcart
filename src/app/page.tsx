@@ -561,7 +561,7 @@ const BrandCartPage = () => {
         ...itemToAdd,
         cartItemId: `${itemToAdd.id}-${itemToAdd.variant || 'base'}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         quantity: 1,
-        selected: false,
+        selected: false, // Default to not selected when added from CYL or Recently Viewed
       };
 
       setCartItems(prevItems => {
@@ -571,15 +571,45 @@ const BrandCartPage = () => {
         let insertAtIndex = -1;
         for(let i=0; i < updatedItems.length; i++){
             if(updatedItems[i].brand === brandOfNewItem){
-                insertAtIndex = i;
+                // Try to insert after the last item of the same brand
+                let lastIndexOfBrand = i;
+                for (let j = i + 1; j < updatedItems.length; j++) {
+                    if (updatedItems[j].brand === brandOfNewItem) {
+                        lastIndexOfBrand = j;
+                    } else {
+                        break; 
+                    }
+                }
+                insertAtIndex = lastIndexOfBrand + 1;
                 break;
             }
         }
-
+        
         if (insertAtIndex !== -1) {
           updatedItems.splice(insertAtIndex, 0, newCartItem);
         } else {
-          updatedItems.push(newCartItem);
+          // If brand not found or it's the first item of this brand, add to end or find appropriate shop order
+          const shopOrder = mockShops.map(s => s.name);
+          const brandIndexInMock = shopOrder.indexOf(brandOfNewItem);
+          
+          if (brandIndexInMock !== -1) {
+            let foundHigherBrand = false;
+            for(let i=0; i < updatedItems.length; i++){
+              const currentItemBrandIndex = shopOrder.indexOf(updatedItems[i].brand);
+              if (currentItemBrandIndex > brandIndexInMock) {
+                insertAtIndex = i;
+                foundHigherBrand = true;
+                break;
+              }
+            }
+            if (foundHigherBrand && insertAtIndex !== -1) {
+               updatedItems.splice(insertAtIndex, 0, newCartItem);
+            } else {
+               updatedItems.push(newCartItem); // Add to end if no higher brand or list is empty
+            }
+          } else {
+             updatedItems.push(newCartItem); // Add to end if brand not in mockShops (fallback)
+          }
         }
         return updatedItems;
       });
@@ -589,6 +619,11 @@ const BrandCartPage = () => {
         description: t('toast.itemAddedToCart.description')
       });
     }
+  };
+
+  const handleRecentlyViewedItemAddToCart = (itemToAdd: Product) => {
+    handleAddToCart(itemToAdd); // Adds to cart and shows toast
+    setRecentlyViewedItems(prev => prev.filter(item => item.id !== itemToAdd.id || item.variant !== itemToAdd.variant));
   };
 
   const shippingDiscount = useMemo(() => {
@@ -658,7 +693,7 @@ const BrandCartPage = () => {
                   onQuantityChange={handleQuantityChange}
                   onDeleteItem={handleDeleteItem}
                   onVariantChange={handleVariantChange}
-                  onAddToCart={handleAddToCart}
+                  onAddToCart={handleAddToCart} // Pass the main handler
                 />
               ))}
             </>
@@ -761,7 +796,7 @@ const BrandCartPage = () => {
               </Sheet>
 
              <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
-                <div className="flex items-center min-w-0"> {/* Added min-w-0 here */}
+                <div className="flex items-center min-w-0">
                   <Truck className={`w-5 h-5 mr-3 flex-shrink-0 ${truckIconClass}`} />
                   <span className={cn("text-sm truncate", truckIconClass === 'text-green-500' ? 'text-green-600' : 'text-muted-foreground')}>
                     {displayShippingMessage}
@@ -778,7 +813,11 @@ const BrandCartPage = () => {
               <ScrollArea className="w-full whitespace-nowrap" orientation="horizontal">
                 <div className="flex space-x-3 sm:space-x-4 pb-3">
                   {recentlyViewedItems.map(item => (
-                    <RecentlyViewedItemCard key={`recent-${item.id}`} item={item} onAddToCart={handleAddToCart} />
+                    <RecentlyViewedItemCard 
+                        key={`recent-${item.id}-${item.variant || 'base'}`} 
+                        item={item} 
+                        onAddToCart={handleRecentlyViewedItemAddToCart} 
+                    />
                   ))}
                 </div>
                 <ScrollBar orientation="horizontal" />
