@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import type { CartItem, SimpleVariant } from '@/interfaces';
 import QuantitySelector from './QuantitySelector';
-import { Check, Trash2, ChevronDown, Minus, Plus } from 'lucide-react';
+import { Check, Trash2, ChevronDown, Minus, Plus, Shirt, X } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import {
   Sheet,
@@ -17,10 +17,23 @@ import {
   SheetTitle,
   SheetFooter,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Table, TableBody, TableCell, TableHead, TableHeader as TableHeaderUI, TableRow } from '@/components/ui/table';
+
 
 interface ProductItemProps {
   item: CartItem;
@@ -43,6 +56,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const swipeableContentRef = useRef<HTMLDivElement>(null);
 
   const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+
 
   const cleanVariantName = useCallback((name: string | undefined): string => {
     if (!name) return '';
@@ -250,7 +265,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 
 
   let stockStatusTextInSheet = '';
-  let stockStatusClassesInSheet = 'text-sm font-medium ';
+  let stockStatusClassesInSheet = 'text-xs font-medium ';
 
   if (currentDisplayDetailsInSheet.stock !== undefined) {
     if (currentDisplayDetailsInSheet.stock > 10) {
@@ -330,169 +345,241 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
           <Image
             src={item.imageUrl}
             alt={item.name}
-            width={80}
-            height={80}
-            className="rounded-md object-cover w-20 h-20 shrink-0 border"
+            width={96} 
+            height={96}
+            className="rounded-md object-cover w-24 h-24 shrink-0 border"
             data-ai-hint={item.dataAiHint}
             priority={false}
           />
           <div className="flex-grow min-w-0">
             <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
             
-            {hasAvailableVariants ? ( 
-                <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
-                  <SheetTrigger asChild disabled={isOutOfStock || !canOpenVariantSheet}>
-                    <button 
-                      type="button" 
-                      className={cn(
-                        "text-left block hover:opacity-80 transition-opacity focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
-                        (isOutOfStock || !canOpenVariantSheet) && "cursor-not-allowed opacity-70"
-                      )}
-                      disabled={isOutOfStock || !canOpenVariantSheet}
-                    >
+            <div className="flex items-center space-x-2 mt-1">
+                {hasAvailableVariants ? ( 
+                    <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
+                      <SheetTrigger asChild disabled={isOutOfStock || !canOpenVariantSheet}>
+                        <button 
+                          type="button" 
+                          className={cn(
+                            "text-left block hover:opacity-80 transition-opacity focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
+                            (isOutOfStock || !canOpenVariantSheet) && "cursor-not-allowed opacity-70"
+                          )}
+                          disabled={isOutOfStock || !canOpenVariantSheet}
+                        >
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                                "bg-green-600 hover:bg-green-600 text-white text-xs px-1.5 py-0.5 inline-flex items-center",
+                                (isOutOfStock || !canOpenVariantSheet) ? "cursor-not-allowed" : "cursor-pointer"
+                            )}
+                          >
+                            {showSelectVariantPlaceholder ? (
+                               <span className="italic text-white/80 truncate">{t('cart.sheet.selectVariantPlaceholder')}</span>
+                            ) : (
+                               badgeDisplayString && <span className="truncate">{badgeDisplayString}</span>
+                            )}
+                            <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
+                          </Badge>
+                        </button>
+                      </SheetTrigger>
+                      <SheetContent side="bottom" className="rounded-t-lg p-0 flex flex-col max-h-[85vh] sm:max-h-[80vh]">
+                        <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10">
+                           <SheetTitle className="text-lg text-center font-semibold">{t('cart.sheet.productInfoTitle')}</SheetTitle>
+                            <SheetClose className="absolute right-2 top-1/2 -translate-y-1/2 p-2">
+                                <X className="h-5 w-5" />
+                                <span className="sr-only">Close</span>
+                            </SheetClose>
+                        </SheetHeader>
+
+                        <ScrollArea className="flex-grow">
+                          <div className="p-4 space-y-4">
+                            <div className="flex items-start space-x-3">
+                              <Image
+                                src={currentDisplayDetailsInSheet.imageUrl}
+                                alt={item.name}
+                                width={112}
+                                height={112}
+                                className="rounded-md object-cover w-28 h-28 sm:w-32 sm:h-32 border flex-shrink-0"
+                                data-ai-hint={currentDisplayDetailsInSheet.dataAiHint || "product image"}
+                                sizes="(max-width: 640px) 112px, 128px"
+                              />
+                              <div className="flex-grow min-w-0">
+                                {item.brand && <p className="text-xs font-medium text-foreground">{item.brand}</p>}
+                                <p className="text-sm text-foreground mt-0.5 line-clamp-3">{item.name}</p>
+                                <div className="flex items-baseline space-x-2 mt-1">
+                                    <p className="text-base font-bold text-foreground">{currentDisplayDetailsInSheet.price.toLocaleString('vi-VN')}₫</p>
+                                    {stockStatusTextInSheet && (
+                                      <>
+                                        <span className="text-xs text-muted-foreground">|</span>
+                                        <span className={stockStatusClassesInSheet}>{stockStatusTextInSheet}</span>
+                                      </>
+                                    )}
+                                </div>
+                                <div className="flex items-center space-x-2 text-foreground mt-2">
+                                  <Button variant="outline" size="icon" className="h-7 w-7 opacity-50 cursor-not-allowed" disabled><Minus className="h-4 w-4" /></Button>
+                                  <span className="text-sm font-semibold tabular-nums">{item.quantity}</span>
+                                  <Button variant="outline" size="icon" className="h-7 w-7 opacity-50 cursor-not-allowed" disabled><Plus className="h-4 w-4" /></Button>
+                                </div>
+                              </div>
+                            </div>
+
+                            {uniqueColors.length > 0 && (
+                              <div className="space-y-2">
+                                <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
+                                <div className="flex space-x-2 overflow-x-auto pb-2 -mb-2">
+                                  {uniqueColors.map(color => (
+                                    <button
+                                      key={color}
+                                      type="button"
+                                      onClick={() => {
+                                        setTempSelectedColorName(color);
+                                        if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
+                                      }}
+                                      className={cn(
+                                        "rounded border p-0.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
+                                        tempSelectedColorName === color ? "border-foreground border-2" : "border-muted hover:border-muted-foreground"
+                                      )}
+                                      aria-label={color}
+                                    >
+                                      <Image
+                                        src={item.availableVariants?.find(v => parseVariantName(v.name).color === color)?.imageUrl || `https://placehold.co/56x56.png`}
+                                        alt={color}
+                                        width={56}
+                                        height={56}
+                                        className="rounded-sm object-cover"
+                                        data-ai-hint={color.toLowerCase()}
+                                      />
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {allPossibleSizes.length > 0 && (
+                              <div className="space-y-2">
+                                <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {allPossibleSizes.map(size => {
+                                    const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
+                                    const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
+                                    const isSizeInStock = variantForThisSize ? (variantForThisSize.stock === undefined || variantForThisSize.stock > 0) : true;
+                                    const isSizeDisabled = !isSizeAvailableForColor || !isSizeInStock;
+                                    
+                                    return (
+                                      <Button
+                                        key={size}
+                                        type="button"
+                                        variant={tempSelectedSizeValue === size && !isSizeDisabled ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => {
+                                          if (!isSizeDisabled) setTempSelectedSizeValue(size);
+                                        }}
+                                        disabled={isSizeDisabled}
+                                        className={cn(
+                                          "px-4 py-2 h-auto text-sm rounded",
+                                          tempSelectedSizeValue === size && !isSizeDisabled ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
+                                          isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50"
+                                        )}
+                                      >
+                                        {size}
+                                      </Button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                             {(uniqueColors.length === 0 && allPossibleSizes.length === 0 && item.availableVariants && item.availableVariants.length > 1) && (
+                                <p className="text-sm text-muted-foreground">{t('cart.sheet.complexVariants')}</p>
+                             )}
+                             {(!item.availableVariants || item.availableVariants.length === 0 || (item.availableVariants.length === 1 && !uniqueColors.length && !allPossibleSizes.length)) && (
+                                <p className="text-sm text-muted-foreground">{t('cart.sheet.noOtherVariants')}</p>
+                             )}
+                          </div>
+                        </ScrollArea>
+
+                        <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
+                          <Button onClick={handleConfirmVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
+                            {t('cart.sheet.updateButton')}
+                          </Button>
+                        </SheetFooter>
+                      </SheetContent>
+                    </Sheet>
+                  ) : (
+                    badgeDisplayString && !hasAvailableVariants && (
                       <Badge
                         variant="outline"
-                        className={cn(
-                            "bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center",
-                            (isOutOfStock || !canOpenVariantSheet) ? "cursor-not-allowed" : "cursor-pointer"
-                        )}
+                        className="bg-green-600 hover:bg-green-600 text-white text-xs px-1.5 py-0.5 inline-flex items-center"
                       >
-                        {showSelectVariantPlaceholder ? (
-                           <span className="italic text-white/80 truncate">{t('cart.sheet.selectVariantPlaceholder')}</span>
-                        ) : (
-                           badgeDisplayString && <span className="truncate">{badgeDisplayString}</span>
-                        )}
-                        <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
+                        <span className="truncate">{badgeDisplayString}</span>
                       </Badge>
-                    </button>
-                  </SheetTrigger>
-                  <SheetContent side="bottom" className="rounded-t-lg p-0 flex flex-col max-h-[85vh] sm:max-h-[80vh]">
-                    <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10">
-                       <SheetTitle className="text-lg text-center font-semibold">{t('cart.sheet.productInfoTitle')}</SheetTitle>
-                    </SheetHeader>
+                    )
+                )}
+                
+                {hasAvailableVariants && !isOutOfStock && (
+                     <Dialog open={isSizeGuideOpen} onOpenChange={setIsSizeGuideOpen}>
+                        <DialogTrigger asChild>
+                             <Button variant="outline" size="sm" className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground border-muted-foreground/30 hover:border-foreground">
+                                <Shirt className="w-3.5 h-3.5 mr-1" />
+                                {t('cart.sheet.sizeGuide.button')}
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>{t('cart.sheet.sizeGuide.title')}</DialogTitle>
+                            <DialogDescription>
+                                {t('cart.sheet.sizeGuide.description')}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="max-h-[60vh]">
+                            <Table className="mt-2 text-xs">
+                                <TableHeaderUI>
+                                    <TableRow>
+                                    <TableHead className="w-[80px]">{t('cart.sheet.sizeGuide.table.size')}</TableHead>
+                                    <TableHead>{t('cart.sheet.sizeGuide.table.chest')}</TableHead>
+                                    <TableHead>{t('cart.sheet.sizeGuide.table.length')}</TableHead>
+                                    <TableHead className="text-right">{t('cart.sheet.sizeGuide.table.sleeve')}</TableHead>
+                                    </TableRow>
+                                </TableHeaderUI>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell className="font-medium">S</TableCell>
+                                        <TableCell>90-95 cm</TableCell>
+                                        <TableCell>68-70 cm</TableCell>
+                                        <TableCell className="text-right">20 cm</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium">M</TableCell>
+                                        <TableCell>96-101 cm</TableCell>
+                                        <TableCell>70-72 cm</TableCell>
+                                        <TableCell className="text-right">21 cm</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium">L</TableCell>
+                                        <TableCell>102-107 cm</TableCell>
+                                        <TableCell>72-74 cm</TableCell>
+                                        <TableCell className="text-right">22 cm</TableCell>
+                                    </TableRow>
+                                     <TableRow>
+                                        <TableCell className="font-medium">XL</TableCell>
+                                        <TableCell>108-113 cm</TableCell>
+                                        <TableCell>74-76 cm</TableCell>
+                                        <TableCell className="text-right">23 cm</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </ScrollArea>
+                        <DialogFooter className="sm:justify-start mt-4">
+                            <DialogClose asChild>
+                            <Button type="button" variant="secondary" className="w-full">
+                                {t('cart.sheet.sizeGuide.closeButton')}
+                            </Button>
+                            </DialogClose>
+                        </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                )}
+            </div>
 
-                    <ScrollArea className="flex-grow">
-                      <div className="p-4 space-y-5">
-                        <div className="flex items-start space-x-3">
-                          <Image
-                            src={currentDisplayDetailsInSheet.imageUrl}
-                            alt={item.name}
-                            width={88}
-                            height={88}
-                            className="rounded-md object-cover w-20 h-20 sm:w-24 sm:h-24 border flex-shrink-0"
-                            data-ai-hint={currentDisplayDetailsInSheet.dataAiHint || "product image"}
-                          />
-                          <div className="flex-grow min-w-0">
-                            {item.brand && <p className="text-sm font-semibold text-foreground">{item.brand}</p>}
-                            <p className="text-sm text-foreground mt-0.5 line-clamp-2">{item.name}</p>
-                            <div className="flex items-baseline space-x-2 mt-1">
-                                <p className="text-lg font-bold text-foreground">{currentDisplayDetailsInSheet.price.toLocaleString('vi-VN')}₫</p>
-                                {stockStatusTextInSheet && (
-                                  <>
-                                    <span className="text-sm text-muted-foreground">|</span>
-                                    <span className={stockStatusClassesInSheet}>{stockStatusTextInSheet}</span>
-                                  </>
-                                )}
-                            </div>
-                            <div className="flex items-center space-x-2 text-lg text-foreground mt-2">
-                              <Button variant="outline" size="icon" className="h-7 w-7 opacity-50 cursor-not-allowed" disabled><Minus className="h-4 w-4" /></Button>
-                              <span className="font-semibold tabular-nums">{item.quantity}</span>
-                              <Button variant="outline" size="icon" className="h-7 w-7 opacity-50 cursor-not-allowed" disabled><Plus className="h-4 w-4" /></Button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {uniqueColors.length > 0 && (
-                          <div className="space-y-2">
-                            <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
-                            <div className="flex space-x-2 overflow-x-auto pb-2 -mb-2">
-                              {uniqueColors.map(color => (
-                                <button
-                                  key={color}
-                                  type="button"
-                                  onClick={() => {
-                                    setTempSelectedColorName(color);
-                                    if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
-                                  }}
-                                  className={cn(
-                                    "rounded border p-0.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
-                                    tempSelectedColorName === color ? "border-foreground border-2" : "border-muted hover:border-muted-foreground"
-                                  )}
-                                  aria-label={color}
-                                >
-                                  <Image
-                                    src={`https://placehold.co/56x56.png`} 
-                                    alt={color}
-                                    width={56}
-                                    height={56}
-                                    className="rounded-sm object-cover"
-                                    data-ai-hint={color.toLowerCase()}
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {allPossibleSizes.length > 0 && (
-                          <div className="space-y-2">
-                            <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
-                            <div className="flex flex-wrap gap-2">
-                              {allPossibleSizes.map(size => {
-                                const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
-                                const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
-                                const isSizeInStock = variantForThisSize ? (variantForThisSize.stock === undefined || variantForThisSize.stock > 0) : true;
-                                const isSizeDisabled = !isSizeAvailableForColor || !isSizeInStock;
-                                
-                                return (
-                                  <Button
-                                    key={size}
-                                    type="button"
-                                    variant={tempSelectedSizeValue === size && !isSizeDisabled ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => {
-                                      if (!isSizeDisabled) setTempSelectedSizeValue(size);
-                                    }}
-                                    disabled={isSizeDisabled}
-                                    className={cn(
-                                      "px-4 py-2 h-auto text-sm rounded",
-                                      tempSelectedSizeValue === size && !isSizeDisabled ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
-                                      isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50"
-                                    )}
-                                  >
-                                    {size}
-                                  </Button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                         {(uniqueColors.length === 0 && allPossibleSizes.length === 0 && item.availableVariants && item.availableVariants.length > 1) && (
-                            <p className="text-sm text-muted-foreground">{t('cart.sheet.complexVariants')}</p>
-                         )}
-                         {(!item.availableVariants || item.availableVariants.length === 0 || (item.availableVariants.length === 1 && !uniqueColors.length && !allPossibleSizes.length)) && (
-                            <p className="text-sm text-muted-foreground">{t('cart.sheet.noOtherVariants')}</p>
-                         )}
-                      </div>
-                    </ScrollArea>
-
-                    <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
-                      <Button onClick={handleConfirmVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
-                        {t('cart.sheet.updateButton')}
-                      </Button>
-                    </SheetFooter>
-                  </SheetContent>
-                </Sheet>
-              ) : (
-                badgeDisplayString && !hasAvailableVariants && (
-                  <Badge
-                    variant="outline"
-                    className="bg-green-600 hover:bg-green-600 text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center"
-                  >
-                    <span className="truncate">{badgeDisplayString}</span>
-                  </Badge>
-                )
-            )}
 
             <div className="flex items-baseline space-x-2 mt-1">
               <p className="text-sm font-bold text-foreground">{item.price.toLocaleString('vi-VN')}₫</p>
