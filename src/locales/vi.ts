@@ -40,6 +40,12 @@ const viTranslations = {
       addToCartButton: "Thêm vào giỏ",
       noSuggestions: "Hiện không có gợi ý nào.",
       relevantItemLabel: "Sản phẩm liên quan"
+    },
+    confirmDelete: {
+      title: "Xác nhận xóa",
+      description: "Bạn có chắc chắn muốn xóa {itemName} khỏi giỏ hàng không?",
+      confirm: "Xóa",
+      cancel: "Hủy"
     }
   },
   toast: {
@@ -117,7 +123,7 @@ const viTranslations = {
         issueInvoice: "Xuất hóa đơn điện tử"
       },
       status: {
-        requestNow: "Nhập thông tin", 
+        requestNow: "Nhập thông tin",
         detailsSaved: "{summary}",
         enterDetails: "Nhập thông tin"
       },
@@ -201,26 +207,26 @@ const viTranslations = {
     addNewButton: "Thêm Địa Chỉ Mới",
   },
   selectVoucher: {
-    title: "Chọn Shopee Voucher", 
+    title: "Chọn Shopee Voucher",
     titleOffers: "Ưu đãi",
     typeOfVoucherLabel: "Loại Voucher",
     allVouchersOption: "Tất cả voucher",
     inputPlaceholder: "Nhập mã khuyến mãi hoặc Gift Code",
     applyButton: "ÁP DỤNG",
-    usableVouchersTitle: "Voucher có thể dùng", 
+    usableVouchersTitle: "Voucher có thể dùng",
     unusableVouchersTitle: "Voucher không thể dùng",
     noUsableVouchers: "Không có voucher nào có thể dùng.",
     noUnusableVouchers: "Không có voucher nào không thể dùng.",
     footer: {
-      selectedInfo: "Đã chọn 1 Voucher. Ưu đãi phí vận chuyển đã được áp dụng.", 
+      selectedInfo: "Đã chọn 1 Voucher. Ưu đãi phí vận chuyển đã được áp dụng.",
       notSelectedInfo: "Chưa chọn voucher nào.",
       vouchersSelected: "Đã chọn {count} Voucher",
-      confirmButton: "ĐỒNG Ý", 
+      confirmButton: "ĐỒNG Ý",
       useVoucherButton: "Dùng Voucher",
     },
     voucherCard: {
-        bestChoice: "Tốt nhất", 
-        typeFreeShipping: "MIỄN PHÍ VẬN CHUYỂN", 
+        bestChoice: "Tốt nhất",
+        typeFreeShipping: "MIỄN PHÍ VẬN CHUYỂN",
         unavailableReasonMinOrder: "Chưa đạt GTĐH tối thiểu.",
     },
   },
@@ -252,7 +258,7 @@ const viTranslations = {
             title: "Lỗi",
             description: "Không thể xử lý chi tiết đơn hàng. Vui lòng thử lại hoặc liên hệ hỗ trợ."
         },
-        feedbackReceived: { 
+        feedbackReceived: {
             title: "Đã nhận phản hồi",
             description: "Cảm ơn phản hồi của bạn! Bạn đã đánh giá {rating} trên 5."
         },
@@ -282,3 +288,4 @@ const viTranslations = {
 };
 
 export default viTranslations;
+

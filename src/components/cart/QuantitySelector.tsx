@@ -16,23 +16,23 @@ interface QuantitySelectorProps {
 const QuantitySelector: React.FC<QuantitySelectorProps> = ({ quantity, onIncrement, onDecrement, maxQuantity = 99, disabled = false }) => {
   return (
     <div className="flex items-center space-x-1 sm:space-x-2">
-      <Button 
-        variant="outline" 
-        size="icon" 
-        className="h-8 w-8 sm:h-9 sm:w-9" 
-        onClick={onDecrement} 
-        disabled={disabled || quantity <= 1} 
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-8 w-8 sm:h-9 sm:w-9"
+        onClick={onDecrement}
+        disabled={disabled || quantity === 0}
         aria-label="Decrease quantity"
       >
         <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
       </Button>
       <span className="font-body font-semibold text-sm sm:text-md w-6 sm:w-8 text-center tabular-nums">{quantity}</span>
-      <Button 
-        variant="outline" 
-        size="icon" 
-        className="h-8 w-8 sm:h-9 sm:w-9" 
-        onClick={onIncrement} 
-        disabled={disabled || quantity >= maxQuantity} 
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-8 w-8 sm:h-9 sm:w-9"
+        onClick={onIncrement}
+        disabled={disabled || quantity >= maxQuantity}
         aria-label="Increase quantity"
       >
         <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -42,3 +42,4 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({ quantity, onIncreme
 };
 
 export default QuantitySelector;
+

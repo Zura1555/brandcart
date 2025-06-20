@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle as SheetTitleComponent, SheetFooter } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -216,7 +216,7 @@ const getShippingVoucherPromotionMessage = (currentCheckoutTotal: number): strin
       if (tier.nextDiscountAmount > 0) {
         return `Giảm ${formatVnd(tier.nextDiscountAmount)}đ phí vận chuyển cho đơn tối thiểu ${formatVnd(tier.nextMinOrder)}đ`;
       }
-      break; 
+      break;
     }
   }
   return "";
@@ -231,7 +231,7 @@ const BrandCartPage = () => {
 
   const [isVoucherSheetOpen, setIsVoucherSheetOpen] = useState(false);
   const [voucherCodeInput, setVoucherCodeInput] = useState('');
-  
+
   const [sheetAvailableVouchers, setSheetAvailableVouchers] = useState<VoucherInterface[]>(
     mockAvailableVouchersSheet.map(v => ({...v})) // Create copies to allow local modification
   );
@@ -246,6 +246,10 @@ const BrandCartPage = () => {
   const [finalAppliedVoucherSummary, setFinalAppliedVoucherSummary] = useState<string | null>(null);
 
   const [recentlyViewedItems, setRecentlyViewedItems] = useState<Product[]>([]);
+
+  const [itemPendingDeletion, setItemPendingDeletion] = useState<CartItem | null>(null);
+  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
+
 
   useEffect(() => {
     // Client-side only initialization for cartItems
@@ -263,7 +267,7 @@ const BrandCartPage = () => {
       allProducts.find(p => p.id === 'puma3'), // Cap
       allProducts.find(p => p.id === 'havaianas1'), // Flipflops
       allProducts.find(p => p.id === 'mlb2'), // Shorts
-    ].filter(Boolean) as Product[]; 
+    ].filter(Boolean) as Product[];
 
     setRecentlyViewedItems(sampleRecentItems.slice(0, 6));
   }, []);
@@ -303,7 +307,11 @@ const BrandCartPage = () => {
     const itemToUpdate = cartItems.find(item => item.cartItemId === cartItemId);
     if (!itemToUpdate) return;
 
-    if (newQuantity < 1) return;
+    if (newQuantity === 0) {
+      setItemPendingDeletion(itemToUpdate);
+      setIsConfirmDeleteDialogOpen(true);
+      return;
+    }
 
     const currentItemStock = itemToUpdate.stock;
     let effectiveMaxQuantity = 99; // Default application-wide max
@@ -311,14 +319,14 @@ const BrandCartPage = () => {
     if (currentItemStock !== undefined && currentItemStock < effectiveMaxQuantity) {
       effectiveMaxQuantity = currentItemStock;
     }
-    
-    if (effectiveMaxQuantity === 0 && newQuantity > 0) { 
+
+    if (effectiveMaxQuantity === 0 && newQuantity > 0) {
       toast({
         title: t('toast.itemOutOfStock.title', { itemName: itemToUpdate.name }),
         description: t('toast.itemOutOfStock.description'),
         variant: "destructive",
       });
-      return; 
+      return;
     }
 
     if (newQuantity > effectiveMaxQuantity) {
@@ -328,14 +336,14 @@ const BrandCartPage = () => {
           description: t('toast.stockLimitReached.description', { stock: currentItemStock }),
           variant: "destructive",
         });
-      } else { 
+      } else {
          toast({
           title: t('toast.limitReachedTitle'),
           description: t('toast.limitReachedDescription'),
           variant: "destructive",
         });
       }
-      newQuantity = effectiveMaxQuantity; 
+      newQuantity = effectiveMaxQuantity;
     }
 
     setCartItems(prevItems =>
@@ -354,7 +362,20 @@ const BrandCartPage = () => {
       });
     }
   };
-  
+
+  const confirmDeleteItem = () => {
+    if (itemPendingDeletion) {
+      handleDeleteItem(itemPendingDeletion.cartItemId);
+    }
+    setItemPendingDeletion(null);
+    setIsConfirmDeleteDialogOpen(false);
+  };
+
+  const cancelDeleteItem = () => {
+    setItemPendingDeletion(null);
+    setIsConfirmDeleteDialogOpen(false);
+  };
+
   const handleVariantChange = (cartItemId: string, newVariantData: SimpleVariant) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
@@ -391,7 +412,7 @@ const BrandCartPage = () => {
   }, [cartItems]);
 
   const isAnythingSelected = useMemo(() => cartItems.some(item => item.selected && item.stock !== 0), [cartItems]);
-  
+
   const areAllItemsEffectivelySelected = useMemo(() => {
     const inStockItems = cartItems.filter(item => item.stock !== 0);
     if (inStockItems.length === 0) return false;
@@ -426,9 +447,9 @@ const BrandCartPage = () => {
         products: productsInShop,
         isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
       };
-    }).filter(shopGroup => shopGroup.products.length > 0); 
+    }).filter(shopGroup => shopGroup.products.length > 0);
   }, [cartItems]);
-  
+
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')}₫`;
   };
@@ -438,7 +459,7 @@ const BrandCartPage = () => {
     const canSelect = voucher.isAvailable;
 
     return (
-      <Card 
+      <Card
         className={cn(
           "mb-3 shadow-sm overflow-hidden border",
           !canSelect && "bg-muted/50 opacity-70",
@@ -497,7 +518,7 @@ const BrandCartPage = () => {
   };
 
   const handleToggleVoucherInSheet = (voucherId: string) => {
-    setSheetAvailableVouchers(prev => 
+    setSheetAvailableVouchers(prev =>
       prev.map(v => v.id === voucherId ? { ...v, isSelected: !v.isSelected } : v)
     );
   };
@@ -535,13 +556,13 @@ const BrandCartPage = () => {
         ...itemToAdd,
         cartItemId: `${itemToAdd.id}-${itemToAdd.variant || 'base'}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         quantity: 1,
-        selected: false, 
+        selected: false,
       };
-      
+
       setCartItems(prevItems => {
         const updatedItems = [...prevItems];
         const brandOfNewItem = newCartItem.brand;
-        
+
         let insertAtIndex = -1;
         for(let i=0; i < updatedItems.length; i++){
             if(updatedItems[i].brand === brandOfNewItem){
@@ -572,7 +593,7 @@ const BrandCartPage = () => {
   const shippingPromotionMessage = useMemo(() => {
     return getShippingVoucherPromotionMessage(totalAmount);
   }, [totalAmount]);
-  
+
   const displayShippingMessage = useMemo(() => {
     const promotion = getShippingVoucherPromotionMessage(totalAmount);
     if (promotion) {
@@ -646,8 +667,8 @@ const BrandCartPage = () => {
                     <div className="flex items-center">
                       <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                       <span className="text-sm text-foreground">
-                        {finalAppliedVoucherSummary 
-                          ? finalAppliedVoucherSummary 
+                        {finalAppliedVoucherSummary
+                          ? finalAppliedVoucherSummary
                           : t('cart.vouchersAndShipping.voucherLabel', { amount: "5k" }) // Fallback
                         }
                       </span>
@@ -663,7 +684,7 @@ const BrandCartPage = () => {
                     <SheetTitleComponent className="text-lg text-center font-semibold flex-grow">{t('selectVoucher.titleOffers')}</SheetTitleComponent>
                     <div className="w-8"></div> {/* Spacer to balance the back button */}
                   </SheetHeader>
-                  
+
                   <div className="p-4 border-b bg-card z-10 space-y-3">
                     <div className="flex items-center space-x-2">
                         <Label htmlFor="voucherTypeSelect" className="text-sm whitespace-nowrap">{t('selectVoucher.typeOfVoucherLabel')}:</Label>
@@ -700,8 +721,8 @@ const BrandCartPage = () => {
                         {/* Usable Vouchers Title is part of general list now */}
                         {sheetAvailableVouchers.map(voucher => (
                           <VoucherCardDisplay
-                            key={voucher.id} 
-                            voucher={voucher} 
+                            key={voucher.id}
+                            voucher={voucher}
                             onToggleSelect={handleToggleVoucherInSheet}
                           />
                         ))}
@@ -713,15 +734,15 @@ const BrandCartPage = () => {
                           <h2 className="text-sm font-semibold text-muted-foreground mb-2 px-1">{t('selectVoucher.unusableVouchersTitle')}</h2>
                           {sheetUnavailableVouchers.map(voucher => (
                             <VoucherCardDisplay
-                              key={voucher.id} 
-                              voucher={voucher} 
+                              key={voucher.id}
+                              voucher={voucher}
                               onToggleSelect={() => {}} // Non-selectable
                             />
                           ))}
                         </div>
                       )}
                   </ScrollArea>
-                  
+
                   <SheetFooter className="p-3 border-t sticky bottom-0 bg-card z-10 flex flex-row items-center justify-between w-full">
                     <p className="text-sm text-foreground font-medium">
                       {t('selectVoucher.footer.vouchersSelected', {count: selectedVoucherCountInSheet })}
@@ -789,7 +810,7 @@ const BrandCartPage = () => {
             <Button
               onClick={handleCheckout}
               disabled={!isAnythingSelected}
-              size="default" 
+              size="default"
               className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold px-3 text-xs w-auto min-w-[100px] sm:px-4 sm:text-sm sm:min-w-[120px]"
             >
               {t('cart.checkoutButton', { count: selectedItemsCount })}
@@ -797,8 +818,23 @@ const BrandCartPage = () => {
           </div>
         </div>
       </footer>
+      <AlertDialog open={isConfirmDeleteDialogOpen} onOpenChange={setIsConfirmDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('cart.confirmDelete.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('cart.confirmDelete.description', { itemName: itemPendingDeletion?.name || '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDeleteItem}>{t('cart.confirmDelete.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteItem} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">{t('cart.confirmDelete.confirm')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
 
 export default BrandCartPage;
+

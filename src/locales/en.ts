@@ -23,9 +23,9 @@ const enTranslations = {
       selectColor: "Color",
       selectSize: "Select Size",
       updateButton: "UPDATE",
-      noVariantsAvailable: "No other variants available for this item.", 
-      complexVariants: "This product has other options. Please select one.", 
-      noOtherVariants: "This is the only version of this product available.", 
+      noVariantsAvailable: "No other variants available for this item.",
+      complexVariants: "This product has other options. Please select one.",
+      noOtherVariants: "This is the only version of this product available.",
       currentSelection: "Current selection:",
       stock: {
         inStock: "In stock",
@@ -40,6 +40,12 @@ const enTranslations = {
       addToCartButton: "Add to Cart",
       noSuggestions: "No specific suggestions right now.",
       relevantItemLabel: "Relevant Item"
+    },
+    confirmDelete: {
+      title: "Confirm Deletion",
+      description: "Are you sure you want to remove {itemName} from your cart?",
+      confirm: "Remove",
+      cancel: "Cancel"
     }
   },
   toast: {
@@ -117,7 +123,7 @@ const enTranslations = {
         issueInvoice: "Issue E-invoice"
       },
       status: {
-        requestNow: "Enter Details", 
+        requestNow: "Enter Details",
         detailsSaved: "{summary}",
         enterDetails: "Enter Details"
       },
@@ -201,26 +207,26 @@ const enTranslations = {
     addNewButton: "Add New Address",
   },
   selectVoucher: {
-    title: "Select Shopee Voucher", 
+    title: "Select Shopee Voucher",
     titleOffers: "Offers",
     typeOfVoucherLabel: "Type of Voucher",
     allVouchersOption: "All vouchers",
     inputPlaceholder: "Enter promo or Gift Code here",
     applyButton: "APPLY",
-    usableVouchersTitle: "Usable Vouchers", 
+    usableVouchersTitle: "Usable Vouchers",
     unusableVouchersTitle: "Unusable Vouchers",
     noUsableVouchers: "No usable vouchers available.",
     noUnusableVouchers: "No unusable vouchers.",
     footer: {
-      selectedInfo: "1 Voucher selected. Shipping discount applied.", 
+      selectedInfo: "1 Voucher selected. Shipping discount applied.",
       notSelectedInfo: "No voucher selected.",
       vouchersSelected: "{count} Vouchers Selected",
-      confirmButton: "CONFIRM", 
+      confirmButton: "CONFIRM",
       useVoucherButton: "Use Voucher",
     },
     voucherCard: {
-        bestChoice: "Best Choice", 
-        typeFreeShipping: "FREE SHIPPING", 
+        bestChoice: "Best Choice",
+        typeFreeShipping: "FREE SHIPPING",
         unavailableReasonMinOrder: "Minimum order value not met.",
     },
   },
@@ -252,7 +258,7 @@ const enTranslations = {
             title: "Error",
             description: "Could not process order details. Please try again or contact support."
         },
-        feedbackReceived: { 
+        feedbackReceived: {
             title: "Feedback Received",
             description: "Thanks for your feedback! You rated {rating} out of 5."
         },
@@ -282,3 +288,4 @@ const enTranslations = {
 };
 
 export default enTranslations;
+
