@@ -37,20 +37,6 @@ const enTranslations = {
       },
       selectVariantPlaceholder: "Select variant"
     },
-    productItem: {
-      sizeGuideButtonLabel: "Size Guide",
-      findMySizeButtonLabel: "Find My Size",
-    },
-    sizeGuide: {
-      dialogTitle: "Size Guide",
-      dialogDescription: "Measurements are approximate. Please refer to specific brand guidelines if available.",
-      table: {
-        size: "Size",
-        chest: "Chest (cm)",
-        length: "Length (cm)",
-        close: "Close"
-      }
-    },
     completeLook: {
       bannerText: "COMPLETE YOUR LOOK",
       dialogTitle: "Pairs well with {productName}",

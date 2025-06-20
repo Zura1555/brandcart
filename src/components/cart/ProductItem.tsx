@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import type { CartItem, SimpleVariant } from '@/interfaces';
 import QuantitySelector from './QuantitySelector';
-import { Check, Trash2, ChevronDown, Minus, Plus, Shirt, X, Ruler } from 'lucide-react';
+import { Check, Trash2, ChevronDown, Minus, Plus, X } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import {
   Sheet,
@@ -19,20 +19,9 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 
 interface ProductItemProps {
@@ -56,7 +45,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const swipeableContentRef = useRef<HTMLDivElement>(null);
 
   const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
-  const [isSizeGuideDialogOpen, setIsSizeGuideDialogOpen] = useState(false);
 
   const cleanVariantName = useCallback((name: string | undefined): string => {
     if (!name) return '';
@@ -530,80 +518,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
               </div>
             )}
             
-            {hasAvailableVariants && !isOutOfStock && (
-              <div className="flex items-center space-x-3 mt-2">
-                <Dialog open={isSizeGuideDialogOpen} onOpenChange={setIsSizeGuideDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="h-auto px-0 py-1 text-xs text-muted-foreground hover:text-foreground hover:no-underline"
-                    >
-                      <Ruler className="w-3.5 h-3.5 mr-1" />
-                      {t('cart.productItem.sizeGuideButtonLabel')}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>{t('cart.sizeGuide.dialogTitle')}</DialogTitle>
-                      <DialogDescription>
-                        {t('cart.sizeGuide.dialogDescription')}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t('cart.sizeGuide.table.size')}</TableHead>
-                          <TableHead>{t('cart.sizeGuide.table.chest')}</TableHead>
-                          <TableHead>{t('cart.sizeGuide.table.length')}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>S</TableCell>
-                          <TableCell>90-95</TableCell>
-                          <TableCell>68-70</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>M</TableCell>
-                          <TableCell>96-101</TableCell>
-                          <TableCell>70-72</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>L</TableCell>
-                          <TableCell>102-107</TableCell>
-                          <TableCell>72-74</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>XL</TableCell>
-                          <TableCell>108-113</TableCell>
-                          <TableCell>74-76</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                    <DialogFooter className="sm:justify-start">
-                      <DialogClose asChild>
-                        <Button type="button" variant="secondary">
-                          {t('cart.sizeGuide.table.close')}
-                        </Button>
-                      </DialogClose>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="h-auto px-0 py-1 text-xs text-muted-foreground hover:text-foreground hover:no-underline"
-                  onClick={() => alert(t('cart.productItem.findMySizeButtonLabel') + ' - Coming soon!')}
-                >
-                  <Shirt className="w-3.5 h-3.5 mr-1" />
-                  {t('cart.productItem.findMySizeButtonLabel')}
-                </Button>
-              </div>
-            )}
-
-
             <div className="flex items-center mt-2 space-x-4">
               <QuantitySelector
                 quantity={item.quantity}
@@ -624,4 +538,3 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
-

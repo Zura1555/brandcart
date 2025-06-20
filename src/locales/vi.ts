@@ -37,20 +37,6 @@ const viTranslations = {
       },
       selectVariantPlaceholder: "Chọn phân loại"
     },
-    productItem: {
-      sizeGuideButtonLabel: "Bảng kích cỡ",
-      findMySizeButtonLabel: "Tìm cỡ của bạn",
-    },
-    sizeGuide: {
-      dialogTitle: "Bảng kích cỡ",
-      dialogDescription: "Số đo là ước tính. Vui lòng tham khảo hướng dẫn của thương hiệu nếu có.",
-      table: {
-        size: "Cỡ",
-        chest: "Ngực (cm)",
-        length: "Dài áo (cm)",
-        close: "Đóng"
-      }
-    },
     completeLook: {
       bannerText: "HOÀN THIỆN SET ĐỒ",
       dialogTitle: "Phối cùng {productName}",
