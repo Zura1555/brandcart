@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight, XCircle, CheckCircle2, Clock, AlertTriangle, ShoppingBag, PlusCircle } from 'lucide-react';
-import type { CartItem, Shop, SimpleVariant, Product } from '@/interfaces';
+import type { CartItem, Shop, SimpleVariant, Product, SelectedVoucherInfo } from '@/interfaces';
 import { mockShops, mockRelevantProducts, newRecentlyViewedProducts } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
 import RecentlyViewedItemCard from '@/components/cart/RecentlyViewedItemCard';
@@ -31,87 +31,82 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_VOUCHER_COUNT_KEY = 'selectedVoucherUserCount';
+const SELECTED_VOUCHERS_DETAILS_KEY = 'selectedVouchersDetails';
+
 
 interface VoucherInterface {
   id: string;
   title: string;
   imageUrl?: string;
   imageAiHint?: string;
-  expiryInfo: string; // e.g., "31/08/2024" or "31/07/2024 - 3 days left"
-  conditionText?: string; // e.g., "Spend 500,000 ₫ more to get this voucher"
-  restrictionText?: string; // e.g., "Only Apply for PUMA items"
-  paymentMethodSwitchText?: string; // e.g., "Switch your payment method to enjoy this offer"
-  isSelected: boolean; // For managing selection in the sheet
+  expiryInfo: string; 
+  conditionText?: string; 
+  restrictionText?: string; 
+  paymentMethodSwitchText?: string; 
+  isSelected: boolean; 
   isAvailable: boolean;
-  unavailableReason?: string; // If !isAvailable
+  unavailableReason?: string; 
+  discountValue: number;
+  discountType: 'fixed' | 'percentage';
 }
 
 const mockAvailableVouchersSheet: VoucherInterface[] = [
   {
     id: 'v_birthday_100k',
     title: 'Birthday Voucher ưu đãi 100.000 ₫',
-    imageUrl: 'https://placehold.co/40x40/E91E63/FFFFFF.png', // Pinkish placeholder
+    imageUrl: 'https://placehold.co/40x40/E91E63/FFFFFF.png', 
     imageAiHint: 'birthday gift voucher',
     expiryInfo: '31/08/2024',
-    isSelected: true, // Initially selected for demo
+    isSelected: false, 
     isAvailable: true,
+    discountValue: 100000,
+    discountType: 'fixed',
   },
   {
     id: 'v_techcom_50k',
     title: 'Ưu đãi 50.000, đơn từ 1.000.000 ₫',
-    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', // Red placeholder
+    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', 
     imageAiHint: 'Techcombank logo',
     expiryInfo: '31/08/2024',
-    isSelected: true, // Initially selected for demo
+    isSelected: false, 
     isAvailable: true,
+    discountValue: 50000,
+    discountType: 'fixed',
   },
   {
     id: 'v_zalopay_5percent',
     title: 'Zalo Pay giảm 5% giá trị đơn hàng',
-    imageUrl: 'https://placehold.co/40x40/2196F3/FFFFFF.png', // Blue placeholder
+    imageUrl: 'https://placehold.co/40x40/2196F3/FFFFFF.png', 
     imageAiHint: 'ZaloPay logo',
     expiryInfo: '02/09/2024',
     paymentMethodSwitchText: 'Switch your payment method to enjoy this offer',
     isSelected: false,
     isAvailable: true,
+    discountValue: 50000, // Example fixed value for 5% up to 50k
+    discountType: 'percentage', 
   },
   {
-    id: 'v_freeship_50k_sheet',
-    title: 'Miễn phí vận chuyển, đơn từ 50.000₫',
-    imageUrl: 'https://placehold.co/40x40/4CAF50/FFFFFF.png',
-    imageAiHint: 'free shipping truck',
-    expiryInfo: '15/09/2024',
-    isSelected: false,
-    isAvailable: true,
-  },
-  {
-    id: 'v_adidas_10percent_sheet',
-    title: 'Giảm 10% cho sản phẩm Adidas',
-    imageUrl: 'https://placehold.co/40x40/000000/FFFFFF.png',
-    imageAiHint: 'Adidas logo',
-    expiryInfo: '30/09/2024',
-    restrictionText: 'Chỉ áp dụng cho sản phẩm Adidas',
-    isSelected: false,
-    isAvailable: true,
-  },
-  {
-    id: 'v_generic_20k_sheet',
-    title: 'Voucher giảm 20.000₫ toàn sàn',
+    id: 'v_generic_20k_from_200k',
+    title: 'Giảm 20.000₫ cho đơn từ 200.000₫',
     imageUrl: 'https://placehold.co/40x40/FF9800/FFFFFF.png',
-    imageAiHint: 'generic voucher',
-    expiryInfo: '10/10/2024',
+    imageAiHint: 'generic discount',
+    expiryInfo: '30/09/2024',
     isSelected: false,
     isAvailable: true,
+    discountValue: 20000,
+    discountType: 'fixed',
+    conditionText: 'Đơn tối thiểu 200.000₫',
   },
   {
-    id: 'v_partner_deal_sheet',
-    title: 'Ưu đãi đối tác 15%',
-    imageUrl: 'https://placehold.co/40x40/795548/FFFFFF.png',
-    imageAiHint: 'partner deal',
-    expiryInfo: '05/11/2024',
-    conditionText: 'Áp dụng cho đơn hàng từ 500.000₫',
+    id: 'v_shipping_15k',
+    title: 'Giảm 15.000₫ phí vận chuyển',
+    imageUrl: 'https://placehold.co/40x40/4CAF50/FFFFFF.png',
+    imageAiHint: 'shipping discount',
+    expiryInfo: '31/10/2024',
     isSelected: false,
     isAvailable: true,
+    discountValue: 15000,
+    discountType: 'fixed',
   },
 ];
 
@@ -119,67 +114,15 @@ const mockUnavailableVouchersSheet: VoucherInterface[] = [
   {
     id: 'v_techcom_100k_spend',
     title: 'Ưu đãi 100.000, đơn từ 2.000.000 ₫',
-    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', // Red placeholder
+    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', 
     imageAiHint: 'Techcombank logo',
     expiryInfo: '31/07/2024 - 3 days left',
     conditionText: 'Spend 500,000 ₫ more to get this voucher',
     isSelected: false,
     isAvailable: false,
     unavailableReason: 'selectVoucher.voucherCard.unavailableReasonMinOrder',
-  },
-  {
-    id: 'v_honda_1m_puma',
-    title: 'Honda Voucher ưu đãi 1.000.000 ₫',
-    imageUrl: 'https://placehold.co/40x40/F44336/FFFFFF.png', // Another red placeholder
-    imageAiHint: 'Honda logo',
-    expiryInfo: '31/12/2024',
-    restrictionText: 'Only Apply for PUMA items',
-    isSelected: false,
-    isAvailable: false, // Assuming unavailable for this demo list
-    unavailableReason: 'Restricted to specific items.',
-  },
-  {
-    id: 'v_expired_generic_sheet',
-    title: 'Voucher giảm 20.000₫ (Đã hết hạn)',
-    imageUrl: 'https://placehold.co/40x40/9E9E9E/FFFFFF.png',
-    imageAiHint: 'expired voucher',
-    expiryInfo: '01/01/2024 - Hết hạn',
-    isSelected: false,
-    isAvailable: false,
-    unavailableReason: 'Voucher đã hết hạn sử dụng.',
-  },
-  {
-    id: 'v_shopeepay_20k_sheet',
-    title: 'Giảm 20.000₫ khi thanh toán bằng ShopeePay',
-    imageUrl: 'https://placehold.co/40x40/FF6F00/FFFFFF.png',
-    imageAiHint: 'ShopeePay logo',
-    expiryInfo: '31/10/2024',
-    paymentMethodSwitchText: 'Chuyển sang ShopeePay để hưởng ưu đãi này',
-    isSelected: false,
-    isAvailable: false,
-    unavailableReason: 'Cần chọn phương thức thanh toán ShopeePay.',
-  },
-  {
-    id: 'v_brand_specific_expired_sheet',
-    title: 'Giảm 5% cho Nike (Hết hạn)',
-    imageUrl: 'https://placehold.co/40x40/607D8B/FFFFFF.png',
-    imageAiHint: 'Nike logo',
-    expiryInfo: '15/02/2024 - Hết hạn',
-    restrictionText: 'Chỉ áp dụng cho sản phẩm Nike',
-    isSelected: false,
-    isAvailable: false,
-    unavailableReason: 'Voucher đã hết hạn và chỉ dành cho Nike.',
-  },
-  {
-    id: 'v_min_spend_high_sheet',
-    title: 'Giảm 500.000₫ cho đơn từ 10.000.000₫',
-    imageUrl: 'https://placehold.co/40x40/4A148C/FFFFFF.png',
-    imageAiHint: 'premium voucher',
-    expiryInfo: '31/12/2024',
-    conditionText: 'Chi tiêu thêm 9.500.000₫ để sử dụng',
-    isSelected: false,
-    isAvailable: false,
-    unavailableReason: 'selectVoucher.voucherCard.unavailableReasonMinOrder',
+    discountValue: 100000,
+    discountType: 'fixed',
   },
 ];
 
@@ -234,7 +177,7 @@ const BrandCartPage = () => {
   const [voucherCodeInput, setVoucherCodeInput] = useState('');
 
   const [sheetAvailableVouchers, setSheetAvailableVouchers] = useState<VoucherInterface[]>(
-    mockAvailableVouchersSheet.map(v => ({...v})) // Create copies to allow local modification
+    mockAvailableVouchersSheet.map(v => ({...v})) 
   );
   const [sheetUnavailableVouchers, setSheetUnavailableVouchers] = useState<VoucherInterface[]>(
      mockUnavailableVouchersSheet.map(v => ({...v}))
@@ -251,28 +194,59 @@ const BrandCartPage = () => {
   const [itemPendingDeletion, setItemPendingDeletion] = useState<CartItem | null>(null);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
   const [lastAddedBrand, setLastAddedBrand] = useState<string | null>(null);
+  
+  const [actualTotalVoucherDiscount, setActualTotalVoucherDiscount] = useState(0);
 
 
   useEffect(() => {
-    // Client-side only initialization for cartItems
     const initialCartItems = mockShops.flatMap(shop =>
       shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random().toString(36).substring(2,7)}`, quantity: 1, selected: false }))
     );
     setCartItems(initialCartItems);
     
-    // Set recently viewed items from the new mock data
     setRecentlyViewedItems(newRecentlyViewedProducts.slice(0, 6));
+
+    if (typeof window !== 'undefined') {
+      const storedVouchersRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
+      if (storedVouchersRaw) {
+          try {
+              const storedSelectedVoucherInfos: SelectedVoucherInfo[] = JSON.parse(storedVouchersRaw);
+              setSheetAvailableVouchers(prevSheetVouchers =>
+                  prevSheetVouchers.map(sv => ({
+                      ...sv,
+                      isSelected: storedSelectedVoucherInfos.some(info => info.id === sv.id)
+                  }))
+              );
+          } catch (e) {
+              console.error("Error parsing selected vouchers from localStorage for sheet init:", e);
+          }
+      }
+    }
   }, []);
 
-
   useEffect(() => {
-    const storedCountRaw = localStorage.getItem(SELECTED_VOUCHER_COUNT_KEY);
-    const storedCount = storedCountRaw ? parseInt(storedCountRaw, 10) : 0;
+    if (typeof window !== 'undefined') {
+      const storedVoucherCountRaw = localStorage.getItem(SELECTED_VOUCHER_COUNT_KEY);
+      const count = storedVoucherCountRaw ? parseInt(storedVoucherCountRaw, 10) : 0;
 
-    if (storedCount > 0) {
-        setVoucherTriggerText(t('selectVoucher.footer.vouchersSelected', { count: storedCount }));
-    } else {
-        setVoucherTriggerText(t('cart.vouchersAndShipping.availableVouchersText', { count: mockAvailableVouchersSheet.length }));
+      if (count > 0) {
+          setVoucherTriggerText(t('selectVoucher.footer.vouchersSelected', { count: count }));
+      } else {
+          setVoucherTriggerText(t('cart.vouchersAndShipping.availableVouchersText', { count: mockAvailableVouchersSheet.length }));
+      }
+
+      // Calculate total voucher discount
+      const storedVouchersRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
+      let discount = 0;
+      if (storedVouchersRaw) {
+        try {
+          const selectedVouchers: SelectedVoucherInfo[] = JSON.parse(storedVouchersRaw);
+          discount = selectedVouchers.reduce((sum, v) => sum + (v.discountValue || 0), 0);
+        } catch (e) {
+          console.error("Error parsing selectedVouchersData from localStorage on cart page", e);
+        }
+      }
+      setActualTotalVoucherDiscount(discount);
     }
   }, [isVoucherSheetOpen, t]);
 
@@ -308,7 +282,7 @@ const BrandCartPage = () => {
     }
 
     const currentItemStock = itemToUpdate.stock;
-    let effectiveMaxQuantity = 99; // Default application-wide max
+    let effectiveMaxQuantity = 99; 
 
     if (currentItemStock !== undefined && currentItemStock < effectiveMaxQuantity) {
       effectiveMaxQuantity = currentItemStock;
@@ -374,10 +348,8 @@ const BrandCartPage = () => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.cartItemId === cartItemId) {
-          // If the new variant is out of stock, deselect the item
           const newSelectedState = newVariantData.stock === 0 ? false : item.selected;
           const newQuantity = (newVariantData.stock !== undefined && item.quantity > newVariantData.stock) ? Math.max(1, newVariantData.stock) : item.quantity;
-
 
           return {
             ...item,
@@ -396,14 +368,19 @@ const BrandCartPage = () => {
     );
   };
 
-  const totalAmount = useMemo(() => {
+  const subtotalAmount = useMemo(() => {
     return cartItems.reduce((sum, item) => {
-      if (item.selected && item.stock !== 0) { // Only include selected and in-stock items
+      if (item.selected && item.stock !== 0) { 
         return sum + item.price * item.quantity;
       }
       return sum;
     }, 0);
   }, [cartItems]);
+
+  const finalTotalAmount = useMemo(() => {
+    return Math.max(0, subtotalAmount - actualTotalVoucherDiscount);
+  }, [subtotalAmount, actualTotalVoucherDiscount]);
+
 
   const isAnythingSelected = useMemo(() => cartItems.some(item => item.selected && item.stock !== 0), [cartItems]);
 
@@ -421,7 +398,9 @@ const BrandCartPage = () => {
   const handleCheckout = () => {
     const selectedCartItems = cartItems.filter(item => item.selected && item.stock !== 0);
     if (selectedCartItems.length > 0) {
-      localStorage.setItem(CHECKOUT_ITEMS_STORAGE_KEY, JSON.stringify(selectedCartItems));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(CHECKOUT_ITEMS_STORAGE_KEY, JSON.stringify(selectedCartItems));
+      }
       router.push('/checkout');
     } else {
        toast({
@@ -563,18 +542,31 @@ const BrandCartPage = () => {
 
   const handleApplyVoucherInSheet = () => {
     if (voucherCodeInput.trim() === '') return;
+    // Future: Implement actual voucher code validation and application logic
     toast({
       title: t('toast.voucher.codeApplied', {code: voucherCodeInput})
     });
   };
 
   const handleConfirmVoucherSelectionInSheet = () => {
-    const currentSelectedCount = sheetAvailableVouchers.filter(v => v.isSelected).length;
-    localStorage.setItem(SELECTED_VOUCHER_COUNT_KEY, currentSelectedCount.toString());
+    const selectedFullVouchers: SelectedVoucherInfo[] = sheetAvailableVouchers
+        .filter(v => v.isSelected && v.isAvailable)
+        .map(v => ({
+            id: v.id,
+            title: v.title,
+            discountValue: v.discountValue,
+            discountType: v.discountType,
+        }));
 
-    if (currentSelectedCount > 0) {
-      setVoucherTriggerText(t('selectVoucher.footer.vouchersSelected', { count: currentSelectedCount }));
-      toast({ title: t('selectVoucher.footer.vouchersSelected', { count: currentSelectedCount }) });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SELECTED_VOUCHERS_DETAILS_KEY, JSON.stringify(selectedFullVouchers));
+      localStorage.setItem(SELECTED_VOUCHER_COUNT_KEY, selectedFullVouchers.length.toString());
+    }
+
+
+    if (selectedFullVouchers.length > 0) {
+      setVoucherTriggerText(t('selectVoucher.footer.vouchersSelected', { count: selectedFullVouchers.length }));
+      toast({ title: t('selectVoucher.footer.vouchersSelected', { count: selectedFullVouchers.length }) });
     } else {
       setVoucherTriggerText(t('cart.vouchersAndShipping.availableVouchersText', { count: mockAvailableVouchersSheet.length }));
       toast({ title: t('selectVoucher.footer.notSelectedInfo') });
@@ -600,18 +592,22 @@ const BrandCartPage = () => {
       };
 
       setCartItems(prevItems => {
-        const updatedItems = [...prevItems];
+        let updatedItems = [...prevItems];
         const brandOfNewItem = newCartItem.brand;
+        
+        // Find if other items of the same brand exist
         const firstItemIndexOfBrand = prevItems.findIndex(item => item.brand === brandOfNewItem);
 
         if (firstItemIndexOfBrand !== -1) {
+          // Insert the new item at the beginning of this brand's group
           updatedItems.splice(firstItemIndexOfBrand, 0, newCartItem);
         } else {
+          // Brand is new, add it according to mockShop order or then alphabetically
           const shopOrder = mockShops.map(s => s.name);
           const brandIndexInMock = shopOrder.indexOf(brandOfNewItem);
           let insertPos = updatedItems.length; 
 
-          if (brandIndexInMock !== -1) {
+          if (brandIndexInMock !== -1) { // If brand is in mockShops, find its position
             for (let i = 0; i < updatedItems.length; i++) {
               const currentItemBrandIndexInMock = shopOrder.indexOf(updatedItems[i].brand);
               if (currentItemBrandIndexInMock === -1 || currentItemBrandIndexInMock > brandIndexInMock) {
@@ -620,8 +616,9 @@ const BrandCartPage = () => {
               }
             }
             updatedItems.splice(insertPos, 0, newCartItem);
-          } else { 
-            updatedItems.push(newCartItem);
+          } else { // New brand not in mockShops, typically add to end or handle custom sort
+             // For simplicity, we add new brands to the top when they are the lastAddedBrand later in itemsByShop
+            updatedItems.unshift(newCartItem); // Add to top, itemsByShop will re-sort
           }
         }
         return updatedItems;
@@ -642,33 +639,33 @@ const BrandCartPage = () => {
   };
 
   const shippingDiscount = useMemo(() => {
-    return calculateShippingVoucherDiscount(totalAmount);
-  }, [totalAmount]);
+    return calculateShippingVoucherDiscount(subtotalAmount);
+  }, [subtotalAmount]);
 
   const shippingPromotionMessage = useMemo(() => {
-    return getShippingVoucherPromotionMessage(totalAmount);
-  }, [totalAmount]);
+    return getShippingVoucherPromotionMessage(subtotalAmount);
+  }, [subtotalAmount]);
 
   const displayShippingMessage = useMemo(() => {
-    const promotion = getShippingVoucherPromotionMessage(totalAmount);
+    const promotion = getShippingVoucherPromotionMessage(subtotalAmount);
     if (promotion) {
       return promotion;
     }
-    const discount = calculateShippingVoucherDiscount(totalAmount);
+    const discount = calculateShippingVoucherDiscount(subtotalAmount);
     if (discount > 0) {
       return t('cart.vouchersAndShipping.shippingDiscountApplied', { amount: formatCurrency(discount) });
     }
     return t('cart.vouchersAndShipping.noPromotionsAvailable');
-  }, [totalAmount, t, formatCurrency]);
+  }, [subtotalAmount, t, formatCurrency]);
 
   const truckIconClass = useMemo(() => {
-    const promotion = getShippingVoucherPromotionMessage(totalAmount);
-    const discount = calculateShippingVoucherDiscount(totalAmount);
+    const promotion = getShippingVoucherPromotionMessage(subtotalAmount);
+    const discount = calculateShippingVoucherDiscount(subtotalAmount);
     if (!promotion && discount > 0) { 
       return 'text-green-500';
     }
     return 'text-muted-foreground'; 
-  }, [totalAmount]);
+  }, [subtotalAmount]);
 
 
   return (
@@ -687,7 +684,7 @@ const BrandCartPage = () => {
         </div>
       </header>
 
-      <main className="flex-grow pt-14 pb-20">
+      <main className="flex-grow pt-14 pb-32"> {/* Increased pb for more footer items */}
         <div className="container mx-auto px-0 sm:px-2 py-4 sm:py-6 space-y-4 sm:space-y-6">
           {cartItems.length === 0 ? (
              <div className="text-center py-10 px-4">
@@ -802,7 +799,6 @@ const BrandCartPage = () => {
                     <Button
                       className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold min-w-[120px]"
                       onClick={handleConfirmVoucherSelectionInSheet}
-                      disabled={selectedVoucherCountInSheet === 0 && voucherCodeInput.trim() === ''} 
                     >
                       {t('selectVoucher.footer.useVoucherButton')}
                     </Button>
@@ -842,36 +838,54 @@ const BrandCartPage = () => {
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-20 bg-card border-t h-20">
-        <div className="container mx-auto px-4 py-3 h-full flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="select-all-footer"
-              checked={areAllItemsEffectivelySelected}
-              onCheckedChange={(checked) => handleToggleSelectAll(Boolean(checked))}
-              aria-label="Select all items"
-              disabled={cartItems.filter(item => item.stock !== 0).length === 0} 
-            />
-            <label htmlFor="select-all-footer" className="text-sm text-foreground cursor-pointer">
-              {t('cart.selectAll')}
-            </label>
-          </div>
-          <div className="flex flex-row items-center space-x-3">
-            <div className="text-left">
-              <p className="text-xs text-muted-foreground">{t('cart.subtotalAmountLabel')}</p>
-              <p className="text-md font-bold text-foreground">
-                {formatCurrency(totalAmount)}
-              </p>
+      <footer className="fixed bottom-0 left-0 right-0 z-20 bg-card border-t h-auto py-2">
+        <div className="container mx-auto px-4">
+            <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center space-x-2">
+                    <Checkbox
+                    id="select-all-footer"
+                    checked={areAllItemsEffectivelySelected}
+                    onCheckedChange={(checked) => handleToggleSelectAll(Boolean(checked))}
+                    aria-label="Select all items"
+                    disabled={cartItems.filter(item => item.stock !== 0).length === 0} 
+                    />
+                    <label htmlFor="select-all-footer" className="text-sm text-foreground cursor-pointer">
+                    {t('cart.selectAll')}
+                    </label>
+                </div>
+                <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{t('cart.subtotalAmountLabel')}</p>
+                    <p className="text-md font-semibold text-foreground">
+                        {formatCurrency(subtotalAmount)}
+                    </p>
+                </div>
             </div>
-            <Button
-              onClick={handleCheckout}
-              disabled={!isAnythingSelected}
-              size="default"
-              className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold px-3 text-xs w-auto min-w-[100px] sm:px-4 sm:text-sm sm:min-w-[120px]"
-            >
-              {t('cart.checkoutButton', { count: selectedItemsCount })}
-            </Button>
-          </div>
+
+            {actualTotalVoucherDiscount > 0 && (
+                <div className="flex justify-end items-center mb-2">
+                    <p className="text-xs text-muted-foreground">{t('cart.voucherDiscountLabel')}:</p>
+                    <p className="text-md font-semibold text-destructive ml-2">
+                        -{formatCurrency(actualTotalVoucherDiscount)}
+                    </p>
+                </div>
+            )}
+            
+            <div className="flex justify-between items-center">
+                <div className="text-left">
+                    <p className="text-sm text-muted-foreground">{t('cart.finalTotalAmountLabel')}:</p>
+                    <p className="text-lg font-bold text-foreground">
+                        {formatCurrency(finalTotalAmount)}
+                    </p>
+                </div>
+                <Button
+                onClick={handleCheckout}
+                disabled={!isAnythingSelected}
+                size="default"
+                className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold px-3 text-xs w-auto min-w-[100px] sm:px-4 sm:text-sm sm:min-w-[120px]"
+                >
+                {t('cart.checkoutButton', { count: selectedItemsCount })}
+                </Button>
+            </div>
         </div>
       </footer>
       <AlertDialog open={isConfirmDeleteDialogOpen} onOpenChange={setIsConfirmDeleteDialogOpen}>
@@ -894,3 +908,4 @@ const BrandCartPage = () => {
 
 export default BrandCartPage;
 
+    

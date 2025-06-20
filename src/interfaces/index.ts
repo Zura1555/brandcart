@@ -56,3 +56,10 @@ export interface ShippingAddress {
   addressType: 'home' | 'office'; // Kept for data integrity if old data exists, but not used in new form
   isDefault?: boolean;
 }
+
+export interface SelectedVoucherInfo {
+  id: string;
+  title: string;
+  discountValue: number;
+  discountType: 'fixed' | 'percentage'; // For now, we'll primarily use 'fixed'
+}

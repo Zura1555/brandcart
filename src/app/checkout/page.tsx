@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, ShieldCheck, ShoppingCart, FileText, Ticket, CheckCircle2, CreditCard, Wallet, QrCode } from 'lucide-react';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import type { CartItem, Shop as MockShopType, ShippingAddress } from '@/interfaces';
+import type { CartItem, Shop as MockShopType, ShippingAddress, SelectedVoucherInfo, Product } from '@/interfaces';
 import { mockShops } from '@/lib/mockData'; 
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -31,6 +31,8 @@ const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
 const SELECTED_VOUCHER_COUNT_KEY = 'selectedVoucherUserCount';
+const SELECTED_VOUCHERS_DETAILS_KEY = 'selectedVouchersDetails';
+const FINAL_ORDER_DETAILS_KEY = 'finalOrderDetailsForPayment';
 
 
 const AVAILABLE_LOYALTY_POINTS = 200;
@@ -46,19 +48,20 @@ interface DisplayShop {
   products: CartItem[];
 }
 
-const staticProductPlaceholder = {
-  seller: "Topick Global",
-  isFavoriteSeller: true,
-  logoUrl: "https://placehold.co/60x24.png",
-  logoAiHint: "company logo",
+const staticProductPlaceholder: CartItem = {
+  cartItemId: 'static-placeholder-001',
+  id: 'sp001',
+  brand: "Topick Global",
   imageUrl: "https://placehold.co/60x60.png",
-  imageAiHint: "beaded bracelet black white",
+  dataAiHint: "beaded bracelet black white",
   name: "Vòng tay mèo đá quý",
-  variation: "Đen, Freesize",
+  variant: "Đen, Freesize",
   productCode: "SP001",
   price: 20900,
   originalPrice: 27500,
   quantity: 1,
+  selected: true,
+  stock: 10,
 };
 
 const staticShippingMethod = {
@@ -74,8 +77,8 @@ const CheckoutPage = () => {
   const { t, locale } = useLanguage();
   const { toast } = useToast();
   const [dynamicDisplayShops, setDynamicDisplayShops] = useState<DisplayShop[]>([]);
-  const [initialTotalAmount, setInitialTotalAmount] = useState<number>(0);
-  const [initialSavings, setInitialSavings] = useState<number>(0);
+  const [checkoutItems, setCheckoutItems] = useState<CartItem[]>([]);
+  
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<SelectedPaymentMethod>('cod');
   const [currentShippingAddress, setCurrentShippingAddress] = useState<ShippingAddress | null>(null);
   const [addressLoaded, setAddressLoaded] = useState(false);
@@ -84,8 +87,7 @@ const CheckoutPage = () => {
   const [voucherTriggerText, setVoucherTriggerText] = useState<string>('');
 
 
-  // E-Invoice state
-  const [wantEInvoice, setWantEInvoice] = useState<boolean>(false); // Default to 'Không xuất hóa đơn'
+  const [wantEInvoice, setWantEInvoice] = useState<boolean>(false); 
   const [eInvoiceType, setEInvoiceType] = useState<'personal' | 'company'>('personal');
   const [eInvoiceDetails, setEInvoiceDetails] = useState({
     fullName: '',
@@ -130,61 +132,41 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
-    let itemsTotal = 0;
-    let itemsSavings = 0;
+    let parsedItems: CartItem[] = [];
 
     if (rawItems) {
       try {
-        const items: CartItem[] = JSON.parse(rawItems);
-        if (items && items.length > 0) {
-          const grouped = items.reduce((acc, item) => {
-            const shopName = item.brand;
-            const shopDataFromMock = mockShops.find(s => s.name === shopName);
-
-            if (!acc[shopName]) {
-              acc[shopName] = {
-                name: shopName,
-                isFavorite: shopDataFromMock?.isFavorite || false,
-                logoUrl: shopDataFromMock?.logoUrl,
-                logoDataAiHint: shopDataFromMock?.logoDataAiHint,
-                products: [],
-              };
-            }
-            acc[shopName].products.push(item);
-            return acc;
-          }, {} as Record<string, DisplayShop>);
-
-          setDynamicDisplayShops(Object.values(grouped));
-
-          items.forEach(item => {
-            itemsTotal += item.price * item.quantity;
-            if (item.originalPrice) {
-              itemsSavings += (item.originalPrice - item.price) * item.quantity;
-            }
-          });
-        } else {
-          itemsTotal = staticProductPlaceholder.price * staticProductPlaceholder.quantity;
-          if (staticProductPlaceholder.originalPrice) {
-            itemsSavings = (staticProductPlaceholder.originalPrice - staticProductPlaceholder.price) * staticProductPlaceholder.quantity;
-          }
+        parsedItems = JSON.parse(rawItems);
+        if (!Array.isArray(parsedItems) || parsedItems.length === 0) {
+          parsedItems = [staticProductPlaceholder];
         }
       } catch (error) {
         console.error("Error parsing checkout items from localStorage:", error);
-        itemsTotal = staticProductPlaceholder.price * staticProductPlaceholder.quantity;
-        if (staticProductPlaceholder.originalPrice) {
-            itemsSavings = (staticProductPlaceholder.originalPrice - staticProductPlaceholder.price) * staticProductPlaceholder.quantity;
-        }
+        parsedItems = [staticProductPlaceholder];
       }
     } else {
-        itemsTotal = staticProductPlaceholder.price * staticProductPlaceholder.quantity;
-        if (staticProductPlaceholder.originalPrice) {
-            itemsSavings = (staticProductPlaceholder.originalPrice - staticProductPlaceholder.price) * staticProductPlaceholder.quantity;
-        }
+      parsedItems = [staticProductPlaceholder];
     }
-    
-    setInitialTotalAmount(itemsTotal + staticShippingMethod.price);
-    setInitialSavings(itemsSavings);
+    setCheckoutItems(parsedItems);
 
+    const grouped = parsedItems.reduce((acc, item) => {
+        const shopName = item.brand;
+        const shopDataFromMock = mockShops.find(s => s.name === shopName);
+
+        if (!acc[shopName]) {
+            acc[shopName] = {
+            name: shopName,
+            isFavorite: shopDataFromMock?.isFavorite || false,
+            logoUrl: shopDataFromMock?.logoUrl,
+            logoDataAiHint: shopDataFromMock?.logoDataAiHint,
+            products: [],
+            };
+        }
+        acc[shopName].products.push(item);
+        return acc;
+        }, {} as Record<string, DisplayShop>);
+    setDynamicDisplayShops(Object.values(grouped));
+    
 
     const selectedAddressId = localStorage.getItem(SELECTED_ADDRESS_STORAGE_KEY);
     const userAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
@@ -208,15 +190,21 @@ const CheckoutPage = () => {
     }
     setAddressLoaded(true);
 
+    const storedVoucherDetailsRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
+    let count = 0;
+    if (storedVoucherDetailsRaw) {
+        try {
+            const storedVoucherDetails: SelectedVoucherInfo[] = JSON.parse(storedVoucherDetailsRaw);
+            count = storedVoucherDetails.length;
+        } catch (e) {
+            console.error("Error parsing selected voucher details:", e);
+        }
+    }
 
-    // Voucher display logic
-    const storedVoucherCountRaw = localStorage.getItem(SELECTED_VOUCHER_COUNT_KEY);
-    const storedVoucherCount = storedVoucherCountRaw ? parseInt(storedVoucherCountRaw, 10) : 0;
-
-    if (storedVoucherCount > 0) {
-      setVoucherTriggerText(t('checkout.yourVoucherSelected', { count: storedVoucherCount }));
+    if (count > 0) {
+      setVoucherTriggerText(t('checkout.yourVoucherSelected', { count: count }));
     } else {
-      setVoucherTriggerText(t('checkout.yourVoucherAvailable', { count: 5 }));
+      setVoucherTriggerText(t('checkout.yourVoucherAvailable', { count: 5 })); // Assuming 5 available on dedicated page
     }
 
   }, [parseVariantNameForCheckout, t, router]); 
@@ -234,21 +222,45 @@ const CheckoutPage = () => {
 
 
   const numberOfProductTypes = useMemo(() => {
-    if (dynamicDisplayShops.length > 0) {
-        return dynamicDisplayShops.reduce((sum, shop) => sum + shop.products.length, 0);
+    return checkoutItems.length;
+  }, [checkoutItems]);
+
+  const merchandiseSubtotal = useMemo(() => {
+    return checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  }, [checkoutItems]);
+
+  const totalVoucherDiscount = useMemo(() => {
+    const storedVouchersRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
+    if (storedVouchersRaw) {
+      try {
+        const selectedVouchers: SelectedVoucherInfo[] = JSON.parse(storedVouchersRaw);
+        return selectedVouchers.reduce((sum, v) => sum + (v.discountValue || 0), 0);
+      } catch (e) {
+        console.error("Error parsing selectedVouchersData from localStorage on checkout page", e);
+        return 0;
+      }
     }
-    return 1;
-  }, [dynamicDisplayShops]);
+    return 0;
+  }, [voucherTriggerText]); // Re-evaluate if voucherTriggerText changes (indirectly indicates selection change)
+
 
   const displayTotalAmount = useMemo(() => {
-    let total = initialTotalAmount;
+    let total = merchandiseSubtotal + shippingMethod.price;
     if (useLoyaltyPoints) {
       total -= LOYALTY_POINTS_DISCOUNT_VALUE;
     }
+    total -= totalVoucherDiscount;
     return Math.max(0, total); 
-  }, [initialTotalAmount, useLoyaltyPoints]);
+  }, [merchandiseSubtotal, shippingMethod.price, useLoyaltyPoints, totalVoucherDiscount]);
   
-  const displaySavings = initialSavings;
+  const displaySavings = useMemo(() => {
+    return checkoutItems.reduce((sum, item) => {
+        if (item.originalPrice) {
+            return sum + (item.originalPrice - item.price) * item.quantity;
+        }
+        return sum;
+    }, 0);
+  }, [checkoutItems]);
 
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
@@ -262,14 +274,33 @@ const CheckoutPage = () => {
 
   const currentAddressNamePhone = currentShippingAddress ? t('checkout.address.namePhone', { name: currentShippingAddress.name, phone: currentShippingAddress.phone }) : '';
 
-  const merchandiseSubtotal = useMemo(() => {
-    if (dynamicDisplayShops.length > 0) {
-        return dynamicDisplayShops.reduce((shopSum, shop) => 
-            shopSum + shop.products.reduce((productSum, p) => productSum + p.price * p.quantity, 0), 
-        0);
+  const handlePlaceOrder = () => {
+    if (!currentShippingAddress) {
+        toast({
+            title: t('checkout.address.noAddressSelectedTitle'),
+            description: t('checkout.address.noAddressSelectedMessage'),
+            variant: 'destructive'
+        });
+        return;
     }
-    return staticProductPlaceholder.price * staticProductPlaceholder.quantity;
-  }, [dynamicDisplayShops]);
+    const finalOrderDetails = {
+      items: checkoutItems,
+      merchandiseSubtotal: merchandiseSubtotal,
+      shippingCost: shippingMethod.price,
+      loyaltyPointsDiscount: useLoyaltyPoints ? LOYALTY_POINTS_DISCOUNT_VALUE : 0,
+      voucherDiscountTotal: totalVoucherDiscount,
+      totalAmount: displayTotalAmount,
+    };
+    localStorage.setItem(FINAL_ORDER_DETAILS_KEY, JSON.stringify(finalOrderDetails));
+    
+    // Clean up keys that are now consolidated into finalOrderDetailsForPayment
+    // CHECKOUT_ITEMS_STORAGE_KEY will be cleared on payment page after use.
+    // SELECTED_VOUCHERS_DETAILS_KEY can be cleared here or on payment page.
+    // For simplicity, let payment page clear all temporary checkout-related keys.
+
+    router.push('/payment');
+  };
+
 
   const handleEInvoiceDetailChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -453,17 +484,17 @@ const CheckoutPage = () => {
                 <CardHeader className="pb-3 pt-4 px-4">
                   <div className="flex items-center space-x-2">
                     <ShoppingCart className="w-4 h-4 text-foreground" />
-                    {staticProductPlaceholder.logoUrl && (
+                    {staticProductPlaceholder.brand && (
                         <Image
-                            src={staticProductPlaceholder.logoUrl}
-                            alt={`${staticProductPlaceholder.seller} logo`}
+                            src={staticProductPlaceholder.imageUrl || "https://placehold.co/60x24.png"}
+                            alt={`${staticProductPlaceholder.brand} logo`}
                             width={60}
                             height={24}
                             className="object-contain max-h-[24px] mr-1"
-                            data-ai-hint={staticProductPlaceholder.logoAiHint}
+                            data-ai-hint={staticProductPlaceholder.dataAiHint || `${staticProductPlaceholder.brand} logo`}
                         />
                     )}
-                    <span className="text-sm font-medium text-foreground">{staticProductPlaceholder.seller}</span>
+                    <span className="text-sm font-medium text-foreground">{staticProductPlaceholder.brand}</span>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -474,7 +505,7 @@ const CheckoutPage = () => {
                         alt={staticProductPlaceholder.name}
                         fill
                         className="rounded border object-cover"
-                        data-ai-hint={staticProductPlaceholder.imageAiHint}
+                        data-ai-hint={staticProductPlaceholder.dataAiHint}
                         sizes="60px"
                       />
                       {staticProductPlaceholder.quantity > 0 && (
@@ -486,7 +517,7 @@ const CheckoutPage = () => {
                     <div className="flex-grow">
                       <p className="text-sm text-foreground leading-snug mb-0.5 line-clamp-2">{staticProductPlaceholder.name}</p>
                       {(() => {
-                        const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(staticProductPlaceholder.variation);
+                        const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(staticProductPlaceholder.variant);
                         let displayColor = parsedColor || "N/A";
                         let displaySize = parsedSize;
                         if (!displaySize) displaySize = "M"; 
@@ -634,13 +665,23 @@ const CheckoutPage = () => {
             </Card>
 
             <Card className="shadow-sm">
-              <CardContent className="p-4">
+              <CardContent className="p-4 space-y-1.5">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-foreground">
                     {t('checkout.totalAmountLabelWithCount', { count: numberOfProductTypes })}
                   </span>
                   <span className="text-sm font-semibold text-foreground">{formatCurrency(merchandiseSubtotal)}</span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-foreground">{t('checkout.shippingMethod')}</span>
+                  <span className="text-sm font-semibold text-foreground">{formatCurrency(shippingMethod.price)}</span>
+                </div>
+                 {totalVoucherDiscount > 0 && (
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm text-foreground">{t('checkout.voucherDiscountLabel')}</span>
+                        <span className="text-sm font-semibold text-destructive">-{formatCurrency(totalVoucherDiscount)}</span>
+                    </div>
+                )}
               </CardContent>
             </Card>
 
@@ -737,7 +778,7 @@ const CheckoutPage = () => {
             <Button
               size="lg"
               className="bg-foreground hover:bg-foreground/90 text-accent-foreground font-semibold min-w-[120px] sm:min-w-[140px] flex-shrink-0"
-              onClick={() => router.push('/payment')}
+              onClick={handlePlaceOrder}
               disabled={!currentShippingAddress}
             >
               {t('checkout.footer.orderButton')}
@@ -750,4 +791,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-    

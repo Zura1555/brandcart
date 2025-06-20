@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,12 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useToast } from "@/hooks/use-toast";
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { cn } from "@/lib/utils";
+import type { SelectedVoucherInfo } from '@/interfaces';
 
 const HEADER_HEIGHT = 'h-14'; 
 const FOOTER_HEIGHT = 'h-20';
 const SELECTED_VOUCHER_COUNT_KEY = 'selectedVoucherUserCount';
+const SELECTED_VOUCHERS_DETAILS_KEY = 'selectedVouchersDetails';
 
 
 interface Voucher {
@@ -34,55 +36,79 @@ interface Voucher {
   isSelected: boolean;
   isAvailable: boolean;
   unavailableReason?: string;
+  discountValue: number;
+  discountType: 'fixed' | 'percentage';
 }
 
 const mockPageAvailableVouchers: Voucher[] = [
   {
     id: 'pv_birthday_100k',
     title: 'Birthday Voucher ưu đãi 100.000 ₫',
-    imageUrl: 'https://placehold.co/40x40/E91E63/FFFFFF.png', // Pinkish placeholder
+    imageUrl: 'https://placehold.co/40x40/E91E63/FFFFFF.png', 
     imageAiHint: 'birthday gift voucher',
     expiryInfo: '31/08/2024',
     isSelected: false,
     isAvailable: true,
+    discountValue: 100000,
+    discountType: 'fixed',
   },
   {
     id: 'pv_techcom_50k',
     title: 'Ưu đãi 50.000, đơn từ 1.000.000 ₫',
-    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', // Red placeholder
+    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', 
     imageAiHint: 'Techcombank logo',
     expiryInfo: '31/08/2024',
     isSelected: false,
     isAvailable: true,
+    discountValue: 50000,
+    discountType: 'fixed',
   },
   {
     id: 'pv_zalopay_5percent',
     title: 'Zalo Pay giảm 5% giá trị đơn hàng',
-    imageUrl: 'https://placehold.co/40x40/2196F3/FFFFFF.png', // Blue placeholder
+    imageUrl: 'https://placehold.co/40x40/2196F3/FFFFFF.png', 
     imageAiHint: 'ZaloPay logo',
     expiryInfo: '02/09/2024',
     paymentMethodSwitchText: 'Switch your payment method to enjoy this offer',
     isSelected: false,
     isAvailable: true,
+    discountValue: 5, // Example, will be treated as fixed for now
+    discountType: 'percentage',
   },
   {
-    id: 'pv_freeship_50k_page',
-    title: 'Miễn phí vận chuyển, đơn từ 50.000₫',
+    id: 'pv_freeship_15k_page', // Changed from 50k to 15k flat for simplicity
+    title: 'Giảm 15.000₫ phí vận chuyển',
     imageUrl: 'https://placehold.co/40x40/4CAF50/FFFFFF.png',
-    imageAiHint: 'free shipping truck',
+    imageAiHint: 'shipping discount truck',
     expiryInfo: '15/09/2024',
     isSelected: false,
     isAvailable: true,
+    discountValue: 15000,
+    discountType: 'fixed',
   },
   {
     id: 'pv_adidas_10percent_page',
-    title: 'Giảm 10% cho sản phẩm Adidas',
+    title: 'Giảm 10% cho sản phẩm Adidas (Tối đa 50k)',
     imageUrl: 'https://placehold.co/40x40/000000/FFFFFF.png',
     imageAiHint: 'Adidas logo',
     expiryInfo: '30/09/2024',
     restrictionText: 'Chỉ áp dụng cho sản phẩm Adidas',
     isSelected: false,
     isAvailable: true,
+    discountValue: 50000, // Max discount fixed
+    discountType: 'percentage', // conceptually
+  },
+  {
+    id: 'pv_generic_20k_page',
+    title: 'Giảm 20.000₫ cho đơn từ 200.000₫',
+    imageUrl: 'https://placehold.co/40x40/FFC107/000000.png',
+    imageAiHint: 'generic discount voucher',
+    expiryInfo: '31/10/2024',
+    isSelected: false,
+    isAvailable: true,
+    conditionText: 'Đơn tối thiểu 200.000₫',
+    discountValue: 20000,
+    discountType: 'fixed',
   },
 ];
 
@@ -90,45 +116,28 @@ const mockPageUnavailableVouchers: Voucher[] = [
   {
     id: 'pv_techcom_100k_spend',
     title: 'Ưu đãi 100.000, đơn từ 2.000.000 ₫',
-    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', // Red placeholder
+    imageUrl: 'https://placehold.co/40x40/D32F2F/FFFFFF.png', 
     imageAiHint: 'Techcombank logo',
     expiryInfo: '31/07/2024 - 3 days left',
     conditionText: 'Spend 500,000 ₫ more to get this voucher',
     isSelected: false,
     isAvailable: false,
     unavailableReason: 'selectVoucher.voucherCard.unavailableReasonMinOrder',
+    discountValue: 100000,
+    discountType: 'fixed',
   },
   {
     id: 'pv_honda_1m_puma',
     title: 'Honda Voucher ưu đãi 1.000.000 ₫',
-    imageUrl: 'https://placehold.co/40x40/F44336/FFFFFF.png', // Another red placeholder
+    imageUrl: 'https://placehold.co/40x40/F44336/FFFFFF.png', 
     imageAiHint: 'Honda logo',
     expiryInfo: '31/12/2024',
     restrictionText: 'Only Apply for PUMA items',
     isSelected: false,
     isAvailable: false,
     unavailableReason: 'Restricted to specific items.',
-  },
-  {
-    id: 'pv_expired_generic_page',
-    title: 'Voucher giảm 20.000₫ (Đã hết hạn)',
-    imageUrl: 'https://placehold.co/40x40/9E9E9E/FFFFFF.png',
-    imageAiHint: 'expired voucher',
-    expiryInfo: '01/01/2024 - Hết hạn',
-    isSelected: false,
-    isAvailable: false,
-    unavailableReason: 'Voucher đã hết hạn sử dụng.',
-  },
-  {
-    id: 'pv_shopeepay_20k_page',
-    title: 'Giảm 20.000₫ khi thanh toán bằng ShopeePay',
-    imageUrl: 'https://placehold.co/40x40/FF6F00/FFFFFF.png',
-    imageAiHint: 'ShopeePay logo',
-    expiryInfo: '31/10/2024',
-    paymentMethodSwitchText: 'Chuyển sang ShopeePay để hưởng ưu đãi này',
-    isSelected: false,
-    isAvailable: false,
-    unavailableReason: 'Cần chọn phương thức thanh toán ShopeePay.',
+    discountValue: 1000000,
+    discountType: 'fixed',
   },
 ];
 
@@ -140,9 +149,26 @@ const SelectVoucherPage = () => {
   const [voucherCodeInput, setVoucherCodeInput] = useState('');
 
   const [availableVouchers, setAvailableVouchers] = useState<Voucher[]>(
-    mockPageAvailableVouchers.map(v => ({...v, isSelected: false})) // Ensure isSelected starts false
+    mockPageAvailableVouchers.map(v => ({...v, isSelected: false})) 
   );
   const [unavailableVouchers] = useState<Voucher[]>(mockPageUnavailableVouchers);
+
+  useEffect(() => {
+    const storedVouchersRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
+    if (storedVouchersRaw) {
+      try {
+        const storedSelectedVoucherInfos: SelectedVoucherInfo[] = JSON.parse(storedVouchersRaw);
+        setAvailableVouchers(prevPageVouchers =>
+          prevPageVouchers.map(pv => ({
+            ...pv,
+            isSelected: storedSelectedVoucherInfos.some(info => info.id === pv.id)
+          }))
+        );
+      } catch (e) {
+        console.error("Error parsing selected vouchers from localStorage on voucher page init:", e);
+      }
+    }
+  }, []);
 
   const selectedVoucherCount = useMemo(() => {
     return availableVouchers.filter(v => v.isSelected).length;
@@ -156,10 +182,19 @@ const SelectVoucherPage = () => {
   };
 
   const handleConfirmSelection = () => {
-    const currentSelectedCount = availableVouchers.filter(v => v.isSelected).length;
-    localStorage.setItem(SELECTED_VOUCHER_COUNT_KEY, currentSelectedCount.toString());
+    const selectedFullVouchers: SelectedVoucherInfo[] = availableVouchers
+        .filter(v => v.isSelected && v.isAvailable)
+        .map(v => ({
+            id: v.id,
+            title: v.title,
+            discountValue: v.discountValue,
+            discountType: v.discountType,
+        }));
     
-    toast({ title: t('selectVoucher.footer.vouchersSelected', { count: currentSelectedCount }) });
+    localStorage.setItem(SELECTED_VOUCHERS_DETAILS_KEY, JSON.stringify(selectedFullVouchers));
+    localStorage.setItem(SELECTED_VOUCHER_COUNT_KEY, selectedFullVouchers.length.toString());
+    
+    toast({ title: t('selectVoucher.footer.vouchersSelected', { count: selectedFullVouchers.length }) });
     router.push('/checkout');
   };
 
@@ -246,7 +281,7 @@ const SelectVoucherPage = () => {
           <div className="flex-grow flex justify-center items-center min-w-0 px-2">
              <h1 className="text-lg font-semibold truncate">{t('selectVoucher.titleOffers')}</h1>
           </div>
-          <div className="flex items-center w-10"> {/* Adjusted for balance or LanguageSwitcher */}
+          <div className="flex items-center w-10"> 
              <LanguageSwitcher />
           </div>
         </div>
@@ -262,7 +297,6 @@ const SelectVoucherPage = () => {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">{t('selectVoucher.allVouchersOption')}</SelectItem>
-                        {/* Add other filter options here later */}
                     </SelectContent>
                 </Select>
             </div>
@@ -286,7 +320,6 @@ const SelectVoucherPage = () => {
         <ScrollArea className="h-full">
           <div className="container mx-auto px-4 py-4 space-y-4">
             <div>
-              {/* Usable Vouchers Title is part of general list now */}
               {availableVouchers.map(voucher => (
                 <VoucherCardDisplay
                   key={voucher.id} 
@@ -304,7 +337,7 @@ const SelectVoucherPage = () => {
                     <VoucherCardDisplay
                     key={voucher.id} 
                     voucher={voucher} 
-                    onToggleSelect={() => {}} // Non-selectable
+                    onToggleSelect={() => {}} 
                     />
                 ))}
                 </div>
@@ -321,7 +354,6 @@ const SelectVoucherPage = () => {
           size="lg"
           className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold min-w-[140px]"
           onClick={handleConfirmSelection}
-          disabled={selectedVoucherCount === 0 && voucherCodeInput.trim() === ''}
         >
           {t('selectVoucher.footer.useVoucherButton')}
         </Button>
@@ -331,4 +363,3 @@ const SelectVoucherPage = () => {
 };
 
 export default SelectVoucherPage;
-

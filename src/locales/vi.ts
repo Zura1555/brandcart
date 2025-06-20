@@ -6,6 +6,8 @@ const viTranslations = {
     selectAll: "Tất cả",
     totalAmountLabel: "Tổng cộng:",
     subtotalAmountLabel: "Tạm tính:",
+    finalTotalAmountLabel: "Tổng cộng",
+    voucherDiscountLabel: "Giảm giá Voucher",
     checkoutButton: "Mua hàng ({count})",
     emptyCartTitle: "Giỏ hàng của bạn trống.",
     emptyCartMessage: "Thêm sản phẩm để bắt đầu mua sắm!",
@@ -152,6 +154,7 @@ const viTranslations = {
     shippingMethodStandardDeliveryLabel: "Giao hàng tiêu chuẩn (3-5 ngày)",
     shippingMethodEstimatedDeliveryTimeLabel: "Thời gian giao hàng dự kiến: 5-7 ngày làm việc",
     totalAmountLabelWithCount: "Tổng số tiền ({count} sản phẩm)",
+    voucherDiscountLabel: "Giảm giá Voucher",
     yourVoucherAvailable: "Có {count} voucher",
     yourVoucherSelected: "Đã chọn {count} Voucher",
     paymentMethod: "Phương thức thanh toán",
@@ -244,6 +247,8 @@ const viTranslations = {
       priceHeader: "Giá",
       subtotalLabel: "Tổng phụ",
       shippingLabel: "Vận chuyển",
+      loyaltyPointsDiscountLabel: "Điểm Thưởng Đã Dùng",
+      voucherDiscountLabel: "Giảm giá Voucher",
       totalLabel: "Tổng cộng",
     },
     feedback: {
@@ -291,4 +296,3 @@ const viTranslations = {
 };
 
 export default viTranslations;
-

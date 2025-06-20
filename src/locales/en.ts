@@ -6,6 +6,8 @@ const enTranslations = {
     selectAll: "Select All",
     totalAmountLabel: "Total:",
     subtotalAmountLabel: "Subtotal:",
+    finalTotalAmountLabel: "Total",
+    voucherDiscountLabel: "Voucher Discount",
     checkoutButton: "Checkout ({count})",
     emptyCartTitle: "Your cart is empty.",
     emptyCartMessage: "Add some products to get started!",
@@ -152,6 +154,7 @@ const enTranslations = {
     shippingMethodStandardDeliveryLabel: "Standard Delivery (3-5 days)",
     shippingMethodEstimatedDeliveryTimeLabel: "Estimated delivery time: 5-7 working days",
     totalAmountLabelWithCount: "Total Amount ({count} products)",
+    voucherDiscountLabel: "Voucher Discount",
     yourVoucherAvailable: "{count} Vouchers available",
     yourVoucherSelected: "{count} Vouchers Selected",
     paymentMethod: "Payment Method",
@@ -244,6 +247,8 @@ const enTranslations = {
       priceHeader: "Price",
       subtotalLabel: "Subtotal",
       shippingLabel: "Shipping",
+      loyaltyPointsDiscountLabel: "Loyalty Points",
+      voucherDiscountLabel: "Voucher Discount",
       totalLabel: "Total",
     },
     feedback: {
@@ -291,4 +296,3 @@ const enTranslations = {
 };
 
 export default enTranslations;
-

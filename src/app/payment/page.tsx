@@ -19,8 +19,10 @@ import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { useToast } from '@/hooks/use-toast';
 
 const HEADER_HEIGHT = 'h-14';
-const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
-const STATIC_SHIPPING_COST = 19000; 
+const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems'; // To be cleared
+const SELECTED_VOUCHERS_DETAILS_KEY = 'selectedVouchersDetails'; // To be cleared
+const FINAL_ORDER_DETAILS_KEY = 'finalOrderDetailsForPayment'; // To be read and cleared
+
 
 interface OrderDetails {
   orderNumber: string;
@@ -28,7 +30,9 @@ interface OrderDetails {
   items: CartItem[];
   merchandiseSubtotal: number;
   shippingCost: number;
-  totalAmount: number;
+  loyaltyPointsDiscount?: number;
+  voucherDiscountTotal?: number;
+  totalAmount: number; // This should be the final, paid amount
 }
 
 const PaymentSuccessPage = () => {
@@ -73,11 +77,12 @@ const PaymentSuccessPage = () => {
 
 
   useEffect(() => {
-    const rawItems = localStorage.getItem(CHECKOUT_ITEMS_STORAGE_KEY);
-    if (rawItems) {
+    const finalOrderDetailsRaw = localStorage.getItem(FINAL_ORDER_DETAILS_KEY);
+    if (finalOrderDetailsRaw) {
       try {
-        const items: CartItem[] = JSON.parse(rawItems);
-        if (items && items.length > 0) {
+        const parsedDetails: Omit<OrderDetails, 'orderNumber' | 'date'> & { totalAmount: number } = JSON.parse(finalOrderDetailsRaw);
+        
+        if (parsedDetails && parsedDetails.items && parsedDetails.items.length > 0) {
           const now = new Date();
           const orderNumber = `ORD-${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}-${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
           const dateFormatted = now.toLocaleDateString(locale, {
@@ -86,30 +91,42 @@ const PaymentSuccessPage = () => {
             day: 'numeric',
           });
 
-          const merchandiseSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-          const totalAmount = merchandiseSubtotal + STATIC_SHIPPING_COST;
-
           setOrderDetails({
+            ...parsedDetails,
             orderNumber,
             date: dateFormatted,
-            items,
-            merchandiseSubtotal,
-            shippingCost: STATIC_SHIPPING_COST,
-            totalAmount,
           });
+          
+          // Clean up localStorage
+          localStorage.removeItem(FINAL_ORDER_DETAILS_KEY);
           localStorage.removeItem(CHECKOUT_ITEMS_STORAGE_KEY);
+          localStorage.removeItem(SELECTED_VOUCHERS_DETAILS_KEY);
+
+        } else {
+          throw new Error("Parsed order details are invalid or items are missing.");
         }
       } catch (error) {
-        console.error("Error processing order details:", error);
+        console.error("Error processing final order details:", error);
         toast({ title: t('paymentSuccess.toast.errorProcessingOrder.title'), description: t('paymentSuccess.toast.errorProcessingOrder.description'), variant: 'destructive' });
+        router.replace('/'); // Redirect if data is corrupt or missing
       }
+    } else {
+      // If no final order details, maybe redirect or show error
+      console.warn("No final order details found in localStorage.");
+      toast({ title: t('paymentSuccess.toast.errorProcessingOrder.title'), description: "Missing order data.", variant: 'destructive' });
+      router.replace('/');
     }
     setIsLoading(false);
-  }, [locale, t, toast]);
+  }, [locale, t, toast, router]);
 
   useEffect(() => {
     if (!isLoading && !orderDetails) {
-      router.replace('/');
+      // This condition implies that useEffect either didn't find data or failed parsing,
+      // and router.replace('/') should have already been called.
+      // This is a safeguard.
+      if (router.pathname === '/payment') { // Avoid redirect loops if already redirecting
+          router.replace('/');
+      }
     }
   }, [isLoading, orderDetails, router]);
 
@@ -170,7 +187,13 @@ const PaymentSuccessPage = () => {
   }
   
   if (!orderDetails) {
-    return null; 
+    // Fallback, though useEffect should handle redirection.
+    // This can prevent rendering an empty page briefly before redirection.
+    return (
+        <div className="flex flex-col min-h-screen bg-background justify-center items-center">
+            <p>{t('paymentSuccess.loadingOrder')}</p>
+        </div>
+    ); 
   }
 
   return (
@@ -208,7 +231,7 @@ const PaymentSuccessPage = () => {
                     const { color: parsedColor, size: parsedSize } = parseVariantNameForCheckout(item.variant);
                     let displayColor = parsedColor || "N/A";
                     let displaySize = parsedSize;
-                    if (!displaySize) displaySize = "M"; // Default to M if no size
+                    if (!displaySize) displaySize = "M"; 
                     let displayCode = item.productCode || "N/A";
                     
                     const badgeParts = [];
@@ -262,6 +285,18 @@ const PaymentSuccessPage = () => {
                 <span>{t('paymentSuccess.orderSummary.shippingLabel')}</span>
                 <span>{formatCurrency(orderDetails.shippingCost)}</span>
               </div>
+               {orderDetails.loyaltyPointsDiscount && orderDetails.loyaltyPointsDiscount > 0 && (
+                <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>{t('paymentSuccess.orderSummary.loyaltyPointsDiscountLabel')}</span>
+                    <span className="text-destructive">-{formatCurrency(orderDetails.loyaltyPointsDiscount)}</span>
+                </div>
+              )}
+              {orderDetails.voucherDiscountTotal && orderDetails.voucherDiscountTotal > 0 && (
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>{t('paymentSuccess.orderSummary.voucherDiscountLabel')}</span>
+                  <span className="text-destructive">-{formatCurrency(orderDetails.voucherDiscountTotal)}</span>
+                </div>
+              )}
               <Separator className="my-2" />
               <div className="flex justify-between text-lg font-bold text-foreground">
                 <span>{t('paymentSuccess.orderSummary.totalLabel')}</span>
@@ -322,5 +357,3 @@ const PaymentSuccessPage = () => {
 };
 
 export default PaymentSuccessPage;
-    
-
