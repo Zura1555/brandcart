@@ -438,8 +438,6 @@ const BrandCartPage = () => {
 
     const allShopDataObjects = Array.from(allBrandsInCartSet).map(brandName => {
         const productsInThisBrand = cartItems.filter(item => item.brand === brandName);
-        // No need to filter if productsInThisBrand.length === 0 here, as filter happens later
-
         const mockShopData = mockShops.find(s => s.name === brandName);
         const inStockProductsInShop = productsInThisBrand.filter(item => item.stock !== 0);
 
@@ -598,52 +596,32 @@ const BrandCartPage = () => {
         ...itemToAdd,
         cartItemId: `${itemToAdd.id}-${itemToAdd.variant || 'base'}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         quantity: 1,
-        selected: false, // Default to not selected when added from CYL or Recently Viewed
+        selected: false, 
       };
 
       setCartItems(prevItems => {
         const updatedItems = [...prevItems];
         const brandOfNewItem = newCartItem.brand;
+        const firstItemIndexOfBrand = prevItems.findIndex(item => item.brand === brandOfNewItem);
 
-        let insertAtIndex = -1;
-        for(let i=0; i < updatedItems.length; i++){
-            if(updatedItems[i].brand === brandOfNewItem){
-                let lastIndexOfBrand = i;
-                for (let j = i + 1; j < updatedItems.length; j++) {
-                    if (updatedItems[j].brand === brandOfNewItem) {
-                        lastIndexOfBrand = j;
-                    } else {
-                        break; 
-                    }
-                }
-                insertAtIndex = lastIndexOfBrand + 1;
-                break;
-            }
-        }
-        
-        if (insertAtIndex !== -1) {
-          updatedItems.splice(insertAtIndex, 0, newCartItem);
+        if (firstItemIndexOfBrand !== -1) {
+          updatedItems.splice(firstItemIndexOfBrand, 0, newCartItem);
         } else {
           const shopOrder = mockShops.map(s => s.name);
           const brandIndexInMock = shopOrder.indexOf(brandOfNewItem);
-          
+          let insertPos = updatedItems.length; 
+
           if (brandIndexInMock !== -1) {
-            let foundHigherBrand = false;
-            for(let i=0; i < updatedItems.length; i++){
-              const currentItemBrandIndex = shopOrder.indexOf(updatedItems[i].brand);
-              if (currentItemBrandIndex > brandIndexInMock) {
-                insertAtIndex = i;
-                foundHigherBrand = true;
+            for (let i = 0; i < updatedItems.length; i++) {
+              const currentItemBrandIndexInMock = shopOrder.indexOf(updatedItems[i].brand);
+              if (currentItemBrandIndexInMock === -1 || currentItemBrandIndexInMock > brandIndexInMock) {
+                insertPos = i;
                 break;
               }
             }
-            if (foundHigherBrand && insertAtIndex !== -1) {
-               updatedItems.splice(insertAtIndex, 0, newCartItem);
-            } else {
-               updatedItems.push(newCartItem); 
-            }
-          } else {
-             updatedItems.push(newCartItem); 
+            updatedItems.splice(insertPos, 0, newCartItem);
+          } else { 
+            updatedItems.push(newCartItem);
           }
         }
         return updatedItems;
@@ -659,7 +637,7 @@ const BrandCartPage = () => {
   };
 
   const handleRecentlyViewedItemAddToCart = (itemToAdd: Product) => {
-    handleAddToCart(itemToAdd); // Adds to cart and shows toast
+    handleAddToCart(itemToAdd); 
     setRecentlyViewedItems(prev => prev.filter(item => item.id !== itemToAdd.id || item.variant !== itemToAdd.variant));
   };
 
@@ -686,10 +664,10 @@ const BrandCartPage = () => {
   const truckIconClass = useMemo(() => {
     const promotion = getShippingVoucherPromotionMessage(totalAmount);
     const discount = calculateShippingVoucherDiscount(totalAmount);
-    if (!promotion && discount > 0) { // Max tier reached AND discount applied
+    if (!promotion && discount > 0) { 
       return 'text-green-500';
     }
-    return 'text-muted-foreground'; // Incentive or no promotion
+    return 'text-muted-foreground'; 
   }, [totalAmount]);
 
 
@@ -730,7 +708,7 @@ const BrandCartPage = () => {
                   onQuantityChange={handleQuantityChange}
                   onDeleteItem={handleDeleteItem}
                   onVariantChange={handleVariantChange}
-                  onAddToCart={handleAddToCart} // Pass the main handler
+                  onAddToCart={handleAddToCart} 
                 />
               ))}
             </>
@@ -756,7 +734,7 @@ const BrandCartPage = () => {
                         <ChevronLeft className="w-5 h-5" />
                      </Button>
                     <SheetTitleComponent className="text-lg text-center font-semibold flex-grow">{t('selectVoucher.titleOffers')}</SheetTitleComponent>
-                    <div className="w-8"></div> {/* Spacer to balance the back button */}
+                    <div className="w-8"></div> 
                   </SheetHeader>
 
                   <div className="p-4 border-b bg-card z-10 space-y-3">
@@ -768,7 +746,7 @@ const BrandCartPage = () => {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">{t('selectVoucher.allVouchersOption')}</SelectItem>
-                                {/* Add other filter options here later */}
+                                
                             </SelectContent>
                         </Select>
                     </div>
@@ -792,7 +770,7 @@ const BrandCartPage = () => {
 
                   <ScrollArea className="flex-grow p-4">
                       <div>
-                        {/* Usable Vouchers Title is part of general list now */}
+                        
                         {sheetAvailableVouchers.map(voucher => (
                           <VoucherCardDisplay
                             key={voucher.id}
@@ -810,7 +788,7 @@ const BrandCartPage = () => {
                             <VoucherCardDisplay
                               key={voucher.id}
                               voucher={voucher}
-                              onToggleSelect={() => {}} // Non-selectable
+                              onToggleSelect={() => {}} 
                             />
                           ))}
                         </div>
@@ -824,7 +802,7 @@ const BrandCartPage = () => {
                     <Button
                       className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold min-w-[120px]"
                       onClick={handleConfirmVoucherSelectionInSheet}
-                      disabled={selectedVoucherCountInSheet === 0 && voucherCodeInput.trim() === ''} // Allow confirm if code entered
+                      disabled={selectedVoucherCountInSheet === 0 && voucherCodeInput.trim() === ''} 
                     >
                       {t('selectVoucher.footer.useVoucherButton')}
                     </Button>
@@ -833,7 +811,7 @@ const BrandCartPage = () => {
               </Sheet>
 
              <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 -mx-4 px-4">
-                <div className="flex items-center min-w-0"> {/* Added min-w-0 here */}
+                <div className="flex items-center min-w-0"> 
                   <Truck className={`w-5 h-5 mr-3 flex-shrink-0 ${truckIconClass}`} />
                   <span className={cn("text-sm truncate", truckIconClass === 'text-green-500' ? 'text-green-600' : 'text-muted-foreground')}>
                     {displayShippingMessage}
@@ -872,7 +850,7 @@ const BrandCartPage = () => {
               checked={areAllItemsEffectivelySelected}
               onCheckedChange={(checked) => handleToggleSelectAll(Boolean(checked))}
               aria-label="Select all items"
-              disabled={cartItems.filter(item => item.stock !== 0).length === 0} // Disable if all in-stock items are 0
+              disabled={cartItems.filter(item => item.stock !== 0).length === 0} 
             />
             <label htmlFor="select-all-footer" className="text-sm text-foreground cursor-pointer">
               {t('cart.selectAll')}
