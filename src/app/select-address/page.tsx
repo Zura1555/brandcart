@@ -89,7 +89,7 @@ const SelectAddressPage = () => {
   };
 
   const handleEditAddress = (addressId: string, event: React.MouseEvent) => {
-    event.stopPropagation();
+    event.stopPropagation(); 
     router.push(`/add-address?editId=${addressId}`);
   };
 
@@ -119,18 +119,24 @@ const SelectAddressPage = () => {
           <div className="container mx-auto px-2 sm:px-4 py-3">
             <div className="py-2 px-0 sm:px-2 text-sm text-muted-foreground">{t('selectAddress.addressesLabel')}</div>
             {shippingAddresses.length > 0 ? (
-              <RadioGroup value={selectedAddressId} onValueChange={handleSelectAddress} className="space-y-0 bg-card rounded-md shadow-sm">
+              <RadioGroup value={selectedAddressId} className="space-y-0 bg-card rounded-md shadow-sm">
                 {shippingAddresses.map((address) => (
                   <Card key={address.id} className={`shadow-none border-b rounded-none last:border-b-0 hover:bg-muted/20 ${selectedAddressId === address.id ? 'bg-muted/10' : ''}`}>
-                    <Label htmlFor={address.id} className="block cursor-pointer w-full">
+                    <Label 
+                      htmlFor={address.id} 
+                      className="block cursor-pointer w-full"
+                      onClick={() => handleSelectAddress(address.id)}
+                    >
                       <CardContent className="p-4 flex items-start space-x-3">
-                        <RadioGroupItem value={address.id} id={address.id} className="mt-1 flex-shrink-0" />
+                        <RadioGroupItem value={address.id} id={address.id} className="mt-1 flex-shrink-0" checked={selectedAddressId === address.id} />
                         <div className="flex-grow min-w-0">
-                          <p className="text-sm font-medium text-foreground">{address.name} | {address.phone}</p>
+                          <div className="flex items-center">
+                            <p className="text-sm font-medium text-foreground">{address.name} | {address.phone}</p>
+                            {address.isDefault && (
+                              <span className="ml-2 text-xs text-green-600 border border-green-600 rounded px-1.5 py-0.5">{t('selectAddress.defaultBadge')}</span>
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{address.address}</p>
-                          {address.isDefault && (
-                            <span className="mt-1.5 inline-block text-xs text-green-600 border border-green-600 rounded px-1.5 py-0.5">{t('selectAddress.defaultBadge')}</span>
-                          )}
                         </div>
                         <button
                           onClick={(e) => handleEditAddress(address.id, e)}
@@ -169,3 +175,4 @@ const SelectAddressPage = () => {
 };
 
 export default SelectAddressPage;
+
