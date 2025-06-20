@@ -19,21 +19,9 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Table, TableBody, TableCell, TableHead, TableHeader as TableHeaderUI, TableRow } from '@/components/ui/table';
-
 
 interface ProductItemProps {
   item: CartItem;
@@ -56,8 +44,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const swipeableContentRef = useRef<HTMLDivElement>(null);
 
   const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
-  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-
 
   const cleanVariantName = useCallback((name: string | undefined): string => {
     if (!name) return '';
@@ -513,70 +499,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                         <span className="truncate">{badgeDisplayString}</span>
                       </Badge>
                     )
-                )}
-                
-                {hasAvailableVariants && !isOutOfStock && (
-                     <Dialog open={isSizeGuideOpen} onOpenChange={setIsSizeGuideOpen}>
-                        <DialogTrigger asChild>
-                             <Button variant="outline" size="sm" className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground border-muted-foreground/30 hover:border-foreground">
-                                <Shirt className="w-3.5 h-3.5 mr-1" />
-                                {t('cart.sheet.sizeGuide.button')}
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>{t('cart.sheet.sizeGuide.title')}</DialogTitle>
-                            <DialogDescription>
-                                {t('cart.sheet.sizeGuide.description')}
-                            </DialogDescription>
-                        </DialogHeader>
-                        <ScrollArea className="max-h-[60vh]">
-                            <Table className="mt-2 text-xs">
-                                <TableHeaderUI>
-                                    <TableRow>
-                                    <TableHead className="w-[80px]">{t('cart.sheet.sizeGuide.table.size')}</TableHead>
-                                    <TableHead>{t('cart.sheet.sizeGuide.table.chest')}</TableHead>
-                                    <TableHead>{t('cart.sheet.sizeGuide.table.length')}</TableHead>
-                                    <TableHead className="text-right">{t('cart.sheet.sizeGuide.table.sleeve')}</TableHead>
-                                    </TableRow>
-                                </TableHeaderUI>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell className="font-medium">S</TableCell>
-                                        <TableCell>90-95 cm</TableCell>
-                                        <TableCell>68-70 cm</TableCell>
-                                        <TableCell className="text-right">20 cm</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell className="font-medium">M</TableCell>
-                                        <TableCell>96-101 cm</TableCell>
-                                        <TableCell>70-72 cm</TableCell>
-                                        <TableCell className="text-right">21 cm</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell className="font-medium">L</TableCell>
-                                        <TableCell>102-107 cm</TableCell>
-                                        <TableCell>72-74 cm</TableCell>
-                                        <TableCell className="text-right">22 cm</TableCell>
-                                    </TableRow>
-                                     <TableRow>
-                                        <TableCell className="font-medium">XL</TableCell>
-                                        <TableCell>108-113 cm</TableCell>
-                                        <TableCell>74-76 cm</TableCell>
-                                        <TableCell className="text-right">23 cm</TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </ScrollArea>
-                        <DialogFooter className="sm:justify-start mt-4">
-                            <DialogClose asChild>
-                            <Button type="button" variant="secondary" className="w-full">
-                                {t('cart.sheet.sizeGuide.closeButton')}
-                            </Button>
-                            </DialogClose>
-                        </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
                 )}
             </div>
 
