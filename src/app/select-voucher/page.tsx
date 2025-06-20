@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 
 const HEADER_HEIGHT = 'h-14'; 
 const FOOTER_HEIGHT = 'h-20';
+const SELECTED_VOUCHER_COUNT_KEY = 'selectedVoucherUserCount';
+
 
 interface Voucher {
   id: string;
@@ -154,11 +156,10 @@ const SelectVoucherPage = () => {
   };
 
   const handleConfirmSelection = () => {
-    const selectedVouchers = availableVouchers.filter(v => v.isSelected);
-    console.log("Selected voucher IDs:", selectedVouchers.map(v => v.id));
-    // Here you would typically save the selected voucher IDs to localStorage or context
-    // and then navigate back to checkout.
-    toast({ title: t('selectVoucher.footer.vouchersSelected', { count: selectedVoucherCount }) });
+    const currentSelectedCount = availableVouchers.filter(v => v.isSelected).length;
+    localStorage.setItem(SELECTED_VOUCHER_COUNT_KEY, currentSelectedCount.toString());
+    
+    toast({ title: t('selectVoucher.footer.vouchersSelected', { count: currentSelectedCount }) });
     router.push('/checkout');
   };
 

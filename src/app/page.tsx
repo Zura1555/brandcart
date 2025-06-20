@@ -30,6 +30,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
+const SELECTED_VOUCHER_COUNT_KEY = 'selectedVoucherUserCount';
 
 interface VoucherInterface {
   id: string;
@@ -243,7 +244,7 @@ const BrandCartPage = () => {
     return sheetAvailableVouchers.filter(v => v.isSelected).length;
   }, [sheetAvailableVouchers]);
 
-  const [finalAppliedVoucherSummary, setFinalAppliedVoucherSummary] = useState<string | null>(null);
+  const [voucherTriggerText, setVoucherTriggerText] = useState<string>('');
 
   const [recentlyViewedItems, setRecentlyViewedItems] = useState<Product[]>([]);
 
@@ -274,13 +275,15 @@ const BrandCartPage = () => {
 
 
   useEffect(() => {
-    const count = sheetAvailableVouchers.filter(v => v.isSelected).length;
-    if (count > 0) {
-      setFinalAppliedVoucherSummary(t('selectVoucher.footer.vouchersSelected', { count }));
+    const storedCountRaw = localStorage.getItem(SELECTED_VOUCHER_COUNT_KEY);
+    const storedCount = storedCountRaw ? parseInt(storedCountRaw, 10) : 0;
+
+    if (storedCount > 0) {
+        setVoucherTriggerText(t('selectVoucher.footer.vouchersSelected', { count: storedCount }));
     } else {
-      setFinalAppliedVoucherSummary(null);
+        setVoucherTriggerText(t('cart.vouchersAndShipping.availableVouchersText', { count: mockAvailableVouchersSheet.length }));
     }
-  }, [sheetAvailableVouchers, t]);
+  }, [isVoucherSheetOpen, t]);
 
 
   const handleToggleSelectAll = (checked: boolean) => {
@@ -531,12 +534,14 @@ const BrandCartPage = () => {
   };
 
   const handleConfirmVoucherSelectionInSheet = () => {
-    const selectedCount = sheetAvailableVouchers.filter(v => v.isSelected).length;
-    if (selectedCount > 0) {
-      setFinalAppliedVoucherSummary(t('selectVoucher.footer.vouchersSelected', { count: selectedCount }));
-      toast({ title: t('selectVoucher.footer.vouchersSelected', { count: selectedCount }) });
+    const currentSelectedCount = sheetAvailableVouchers.filter(v => v.isSelected).length;
+    localStorage.setItem(SELECTED_VOUCHER_COUNT_KEY, currentSelectedCount.toString());
+
+    if (currentSelectedCount > 0) {
+      setVoucherTriggerText(t('selectVoucher.footer.vouchersSelected', { count: currentSelectedCount }));
+      toast({ title: t('selectVoucher.footer.vouchersSelected', { count: currentSelectedCount }) });
     } else {
-      setFinalAppliedVoucherSummary(null);
+      setVoucherTriggerText(t('cart.vouchersAndShipping.availableVouchersText', { count: mockAvailableVouchersSheet.length }));
       toast({ title: t('selectVoucher.footer.notSelectedInfo') });
     }
     setIsVoucherSheetOpen(false);
@@ -667,10 +672,7 @@ const BrandCartPage = () => {
                     <div className="flex items-center">
                       <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                       <span className="text-sm text-foreground">
-                        {finalAppliedVoucherSummary
-                          ? finalAppliedVoucherSummary
-                          : t('cart.vouchersAndShipping.voucherLabel', { amount: "5k" }) // Fallback
-                        }
+                        {voucherTriggerText}
                       </span>
                     </div>
                     <ChevronRight className="w-5 h-5 text-muted-foreground" />

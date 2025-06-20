@@ -30,6 +30,8 @@ const FOOTER_HEIGHT = 'h-36';
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
+const SELECTED_VOUCHER_COUNT_KEY = 'selectedVoucherUserCount';
+
 
 const AVAILABLE_LOYALTY_POINTS = 200;
 const LOYALTY_POINTS_TO_REDEEM = 200;
@@ -79,6 +81,8 @@ const CheckoutPage = () => {
   const [addressLoaded, setAddressLoaded] = useState(false);
   const [shopMessage, setShopMessage] = useState<string>('');
   const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(true);
+  const [voucherTriggerText, setVoucherTriggerText] = useState<string>('');
+
 
   // E-Invoice state
   const [wantEInvoice, setWantEInvoice] = useState<boolean>(false); // Default to 'Không xuất hóa đơn'
@@ -203,7 +207,22 @@ const CheckoutPage = () => {
       setCurrentShippingAddress(userAddresses.find(addr => addr.isDefault) || (userAddresses.length > 0 ? userAddresses[0] : null));
     }
     setAddressLoaded(true);
-  }, [parseVariantNameForCheckout]); 
+
+
+    // Voucher display logic
+    const storedVoucherCountRaw = localStorage.getItem(SELECTED_VOUCHER_COUNT_KEY);
+    const storedVoucherCount = storedVoucherCountRaw ? parseInt(storedVoucherCountRaw, 10) : 0;
+
+    if (storedVoucherCount > 0) {
+      setVoucherTriggerText(t('checkout.yourVoucherSelected', { count: storedVoucherCount }));
+    } else {
+      // Count for "available" specific to select-voucher page's mocks
+      // mockPageAvailableVouchers in select-voucher/page.tsx has 5 items.
+      setVoucherTriggerText(t('checkout.yourVoucherAvailable', { count: 5 }));
+    }
+
+  }, [parseVariantNameForCheckout, t, router]); // Added router to deps to re-run on navigation (e.g., back from select-voucher)
+
 
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')}₫`;
@@ -637,7 +656,7 @@ const CheckoutPage = () => {
                   <div className="flex items-center">
                     <Ticket className="w-5 h-5 text-foreground mr-3 flex-shrink-0" />
                     <span className="text-sm text-foreground">
-                      {t('checkout.yourVoucherAvailable', { count: 3 })} 
+                      {voucherTriggerText}
                     </span>
                   </div>
                   <div className="flex items-center">

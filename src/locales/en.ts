@@ -16,7 +16,8 @@ const enTranslations = {
     vouchersAndShipping: {
       voucherLabel: "Voucher up to {amount}₫",
       shippingDiscountApplied: "Shipping discount: {amount}",
-      noPromotionsAvailable: "No shipping promotions currently available."
+      noPromotionsAvailable: "No shipping promotions currently available.",
+      availableVouchersText: "{count} vouchers available"
     },
     sheet: {
       productInfoTitle: "Product Information",
@@ -151,6 +152,7 @@ const enTranslations = {
     shippingMethodEstimatedDeliveryTimeLabel: "Estimated delivery time: 5-7 working days",
     totalAmountLabelWithCount: "Total Amount ({count} products)",
     yourVoucherAvailable: "{count} Vouchers available",
+    yourVoucherSelected: "{count} Vouchers Selected",
     paymentMethod: "Payment Method",
     footer: {
       totalLabel: "Total:",

@@ -16,7 +16,8 @@ const viTranslations = {
     vouchersAndShipping: {
       voucherLabel: "Voucher giảm đến {amount}₫",
       shippingDiscountApplied: "Giảm giá vận chuyển: {amount}",
-      noPromotionsAvailable: "Hiện không có khuyến mãi vận chuyển."
+      noPromotionsAvailable: "Hiện không có khuyến mãi vận chuyển.",
+      availableVouchersText: "{count} voucher có sẵn"
     },
     sheet: {
       productInfoTitle: "Thông tin sản phẩm",
@@ -151,6 +152,7 @@ const viTranslations = {
     shippingMethodEstimatedDeliveryTimeLabel: "Thời gian giao hàng dự kiến: 5-7 ngày làm việc",
     totalAmountLabelWithCount: "Tổng số tiền ({count} sản phẩm)",
     yourVoucherAvailable: "Có {count} voucher",
+    yourVoucherSelected: "Đã chọn {count} Voucher",
     paymentMethod: "Phương thức thanh toán",
     footer: {
       totalLabel: "Tổng cộng:",
