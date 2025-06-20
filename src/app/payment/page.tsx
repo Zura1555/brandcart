@@ -292,7 +292,7 @@ const PaymentSuccessPage = () => {
                {orderDetails.loyaltyPointsDiscount && orderDetails.loyaltyPointsDiscount > 0 && (
                 <div className="flex justify-between text-sm text-muted-foreground">
                     <span>{t('paymentSuccess.orderSummary.loyaltyPointsDiscountLabel')}</span>
-                    <span className="text-destructive">-{formatCurrency(orderDetails.loyaltyPointsDiscount)}</span>
+                    <span className="text-destructive">{formatCurrency(orderDetails.loyaltyPointsDiscount)}</span>
                 </div>
               )}
               {orderDetails.voucherDiscountTotal && orderDetails.voucherDiscountTotal > 0 && (
@@ -361,3 +361,6 @@ const PaymentSuccessPage = () => {
 };
 
 export default PaymentSuccessPage;
+
+
+    
