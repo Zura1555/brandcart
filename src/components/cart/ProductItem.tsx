@@ -556,6 +556,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                               {sizingSheetView === 'staticGuide' && t('cart.sheet.findMySize.staticGuideTitle')}
                               {sizingSheetView === 'quiz' && t('cart.sheet.findMySize.quizTitle')}
                             </SheetTitle>
+                             {/* The default close button of SheetContent is used */}
                         </SheetHeader>
                         
                         <ScrollArea className="flex-grow overflow-y-auto">
@@ -567,6 +568,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                     </Button>
                                     <Button variant="default" className="w-full h-12 text-base bg-foreground hover:bg-foreground/90 text-accent-foreground" onClick={() => {
                                         toast({ title: t('cart.sheet.findMySize.quizComingSoon'), variant: "default" });
+                                         setSizingSheetView('quiz');
                                     }}>
                                     {t('cart.sheet.findMySize.startQuizButton')}
                                     </Button>
@@ -578,9 +580,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                     <p className="text-sm text-muted-foreground mb-4 text-center">
                                     {t('cart.sheet.findMySize.staticGuideDescription')}
                                     </p>
-                                    <div className="flex justify-center mb-4">
-                                    <Image src="https://placehold.co/300x200.png" alt={t('cart.sheet.findMySize.measurementsAlt')} width={300} height={200} className="rounded border" data-ai-hint="body measurements guide" />
-                                    </div>
                                     <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -597,6 +596,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                         <TableRow><TableCell>XL</TableCell><TableCell>108-113 cm</TableCell><TableCell>74 cm</TableCell><TableCell>23 cm</TableCell></TableRow>
                                     </TableBody>
                                     </Table>
+                                    <div className="flex justify-center mt-4">
+                                      <Image src="https://placehold.co/300x200.png" alt={t('cart.sheet.findMySize.measurementsAlt')} width={300} height={200} className="rounded border" data-ai-hint="body measurements guide" />
+                                    </div>
                                 </div>
                                 )}
 
@@ -646,4 +648,5 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
+
 
