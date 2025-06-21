@@ -147,13 +147,13 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   const allImageUrlsInSheet = useMemo(() => {
     const urls = new Set<string>();
 
-    // Always add the current item's image first if its color matches the selected color, or if no color is selected yet.
-    if (item.imageUrl && (!tempSelectedColorName || parseVariantName(item.variant).color === tempSelectedColorName)) {
+    const currentParsedColor = parseVariantName(item.variant).color;
+    if (item.imageUrl && (!tempSelectedColorName || currentParsedColor === tempSelectedColorName)) {
       urls.add(item.imageUrl);
     }
     
     const variantsForSelectedColor = item.availableVariants?.filter(v => {
-        if (!tempSelectedColorName) return true;
+        if (!tempSelectedColorName) return true; // Show all if no color selected yet
         const parsed = parseVariantName(v.name);
         return parsed.color === tempSelectedColorName;
     });
@@ -161,6 +161,12 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
     variantsForSelectedColor?.forEach(v => {
         if (v.imageUrl) urls.add(v.imageUrl);
     });
+
+    if (item.imageUrl && !urls.has(item.imageUrl) && (!tempSelectedColorName || currentParsedColor === tempSelectedColorName)) {
+        const urlArray = Array.from(urls);
+        urlArray.unshift(item.imageUrl);
+        return urlArray;
+    }
 
     if (urls.size === 0 && item.imageUrl) {
         urls.add(item.imageUrl);
@@ -273,7 +279,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
             </SheetTrigger>
             <SheetContent side="bottom" className="max-h-[85vh] sm:max-h-[80vh] flex flex-col p-0 rounded-t-lg">
                 <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10 flex flex-row items-center justify-between">
-                    <h3 className="text-lg font-semibold text-center flex-grow">{t('cart.sheet.productInfoTitle')}</h3>
+                    <SheetTitle className="text-lg font-semibold text-center flex-grow">{t('cart.sheet.productInfoTitle')}</SheetTitle>
                     <Button variant="ghost" size="icon" onClick={() => setIsVariantSheetOpen(false)} className="h-8 w-8">
                         <X className="h-5 w-5" />
                         <span className="sr-only">Close</span>

@@ -159,7 +159,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     const urls = new Set<string>();
     
     // Always add the current item's image first if its color matches the selected color, or if no color is selected yet.
-    if (item.imageUrl && (!tempSelectedColorName || parseVariantName(item.variant).color === tempSelectedColorName)) {
+    const currentParsedColor = parseVariantName(item.variant).color;
+    if (item.imageUrl && (!tempSelectedColorName || currentParsedColor === tempSelectedColorName)) {
       urls.add(item.imageUrl);
     }
     
@@ -172,6 +173,13 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     variantsForSelectedColor.forEach(v => {
         if (v.imageUrl) urls.add(v.imageUrl);
     });
+
+    // If after all that, the cart item's image wasn't added (e.g., color changed), add it again to be safe.
+    if (item.imageUrl && !urls.has(item.imageUrl) && (!tempSelectedColorName || currentParsedColor === tempSelectedColorName)) {
+        const urlArray = Array.from(urls);
+        urlArray.unshift(item.imageUrl);
+        return urlArray;
+    }
 
     if (urls.size === 0 && item.imageUrl) {
         urls.add(item.imageUrl);
@@ -377,20 +385,19 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
             
             <div className="flex items-center space-x-2 mt-1">
               <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
-                <SheetTrigger asChild disabled={isOutOfStock}>
+                <SheetTrigger asChild>
                   <button 
                     type="button" 
                     className={cn(
                       "text-left block hover:opacity-80 transition-opacity focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
                       isOutOfStock && "cursor-not-allowed opacity-70"
                     )}
-                    disabled={isOutOfStock}
                   >
                     <Badge
                       variant="outline"
                       className={cn(
                           "bg-green-600 hover:bg-green-600 text-white text-xs px-1.5 py-0.5 inline-flex items-center",
-                          isOutOfStock ? "cursor-not-allowed" : "cursor-pointer"
+                           "cursor-pointer"
                       )}
                     >
                       {showSelectVariantPlaceholder ? (
@@ -398,13 +405,13 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                       ) : (
                          badgeDisplayString && <span className="truncate">{badgeDisplayString}</span>
                       )}
-                      {item.availableVariants && <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />}
+                      <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
                     </Badge>
                   </button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="max-h-[85vh] sm:max-h-[80vh] flex flex-col p-0 rounded-t-lg">
                     <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10 flex flex-row items-center justify-between">
-                        <h3 className="text-lg font-semibold text-center flex-grow">{t('cart.sheet.productInfoTitle')}</h3>
+                        <SheetTitle className="text-lg font-semibold text-center flex-grow">{t('cart.sheet.productInfoTitle')}</SheetTitle>
                         <Button variant="ghost" size="icon" onClick={() => setIsVariantSheetOpen(false)} className="h-8 w-8">
                             <X className="h-5 w-5" />
                             <span className="sr-only">Close</span>
@@ -556,13 +563,11 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                       </div>
                     </div>
 
-                    {item.availableVariants && (
-                      <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
-                        <Button onClick={handleConfirmVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
-                          {t('cart.sheet.updateButton')}
-                        </Button>
-                      </SheetFooter>
-                    )}
+                    <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
+                      <Button onClick={handleConfirmVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
+                        {t('cart.sheet.updateButton')}
+                      </Button>
+                    </SheetFooter>
                 </SheetContent>
               </Sheet>
             </div>
