@@ -138,18 +138,33 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
   }, [selectedVariantInSheet, item]);
   
   const allImageUrls = useMemo(() => {
-      if (!item.availableVariants || item.availableVariants.length === 0) {
-          return [currentDisplayDetailsInSheet.imageUrl].filter(Boolean) as string[];
-      }
-      const urls = new Set<string>();
-      if (currentDisplayDetailsInSheet.imageUrl) {
-          urls.add(currentDisplayDetailsInSheet.imageUrl);
-      }
-      item.availableVariants.forEach(v => {
-          if (v.imageUrl) urls.add(v.imageUrl);
-      });
-      return Array.from(urls);
-  }, [item.availableVariants, currentDisplayDetailsInSheet.imageUrl]);
+    const urls = new Set<string>();
+
+    if (!item.availableVariants || item.availableVariants.length === 0) {
+        if (item.imageUrl) urls.add(item.imageUrl);
+        return Array.from(urls);
+    }
+
+    const variantsToScan = tempSelectedColorName
+        ? item.availableVariants.filter(v => parseVariantName(v.name).color === tempSelectedColorName)
+        : item.availableVariants;
+        
+    if (selectedVariantInSheet?.imageUrl) {
+        urls.add(selectedVariantInSheet.imageUrl);
+    }
+
+    variantsToScan.forEach(v => {
+        if (v.imageUrl) {
+            urls.add(v.imageUrl);
+        }
+    });
+    
+    if (urls.size === 0 && item.imageUrl) {
+        urls.add(item.imageUrl);
+    }
+
+    return Array.from(urls);
+  }, [item.availableVariants, item.imageUrl, tempSelectedColorName, parseVariantName, selectedVariantInSheet]);
 
   const availableSizesForSelectedColor = useMemo(() => {
     if (!item.availableVariants) return new Set<string>();
