@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, ChevronLeft, Gift, Ticket, Truck, Trash2, ChevronRight, XCircle, CheckCircle2, Clock, AlertTriangle, ShoppingBag, PlusCircle } from 'lucide-react';
-import type { CartItem, Shop, SimpleVariant, Product, SelectedVoucherInfo } from '@/interfaces';
+import type { CartItem, Shop, SimpleVariant, Product, SelectedVoucherInfo, ShippingAddress } from '@/interfaces';
 import { mockShops, mockRelevantProducts, newRecentlyViewedProducts } from '@/lib/mockData';
 import ShopSection from '@/components/cart/ShopSection';
 import RecentlyViewedItemCard from '@/components/cart/RecentlyViewedItemCard';
@@ -33,6 +33,8 @@ const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_VOUCHER_COUNT_KEY = 'selectedVoucherUserCount';
 const SELECTED_VOUCHERS_DETAILS_KEY = 'selectedVouchersDetails';
 const FINAL_ORDER_DETAILS_KEY = 'finalOrderDetailsForPayment';
+const USER_ADDRESSES_STORAGE_KEY = 'userShippingAddresses';
+const SELECTED_ADDRESS_STORAGE_KEY = 'selectedShippingAddressId';
 
 
 interface VoucherInterface {
@@ -208,6 +210,25 @@ const BrandCartPage = () => {
     setRecentlyViewedItems(newRecentlyViewedProducts.slice(0, 6));
 
     if (typeof window !== 'undefined') {
+      // Add default address if none exist
+      const existingAddressesRaw = localStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
+      if (!existingAddressesRaw || JSON.parse(existingAddressesRaw).length === 0) {
+        const defaultAddress: ShippingAddress = {
+          id: 'default-addr-1',
+          name: 'John Doe',
+          phone: '0987654321',
+          streetAddress: '123 Main Street',
+          ward: 'pdk', // Phường Đa Kao
+          district: 'q1', // Quận 1
+          province: 'hcm', // TP. Hồ Chí Minh
+          address: '123 Main Street, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh',
+          addressType: 'home',
+          isDefault: true,
+        };
+        localStorage.setItem(USER_ADDRESSES_STORAGE_KEY, JSON.stringify([defaultAddress]));
+        localStorage.setItem(SELECTED_ADDRESS_STORAGE_KEY, defaultAddress.id);
+      }
+
       const storedVouchersRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
       if (storedVouchersRaw) {
           try {
