@@ -37,6 +37,20 @@ const enTranslations = {
         outOfStock: "Out of stock"
       },
       selectVariantPlaceholder: "Select variant",
+      findMySize: {
+        trigger: "Find my size",
+        tableTitle: "Size Guide",
+        howToMeasure: "How to measure",
+        size: "Size",
+        chest: "Chest (in)",
+        waist: "Waist (in)",
+        hips: "Hips (in)",
+        xs: "XS",
+        s: "S",
+        m: "M",
+        l: "L",
+        xl: "XL"
+      }
     },
     completeLook: {
       bannerText: "COMPLETE YOUR LOOK",

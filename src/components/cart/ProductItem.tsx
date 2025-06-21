@@ -19,11 +19,21 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 
 interface ProductItemProps {
@@ -48,6 +58,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const swipeableContentRef = useRef<HTMLDivElement>(null);
 
   const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
+  const [isSizeGuideDialogOpen, setIsSizeGuideDialogOpen] = useState(false);
   
 
   const cleanVariantName = useCallback((name: string | undefined): string => {
@@ -147,6 +158,23 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       dataAiHint: selectedVariantInSheet?.dataAiHint ?? item.dataAiHint,
     };
   }, [selectedVariantInSheet, item.price, item.imageUrl, item.originalPrice, item.dataAiHint, item.stock]);
+
+  const allImageUrls = useMemo(() => {
+      if (!item.availableVariants || item.availableVariants.length === 0) {
+          return [currentDisplayDetailsInSheet.imageUrl].filter(Boolean);
+      }
+      const urls = new Set<string>();
+      
+      // Start with the selected variant's image to show it first
+      if (currentDisplayDetailsInSheet.imageUrl) {
+          urls.add(currentDisplayDetailsInSheet.imageUrl);
+      }
+      // Add all other unique variant images
+      item.availableVariants.forEach(v => {
+          if (v.imageUrl) urls.add(v.imageUrl);
+      });
+      return Array.from(urls);
+  }, [item.availableVariants, currentDisplayDetailsInSheet.imageUrl]);
   
   const availableSizesForSelectedColor = useMemo(() => {
     if (!item.availableVariants) return new Set<string>();
@@ -386,15 +414,30 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                         <ScrollArea className="flex-grow">
                           <div className="p-4 space-y-4">
                             <div className="flex items-start space-x-3">
-                              <Image
-                                src={currentDisplayDetailsInSheet.imageUrl}
-                                alt={item.name}
-                                width={112}
-                                height={112}
-                                className="rounded-md object-cover w-28 h-28 sm:w-32 sm:h-32 border flex-shrink-0"
-                                data-ai-hint={currentDisplayDetailsInSheet.dataAiHint || "product image"}
-                                sizes="(max-width: 640px) 112px, 128px"
-                              />
+                                <Carousel className="w-28 sm:w-32 flex-shrink-0" opts={{ loop: true }}>
+                                  <CarouselContent>
+                                    {allImageUrls.map((url, index) => (
+                                      <CarouselItem key={index}>
+                                        <div className="aspect-square relative bg-muted rounded-md">
+                                          <Image
+                                            src={url}
+                                            alt={`${item.name} image ${index + 1}`}
+                                            fill
+                                            className="rounded-md object-cover border"
+                                            sizes="(max-width: 640px) 112px, 128px"
+                                          />
+                                        </div>
+                                      </CarouselItem>
+                                    ))}
+                                  </CarouselContent>
+                                  {allImageUrls.length > 1 && (
+                                    <>
+                                      <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2 h-6 w-6 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                                      <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                                    </>
+                                  )}
+                                </Carousel>
+
                               <div className="flex-grow min-w-0">
                                 {item.brand && <p className="text-xs font-medium text-foreground">{item.brand}</p>}
                                 <p className="text-sm text-foreground mt-0.5 line-clamp-3">{item.name}</p>
@@ -448,8 +491,48 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                             )}
 
                             {allPossibleSizes.length > 0 && (
-                              <div className="space-y-2">
-                                <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
+                               <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
+                                  <Dialog open={isSizeGuideDialogOpen} onOpenChange={setIsSizeGuideDialogOpen}>
+                                    <DialogTrigger asChild>
+                                      <Button variant="link" className="text-sm p-0 h-auto flex items-center gap-1 text-muted-foreground hover:text-foreground">
+                                        <Ruler className="w-3.5 h-3.5" />
+                                        {t('cart.sheet.findMySize.trigger')}
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-md p-0">
+                                      <DialogHeader className="p-4 border-b">
+                                        <DialogTitle>{t('cart.sheet.findMySize.tableTitle')}</DialogTitle>
+                                      </DialogHeader>
+                                      <ScrollArea className="max-h-[70vh]">
+                                        <div className="p-4">
+                                          <Table>
+                                            <TableHeader>
+                                              <TableRow>
+                                                <TableHead>{t('cart.sheet.findMySize.size')}</TableHead>
+                                                <TableHead>{t('cart.sheet.findMySize.chest')}</TableHead>
+                                                <TableHead>{t('cart.sheet.findMySize.waist')}</TableHead>
+                                                <TableHead>{t('cart.sheet.findMySize.hips')}</TableHead>
+                                              </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                              <TableRow><TableCell>{t('cart.sheet.findMySize.xs')}</TableCell><TableCell>32-34</TableCell><TableCell>24-26</TableCell><TableCell>34-36</TableCell></TableRow>
+                                              <TableRow><TableCell>{t('cart.sheet.findMySize.s')}</TableCell><TableCell>34-36</TableCell><TableCell>26-28</TableCell><TableCell>36-38</TableCell></TableRow>
+                                              <TableRow><TableCell>{t('cart.sheet.findMySize.m')}</TableCell><TableCell>36-38</TableCell><TableCell>28-30</TableCell><TableCell>38-40</TableCell></TableRow>
+                                              <TableRow><TableCell>{t('cart.sheet.findMySize.l')}</TableCell><TableCell>38-40</TableCell><TableCell>30-32</TableCell><TableCell>40-42</TableCell></TableRow>
+                                              <TableRow><TableCell>{t('cart.sheet.findMySize.xl')}</TableCell><TableCell>40-42</TableCell><TableCell>32-34</TableCell><TableCell>42-44</TableCell></TableRow>
+                                            </TableBody>
+                                          </Table>
+                                          <div className='mt-4'>
+                                            <h3 className="font-semibold text-sm mb-2">{t('cart.sheet.findMySize.howToMeasure')}</h3>
+                                            <Image src="https://placehold.co/300x200.png" alt="How to measure" width={300} height={200} className="w-full h-auto rounded-md" data-ai-hint="fashion measurement guide" />
+                                          </div>
+                                        </div>
+                                      </ScrollArea>
+                                    </DialogContent>
+                                  </Dialog>
+                                </div>
                                 <div className="flex flex-wrap gap-2">
                                   {allPossibleSizes.map(size => {
                                     const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
@@ -542,6 +625,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
+
 
 
 

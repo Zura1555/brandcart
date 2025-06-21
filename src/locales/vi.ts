@@ -37,6 +37,20 @@ const viTranslations = {
         outOfStock: "Hết hàng"
       },
       selectVariantPlaceholder: "Chọn phân loại",
+      findMySize: {
+        trigger: "Tìm cỡ của bạn",
+        tableTitle: "Bảng kích cỡ",
+        howToMeasure: "Cách đo",
+        size: "Cỡ",
+        chest: "Ngực (cm)",
+        waist: "Eo (cm)",
+        hips: "Hông (cm)",
+        xs: "XS",
+        s: "S",
+        m: "M",
+        l: "L",
+        xl: "XL"
+      }
     },
     completeLook: {
       bannerText: "HOÀN THIỆN SET ĐỒ",
