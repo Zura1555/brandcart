@@ -150,19 +150,19 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   
   const allImageUrls = useMemo(() => {
     const urls = new Set<string>();
-    
+
     const variantsForSelectedColor = item.availableVariants?.filter(v => {
         if (!tempSelectedColorName) return true; // Show all if no color selected yet
         const parsed = parseVariantName(v.name);
         return parsed.color === tempSelectedColorName;
-    });
-
-    // Add the specific variant's image first if it exists
-    if (item.variant && parseVariantName(item.variant).color === tempSelectedColorName && item.imageUrl) {
-        urls.add(item.imageUrl);
+    }) || [];
+    
+    // Always add the current item's image first if its color matches the selected color, or if no color is selected yet.
+    if (item.imageUrl && (!tempSelectedColorName || parseVariantName(item.variant).color === tempSelectedColorName)) {
+      urls.add(item.imageUrl);
     }
     
-    variantsForSelectedColor?.forEach(v => {
+    variantsForSelectedColor.forEach(v => {
         if (v.imageUrl) urls.add(v.imageUrl);
     });
 
@@ -311,8 +311,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       itemCardStockStatusClasses += 'text-destructive';
     }
   }
-
-  const canOpenVariantSheet = hasAvailableVariants && item.stock !== 0;
+  
   const isOutOfStock = item.stock === 0;
 
   return (
@@ -372,206 +371,197 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
             <h3 className="font-body font-semibold text-sm sm:text-md text-foreground truncate" title={item.name}>{item.name}</h3>
             
             <div className="flex items-center space-x-2 mt-1">
-                {hasAvailableVariants ? ( 
-                    <Popover open={isVariantPopoverOpen} onOpenChange={setIsVariantPopoverOpen}>
-                      <PopoverTrigger asChild disabled={isOutOfStock || !canOpenVariantSheet}>
-                        <button 
-                          type="button" 
-                          className={cn(
-                            "text-left block hover:opacity-80 transition-opacity focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
-                            (isOutOfStock || !canOpenVariantSheet) && "cursor-not-allowed opacity-70"
-                          )}
-                          disabled={isOutOfStock || !canOpenVariantSheet}
-                        >
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                                "bg-green-600 hover:bg-green-600 text-white text-xs px-1.5 py-0.5 inline-flex items-center",
-                                (isOutOfStock || !canOpenVariantSheet) ? "cursor-not-allowed" : "cursor-pointer"
-                            )}
-                          >
-                            {showSelectVariantPlaceholder ? (
-                               <span className="italic text-white/80 truncate">{t('cart.sheet.selectVariantPlaceholder')}</span>
-                            ) : (
-                               badgeDisplayString && <span className="truncate">{badgeDisplayString}</span>
-                            )}
-                            <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
-                          </Badge>
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent side="bottom" align="start" className="w-[380px] p-0">
-                        <div className="flex flex-col max-h-[80vh]">
-                            <div className="p-4 border-b sticky top-0 bg-card z-10 flex items-center justify-center relative">
-                                <h3 className="text-lg font-semibold">{t('cart.sheet.productInfoTitle')}</h3>
-                                <Button variant="ghost" size="icon" onClick={() => setIsVariantPopoverOpen(false)} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8">
-                                    <X className="h-5 w-5" />
-                                    <span className="sr-only">Close</span>
-                                </Button>
-                            </div>
-                            
-                            <div className="flex-1 overflow-y-auto min-h-0">
-                              <div className="p-4 space-y-5">
-                                 <div>
-                                  <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrls.length > 1 }}>
-                                    <CarouselContent>
-                                      {allImageUrls.map((url, index) => (
-                                        <CarouselItem key={index}>
-                                          <div className="aspect-square relative bg-muted rounded-md">
-                                            <Image
-                                              src={url}
-                                              alt={`${item.name} image ${index + 1}`}
-                                              fill
-                                              className="rounded-md object-cover border"
-                                              sizes="(max-width: 640px) 90vw, 384px"
-                                            />
-                                          </div>
-                                        </CarouselItem>
-                                      ))}
-                                    </CarouselContent>
-                                    {allImageUrls.length > 1 && (
-                                      <>
-                                        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
-                                        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
-                                      </>
-                                    )}
-                                  </Carousel>
-                                  <div className="mt-4">
-                                    <div className="flex items-baseline justify-between">
-                                        <p className="text-xl font-bold text-foreground">{currentDisplayDetailsInSheet.price.toLocaleString('vi-VN')}₫</p>
-                                        {currentDisplayDetailsInSheet.originalPrice && (
-                                            <p className="text-sm text-muted-foreground line-through">{currentDisplayDetailsInSheet.originalPrice.toLocaleString('vi-VN')}₫</p>
-                                        )}
+              <Popover open={isVariantPopoverOpen} onOpenChange={setIsVariantPopoverOpen}>
+                <PopoverTrigger asChild disabled={isOutOfStock}>
+                  <button 
+                    type="button" 
+                    className={cn(
+                      "text-left block hover:opacity-80 transition-opacity focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
+                      isOutOfStock && "cursor-not-allowed opacity-70"
+                    )}
+                    disabled={isOutOfStock}
+                  >
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                          "bg-green-600 hover:bg-green-600 text-white text-xs px-1.5 py-0.5 inline-flex items-center",
+                          isOutOfStock ? "cursor-not-allowed" : "cursor-pointer"
+                      )}
+                    >
+                      {showSelectVariantPlaceholder ? (
+                         <span className="italic text-white/80 truncate">{t('cart.sheet.selectVariantPlaceholder')}</span>
+                      ) : (
+                         badgeDisplayString && <span className="truncate">{badgeDisplayString}</span>
+                      )}
+                      {hasAvailableVariants && <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />}
+                    </Badge>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="bottom" align="start" className="w-[380px] p-0">
+                  <div className="flex flex-col max-h-[80vh]">
+                      <div className="p-4 border-b sticky top-0 bg-card z-10 flex items-center justify-center relative">
+                          <h3 className="text-lg font-semibold">{t('cart.sheet.productInfoTitle')}</h3>
+                          <Button variant="ghost" size="icon" onClick={() => setIsVariantPopoverOpen(false)} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8">
+                              <X className="h-5 w-5" />
+                              <span className="sr-only">Close</span>
+                          </Button>
+                      </div>
+                      
+                      <div className="flex-1 overflow-y-auto min-h-0">
+                        <div className="p-4 space-y-5">
+                            <div>
+                            <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrls.length > 1 }}>
+                              <CarouselContent>
+                                {allImageUrls.map((url, index) => (
+                                  <CarouselItem key={index}>
+                                    <div className="aspect-square relative bg-muted rounded-md">
+                                      <Image
+                                        src={url}
+                                        alt={`${item.name} image ${index + 1}`}
+                                        fill
+                                        className="rounded-md object-cover border"
+                                        sizes="(max-width: 640px) 90vw, 384px"
+                                      />
                                     </div>
-                                     {stockStatusTextInSheet && (
-                                      <p className={cn(stockStatusClassesInSheet, "mt-1")}>{stockStatusTextInSheet}</p>
-                                     )}
-                                    <p className="text-base text-foreground mt-2 font-medium line-clamp-3">{item.name}</p>
+                                  </CarouselItem>
+                                ))}
+                              </CarouselContent>
+                              {allImageUrls.length > 1 && (
+                                <>
+                                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                                </>
+                              )}
+                            </Carousel>
+                            <div className="mt-4">
+                              <div className="flex items-baseline justify-between">
+                                  <p className="text-xl font-bold text-foreground">{currentDisplayDetailsInSheet.price.toLocaleString('vi-VN')}₫</p>
+                                  {currentDisplayDetailsInSheet.originalPrice && (
+                                      <p className="text-sm text-muted-foreground line-through">{currentDisplayDetailsInSheet.originalPrice.toLocaleString('vi-VN')}₫</p>
+                                  )}
+                              </div>
+                               {stockStatusTextInSheet && (
+                                <p className={cn(stockStatusClassesInSheet, "mt-1")}>{stockStatusTextInSheet}</p>
+                               )}
+                              <p className="text-base text-foreground mt-2 font-medium line-clamp-3">{item.name}</p>
+                            </div>
+                          </div>
+                          
+                          {hasAvailableVariants ? (
+                            <>
+                              {uniqueColors.length > 0 && (
+                                <div className="space-y-3">
+                                  <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {uniqueColors.map(color => {
+                                      const variantForColor = item.availableVariants?.find(v => parseVariantName(v.name).color === color);
+                                      const isSelected = tempSelectedColorName === color;
+                                      return (
+                                        <button
+                                          key={color}
+                                          type="button"
+                                          onClick={() => {
+                                            setTempSelectedColorName(color);
+                                            if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
+                                          }}
+                                          className={cn(
+                                            "flex items-center gap-2 text-left p-1 rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
+                                            isSelected ? "bg-muted border-foreground" : "bg-card border-input hover:bg-muted/50"
+                                          )}
+                                          aria-label={color}
+                                        >
+                                          <Image
+                                            src={variantForColor?.imageUrl || `https://placehold.co/40x40.png`}
+                                            alt={color}
+                                            width={24}
+                                            height={24}
+                                            className="rounded-sm object-cover border"
+                                            data-ai-hint={color.toLowerCase()}
+                                          />
+                                          <span className="text-sm font-medium pr-2">{color}</span>
+                                        </button>
+                                      );
+                                    })}
                                   </div>
                                 </div>
-                                
-                                {uniqueColors.length > 0 && (
-                                  <div className="space-y-3">
-                                    <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
-                                    <div className="flex flex-wrap gap-2">
-                                      {uniqueColors.map(color => {
-                                        const variantForColor = item.availableVariants?.find(v => parseVariantName(v.name).color === color);
-                                        const isSelected = tempSelectedColorName === color;
-                                        return (
-                                          <button
-                                            key={color}
-                                            type="button"
-                                            onClick={() => {
-                                              setTempSelectedColorName(color);
-                                              if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
-                                            }}
-                                            className={cn(
-                                              "flex items-center gap-2 text-left p-1 rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
-                                              isSelected ? "bg-muted border-foreground" : "bg-card border-input hover:bg-muted/50"
-                                            )}
-                                            aria-label={color}
-                                          >
-                                            <Image
-                                              src={variantForColor?.imageUrl || `https://placehold.co/40x40.png`}
-                                              alt={color}
-                                              width={24}
-                                              height={24}
-                                              className="rounded-sm object-cover border"
-                                              data-ai-hint={color.toLowerCase()}
-                                            />
-                                            <span className="text-sm font-medium pr-2">{color}</span>
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
+                              )}
 
-                                {allPossibleSizes.length > 0 && (
-                                   <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                      <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
-                                      <Dialog open={isSizeGuideDialogOpen} onOpenChange={setIsSizeGuideDialogOpen}>
-                                        <DialogTrigger asChild>
-                                          <Button variant="link" className="text-sm p-0 h-auto flex items-center gap-1 text-muted-foreground hover:text-foreground">
-                                            <Ruler className="w-3.5 h-3.5" />
-                                            {t('cart.sheet.findMySize.trigger')}
-                                          </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-md p-0">
-                                          <DialogHeader className="p-4 border-b">
-                                            <DialogTitle>{t('cart.sheet.findMySize.tableTitle')}</DialogTitle>
-                                          </DialogHeader>
-                                          <ScrollArea className="max-h-[70vh]">
-                                            <div className="p-4">
-                                              <Image 
-                                                src="https://file.hstatic.net/1000284478/file/mlb_new_ao_unisex_-_desktop_9701027a890a4e1d885ae36d5ce8ece7.jpg" 
-                                                alt="Size guide chart" 
-                                                width={700} 
-                                                height={1000}
-                                                className="w-full h-auto rounded-md" 
-                                                data-ai-hint="size guide" />
-                                            </div>
-                                          </ScrollArea>
-                                        </DialogContent>
-                                      </Dialog>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                      {allPossibleSizes.map(size => {
-                                        const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
-                                        const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
-                                        const isSizeInStock = variantForThisSize ? (variantForThisSize.stock === undefined || variantForThisSize.stock > 0) : true;
-                                        const isSizeDisabled = !isSizeAvailableForColor || !isSizeInStock;
-                                        const isSelected = tempSelectedSizeValue === size && !isSizeDisabled;
-                                        
-                                        return (
-                                          <Button
-                                            key={size}
-                                            type="button"
-                                            variant={isSelected ? "default" : "outline"}
-                                            size="sm"
-                                            onClick={() => {
-                                              if (!isSizeDisabled) setTempSelectedSizeValue(size);
-                                            }}
-                                            disabled={isSizeDisabled}
-                                            className={cn(
-                                              isSelected ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
-                                              isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50"
-                                            )}
-                                          >
-                                            {size}
-                                          </Button>
-                                        );
-                                      })}
-                                    </div>
+                              {allPossibleSizes.length > 0 && (
+                                 <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
+                                    <Dialog open={isSizeGuideDialogOpen} onOpenChange={setIsSizeGuideDialogOpen}>
+                                      <DialogTrigger asChild>
+                                        <Button variant="link" className="text-sm p-0 h-auto flex items-center gap-1 text-muted-foreground hover:text-foreground">
+                                          <Ruler className="w-3.5 h-3.5" />
+                                          {t('cart.sheet.findMySize.trigger')}
+                                        </Button>
+                                      </DialogTrigger>
+                                      <DialogContent className="max-w-md p-0">
+                                        <DialogHeader className="p-4 border-b">
+                                          <DialogTitle>{t('cart.sheet.findMySize.tableTitle')}</DialogTitle>
+                                        </DialogHeader>
+                                        <ScrollArea className="max-h-[70vh]">
+                                          <div className="p-4">
+                                            <Image 
+                                              src="https://file.hstatic.net/1000284478/file/mlb_new_ao_unisex_-_desktop_9701027a890a4e1d885ae36d5ce8ece7.jpg" 
+                                              alt="Size guide chart" 
+                                              width={700} 
+                                              height={1000}
+                                              className="w-full h-auto rounded-md" 
+                                              data-ai-hint="size guide" />
+                                          </div>
+                                        </ScrollArea>
+                                      </DialogContent>
+                                    </Dialog>
                                   </div>
-                                )}
-                                 {(uniqueColors.length === 0 && allPossibleSizes.length === 0 && item.availableVariants && item.availableVariants.length > 1) && (
-                                    <p className="text-sm text-muted-foreground">{t('cart.sheet.complexVariants')}</p>
-                                 )}
-                                 {(!item.availableVariants || item.availableVariants.length === 0 || (item.availableVariants.length === 1 && !uniqueColors.length && !allPossibleSizes.length)) && (
-                                    <p className="text-sm text-muted-foreground">{t('cart.sheet.noOtherVariants')}</p>
-                                 )}
-                              </div>
-                            </div>
-
-                            <div className="p-4 border-t sticky bottom-0 bg-card z-10">
-                              <Button onClick={handleConfirmVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
-                                {t('cart.sheet.updateButton')}
-                              </Button>
-                            </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {allPossibleSizes.map(size => {
+                                      const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
+                                      const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
+                                      const isSizeInStock = variantForThisSize ? (variantForThisSize.stock === undefined || variantForThisSize.stock > 0) : true;
+                                      const isSizeDisabled = !isSizeAvailableForColor || !isSizeInStock;
+                                      const isSelected = tempSelectedSizeValue === size && !isSizeDisabled;
+                                      
+                                      return (
+                                        <Button
+                                          key={size}
+                                          type="button"
+                                          variant={isSelected ? "default" : "outline"}
+                                          size="sm"
+                                          onClick={() => {
+                                            if (!isSizeDisabled) setTempSelectedSizeValue(size);
+                                          }}
+                                          disabled={isSizeDisabled}
+                                          className={cn(
+                                            isSelected ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
+                                            isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50"
+                                          )}
+                                        >
+                                          {size}
+                                        </Button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <p className="text-sm text-center text-muted-foreground py-8">{t('cart.sheet.noOtherVariants')}</p>
+                          )}
                         </div>
-                      </PopoverContent>
-                    </Popover>
-                  ) : (
-                    badgeDisplayString && !hasAvailableVariants && (
-                      <Badge
-                        variant="outline"
-                        className="bg-green-600 hover:bg-green-600 text-white text-xs px-1.5 py-0.5 inline-flex items-center"
-                      >
-                        <span className="truncate">{badgeDisplayString}</span>
-                      </Badge>
-                    )
-                )}
+                      </div>
+
+                      {hasAvailableVariants && (
+                        <div className="p-4 border-t sticky bottom-0 bg-card z-10">
+                          <Button onClick={handleConfirmVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
+                            {t('cart.sheet.updateButton')}
+                          </Button>
+                        </div>
+                      )}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="flex items-baseline space-x-2 mt-1">
