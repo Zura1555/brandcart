@@ -6,7 +6,7 @@ import type React from 'react';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, ChevronDown, X } from 'lucide-react';
+import { ShoppingBag, ChevronDown, X, Ruler, Check } from 'lucide-react';
 import type { Product, SimpleVariant } from '@/interfaces';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -20,6 +20,13 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from "@/lib/utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface RecentlyViewedItemCardProps {
   item: Product;
@@ -29,6 +36,8 @@ interface RecentlyViewedItemCardProps {
 const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, onAddToCart }) => {
   const { t } = useLanguage();
   const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
+  const [isSizeGuideDialogOpen, setIsSizeGuideDialogOpen] = useState(false);
+
 
   const cleanVariantName = useCallback((name: string | undefined): string => {
     if (!name) return '';
@@ -290,41 +299,73 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
               </div>
 
               {uniqueColors.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
-                  <div className="flex space-x-2 overflow-x-auto pb-2 -mb-2">
-                    {uniqueColors.map(color => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => {
-                          setTempSelectedColorName(color);
-                          if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
-                        }}
-                        className={cn(
-                          "rounded border p-0.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
-                          tempSelectedColorName === color ? "border-foreground border-2" : "border-muted hover:border-muted-foreground"
-                        )}
-                        aria-label={color}
-                      >
-                        <Image
-                          src={item.availableVariants?.find(v => parseVariantName(v.name).color === color)?.imageUrl || `https://placehold.co/56x56.png`}
-                          alt={color}
-                          width={56}
-                          height={56}
-                          className="rounded-sm object-cover"
-                          data-ai-hint={color.toLowerCase()}
-                        />
-                      </button>
-                    ))}
+                  <div className="space-y-2">
+                    {uniqueColors.map(color => {
+                       const variantForColor = item.availableVariants?.find(v => parseVariantName(v.name).color === color);
+                       const isSelected = tempSelectedColorName === color;
+                       return (
+                        <button
+                            key={color}
+                            type="button"
+                            onClick={() => {
+                            setTempSelectedColorName(color);
+                            if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
+                            }}
+                            className={cn(
+                                "w-full flex items-center gap-3 text-left p-2 rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
+                                isSelected ? "bg-muted border-foreground" : "bg-card border-input hover:bg-muted/50"
+                            )}
+                            aria-label={color}
+                        >
+                            <Image
+                                src={variantForColor?.imageUrl || `https://placehold.co/40x40.png`}
+                                alt={color}
+                                width={40}
+                                height={40}
+                                className="rounded-md object-cover border"
+                                data-ai-hint={color.toLowerCase()}
+                            />
+                            <span className="flex-grow text-sm font-medium">{color}</span>
+                            {isSelected && <Check className="w-5 h-5 text-foreground" />}
+                        </button>
+                       );
+                    })}
                   </div>
                 </div>
               )}
 
               {allPossibleSizes.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
+                    <Dialog open={isSizeGuideDialogOpen} onOpenChange={setIsSizeGuideDialogOpen}>
+                        <DialogTrigger asChild>
+                        <Button variant="link" className="text-sm p-0 h-auto flex items-center gap-1 text-muted-foreground hover:text-foreground">
+                            <Ruler className="w-3.5 h-3.5" />
+                            {t('cart.sheet.findMySize.trigger')}
+                        </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md p-0">
+                        <DialogHeader className="p-4 border-b">
+                            <DialogTitle>{t('cart.sheet.findMySize.tableTitle')}</DialogTitle>
+                        </DialogHeader>
+                        <ScrollArea className="max-h-[70vh]">
+                            <div className="p-4">
+                            <Image 
+                                src="https://file.hstatic.net/1000284478/file/mlb_new_ao_unisex_-_desktop_9701027a890a4e1d885ae36d5ce8ece7.jpg" 
+                                alt="Size guide chart" 
+                                width={700} 
+                                height={1000}
+                                className="w-full h-auto rounded-md" 
+                                data-ai-hint="size guide" />
+                            </div>
+                        </ScrollArea>
+                        </DialogContent>
+                    </Dialog>
+                  </div>
+                  <div className="space-y-2">
                     {allPossibleSizes.map(size => {
                       const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
                       const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
@@ -342,7 +383,7 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
                           }}
                           disabled={isSizeDisabled}
                           className={cn(
-                            "px-4 py-2 h-auto text-sm rounded",
+                            "w-full justify-start text-left py-2 h-auto text-sm rounded-md",
                             tempSelectedSizeValue === size && !isSizeDisabled ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
                             isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50"
                           )}

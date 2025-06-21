@@ -12,13 +12,21 @@ import type { CartItem, Shop, SimpleVariant, Product } from '@/interfaces';
 import ProductItem from './ProductItem';
 import BrandOfferBanner from './BrandOfferBanner'; 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChevronRight, Gift, PlusCircle, MinusCircle, ShoppingBag, ChevronDown, Minus, Plus as PlusIcon } from 'lucide-react';
+import { ChevronRight, Gift, PlusCircle, MinusCircle, ShoppingBag, ChevronDown, Minus, Plus as PlusIcon, X, Check, Ruler } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { mockRelevantProducts } from '@/lib/mockData'; 
 import { cn } from "@/lib/utils";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 
 interface RelevantProductCardProps {
@@ -32,6 +40,8 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   const formatCurrency = (amount: number) => `${amount.toLocaleString('vi-VN')}₫`;
   
   const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
+  const [isSizeGuideDialogOpen, setIsSizeGuideDialogOpen] = useState(false);
+
 
   const cleanVariantName = useCallback((name: string | undefined): string => {
     if (!name) return '';
@@ -67,8 +77,12 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
       const currentParsed = parseVariantName(selectedCylVariantDetails.variant);
       setTempSelectedColorName(currentParsed.color);
       setTempSelectedSizeValue(currentParsed.size);
+    } else {
+       // When sheet closes, update the main card display based on final selection
+      const variantToDisplay = item.availableVariants?.find(v => v.name === selectedCylVariantDetails.variant) || item;
+      setSelectedCylVariantDetails(prev => ({...prev, ...variantToDisplay}));
     }
-  }, [isVariantSheetOpen, selectedCylVariantDetails.variant, parseVariantName]);
+  }, [isVariantSheetOpen, selectedCylVariantDetails.variant, parseVariantName, item]);
 
   const uniqueColors = useMemo(() => {
     if (!item.availableVariants) return [];
@@ -122,6 +136,16 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
     originalPrice: selectedVariantInSheet?.originalPrice ?? selectedCylVariantDetails.originalPrice,
     dataAiHint: selectedVariantInSheet?.dataAiHint ?? selectedCylVariantDetails.dataAiHint,
   }), [selectedVariantInSheet, selectedCylVariantDetails]);
+  
+  const allImageUrlsInSheet = useMemo(() => {
+    if (!item.availableVariants || item.availableVariants.length === 0) {
+        return [currentDisplayDetailsInSheet.imageUrl].filter(Boolean) as string[];
+    }
+    const urls = new Set<string>();
+    if (currentDisplayDetailsInSheet.imageUrl) urls.add(currentDisplayDetailsInSheet.imageUrl);
+    item.availableVariants.forEach(v => { if (v.imageUrl) urls.add(v.imageUrl); });
+    return Array.from(urls);
+  }, [item.availableVariants, currentDisplayDetailsInSheet.imageUrl]);
 
   const availableSizesForSelectedColor = useMemo(() => {
     if (!item.availableVariants) return new Set<string>();
@@ -161,7 +185,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   const canConfirmCylSelection = !!selectedVariantInSheet && (selectedVariantInSheet.stock === undefined || selectedVariantInSheet.stock > 0);
 
   let stockStatusTextInSheet = '';
-  let stockStatusClassesInSheet = 'text-sm font-medium ';
+  let stockStatusClassesInSheet = 'text-xs font-medium ';
   if (currentDisplayDetailsInSheet.stock !== undefined) {
     if (currentDisplayDetailsInSheet.stock > 10) { stockStatusTextInSheet = t('cart.sheet.stock.inStock'); stockStatusClassesInSheet += 'text-green-600'; }
     else if (currentDisplayDetailsInSheet.stock > 0) { stockStatusTextInSheet = t('cart.sheet.stock.remaining', { count: currentDisplayDetailsInSheet.stock }); stockStatusClassesInSheet += 'text-orange-600'; }
@@ -170,7 +194,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
 
   const handleRelevantItemAddToCart = () => {
     const itemToAdd: Product = {
-      id: item.id, 
+      id: selectedCylVariantDetails.id || item.id, 
       name: selectedCylVariantDetails.name || item.name, 
       price: selectedCylVariantDetails.price || item.price,
       originalPrice: selectedCylVariantDetails.originalPrice, 
@@ -205,14 +229,14 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
               <button
                 type="button"
                 className={cn(
-                  "text-left block focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
+                  "text-left block focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring rounded-sm mt-1",
                   (isCylItemOutOfStock) && "cursor-not-allowed opacity-70"
                 )}
                 disabled={isCylItemOutOfStock}
               >
                 <Badge
                   className={cn(
-                    "text-xs mt-1 px-1.5 py-0.5 inline-flex items-center bg-black text-white hover:bg-neutral-800",
+                    "text-xs px-1.5 py-0.5 inline-flex items-center bg-black text-white hover:bg-neutral-800",
                     (isCylItemOutOfStock) ? "cursor-not-allowed" : "cursor-pointer"
                   )}
                 >
@@ -228,57 +252,119 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
             <SheetContent side="bottom" className="rounded-t-lg p-0 flex flex-col max-h-[85vh] sm:max-h-[80vh]">
               <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10">
                 <SheetTitle className="text-lg text-center font-semibold">{t('cart.sheet.productInfoTitle')}</SheetTitle>
+                 <SheetClose className="absolute right-2 top-1/2 -translate-y-1/2 p-2">
+                    <X className="h-5 w-5" />
+                    <span className="sr-only">Close</span>
+                </SheetClose>
               </SheetHeader>
               <ScrollArea className="flex-grow">
                 <div className="p-4 space-y-5">
-                  <div className="flex items-start space-x-3">
-                    <Image
-                      src={currentDisplayDetailsInSheet.imageUrl}
-                      alt={item.name}
-                      width={88}
-                      height={88}
-                      className="rounded-md object-cover w-20 h-20 sm:w-24 sm:h-24 border flex-shrink-0"
-                      data-ai-hint={currentDisplayDetailsInSheet.dataAiHint || "product image"}
-                    />
-                    <div className="flex-grow min-w-0">
-                      {item.brand && <p className="text-sm font-semibold text-foreground">{parentShopBrand}</p>}
-                      <p className="text-sm text-foreground mt-0.5 line-clamp-2">{item.name}</p>
-                      <div className="flex items-baseline space-x-2 mt-1">
-                          <p className="text-lg font-bold text-foreground">{formatCurrency(currentDisplayDetailsInSheet.price || 0)}</p>
-                          {stockStatusTextInSheet && (<> <span className="text-sm text-muted-foreground">|</span> <span className={stockStatusClassesInSheet}>{stockStatusTextInSheet}</span> </>)}
-                      </div>
-                       <div className="flex items-center space-x-2 text-lg text-foreground mt-2 opacity-50">
-                          <Button variant="outline" size="icon" className="h-7 w-7" disabled><Minus className="h-4 w-4" /></Button>
-                          <span className="font-semibold tabular-nums">1</span>
-                          <Button variant="outline" size="icon" className="h-7 w-7" disabled><PlusIcon className="h-4 w-4" /></Button>
+                    <div>
+                        <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrlsInSheet.length > 1 }}>
+                            <CarouselContent>
+                                {allImageUrlsInSheet.map((url, index) => (
+                                    <CarouselItem key={index}>
+                                    <div className="aspect-square relative bg-muted rounded-md">
+                                        <Image
+                                        src={url}
+                                        alt={`${item.name} image ${index + 1}`}
+                                        fill
+                                        className="rounded-md object-cover border"
+                                        sizes="(max-width: 640px) 90vw, 384px"
+                                        />
+                                    </div>
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            {allImageUrlsInSheet.length > 1 && (
+                            <>
+                                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                            </>
+                            )}
+                        </Carousel>
+                        <div className="mt-4">
+                            <div className="flex items-baseline justify-between">
+                                <p className="text-xl font-bold text-foreground">{formatCurrency(currentDisplayDetailsInSheet.price || 0)}</p>
+                                {currentDisplayDetailsInSheet.originalPrice && (
+                                    <p className="text-sm text-muted-foreground line-through">{formatCurrency(currentDisplayDetailsInSheet.originalPrice)}</p>
+                                )}
+                            </div>
+                            {stockStatusTextInSheet && (
+                                <p className={cn(stockStatusClassesInSheet, "mt-1")}>{stockStatusTextInSheet}</p>
+                            )}
+                            <p className="text-base text-foreground mt-2 font-medium line-clamp-3">{item.name}</p>
                         </div>
                     </div>
-                  </div>
+                  
                   {uniqueColors.length > 0 && (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
-                      <div className="flex space-x-2 overflow-x-auto pb-2 -mb-2">
-                        {uniqueColors.map(color => (
-                          <button key={color} type="button" onClick={() => { setTempSelectedColorName(color); if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null); }}
-                            className={cn("rounded border p-0.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background", tempSelectedColorName === color ? "border-foreground border-2" : "border-muted hover:border-muted-foreground")}
-                            aria-label={color}
-                          ><Image src={ item.availableVariants?.find(v => parseVariantName(v.name).color === color)?.imageUrl || `https://placehold.co/56x56.png`} alt={color} width={56} height={56} className="rounded-sm object-cover" data-ai-hint={color.toLowerCase()} /></button>
-                        ))}
+                      <div className="space-y-2">
+                        {uniqueColors.map(color => {
+                          const variantForColor = item.availableVariants?.find(v => parseVariantName(v.name).color === color);
+                          const isSelected = tempSelectedColorName === color;
+                          return (
+                            <button
+                                key={color}
+                                type="button"
+                                onClick={() => { setTempSelectedColorName(color); if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null); }}
+                                className={cn(
+                                    "w-full flex items-center gap-3 text-left p-2 rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
+                                    isSelected ? "bg-muted border-foreground" : "bg-card border-input hover:bg-muted/50"
+                                )}
+                                aria-label={color}
+                            >
+                                <Image src={ variantForColor?.imageUrl || `https://placehold.co/40x40.png`} alt={color} width={40} height={40} className="rounded-md object-cover border" data-ai-hint={color.toLowerCase()} />
+                                <span className="flex-grow text-sm font-medium">{color}</span>
+                                {isSelected && <Check className="w-5 h-5 text-foreground" />}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
+
                   {allPossibleSizes.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
+                         <Dialog open={isSizeGuideDialogOpen} onOpenChange={setIsSizeGuideDialogOpen}>
+                            <DialogTrigger asChild>
+                            <Button variant="link" className="text-sm p-0 h-auto flex items-center gap-1 text-muted-foreground hover:text-foreground">
+                                <Ruler className="w-3.5 h-3.5" />
+                                {t('cart.sheet.findMySize.trigger')}
+                            </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md p-0">
+                            <DialogHeader className="p-4 border-b">
+                                <DialogTitle>{t('cart.sheet.findMySize.tableTitle')}</DialogTitle>
+                            </DialogHeader>
+                            <ScrollArea className="max-h-[70vh]">
+                                <div className="p-4">
+                                <Image 
+                                    src="https://file.hstatic.net/1000284478/file/mlb_new_ao_unisex_-_desktop_9701027a890a4e1d885ae36d5ce8ece7.jpg" 
+                                    alt="Size guide chart" 
+                                    width={700} 
+                                    height={1000}
+                                    className="w-full h-auto rounded-md" 
+                                    data-ai-hint="size guide" />
+                                </div>
+                            </ScrollArea>
+                            </DialogContent>
+                        </Dialog>
+                      </div>
+                      <div className="space-y-2">
                         {allPossibleSizes.map(size => {
                           const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
                           const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
                           const isSizeInStock = variantForThisSize ? (variantForThisSize.stock === undefined || variantForThisSize.stock > 0) : true;
                           const isSizeDisabled = !isSizeAvailableForColor || !isSizeInStock;
-                          return (<Button key={size} type="button" variant={tempSelectedSizeValue === size && !isSizeDisabled ? "default" : "outline"} size="sm" onClick={() => { if (!isSizeDisabled) setTempSelectedSizeValue(size); }} disabled={isSizeDisabled}
-                            className={cn("px-4 py-2 h-auto text-sm rounded", tempSelectedSizeValue === size && !isSizeDisabled ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted", isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50")}
-                          >{size}</Button>);
+                          return (
+                            <Button key={size} type="button" variant={tempSelectedSizeValue === size && !isSizeDisabled ? "default" : "outline"} size="sm" onClick={() => { if (!isSizeDisabled) setTempSelectedSizeValue(size); }} disabled={isSizeDisabled}
+                                className={cn("w-full justify-start text-left py-2 h-auto text-sm rounded-md", tempSelectedSizeValue === size && !isSizeDisabled ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted", isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50")}
+                            >{size}</Button>
+                          );
                         })}
                       </div>
                     </div>
@@ -300,7 +386,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
       <Button
         size="icon"
         variant="outline"
-        className="text-foreground hover:bg-primary hover:text-primary-foreground border-foreground/50 hover:border-primary ml-auto"
+        className="text-foreground hover:bg-primary hover:text-primary-foreground border-foreground/50 hover:border-primary ml-auto flex-shrink-0 w-9 h-9"
         onClick={handleRelevantItemAddToCart}
         disabled={isCylItemOutOfStock}
         aria-label={t('cart.addToCartLabel', { itemName: selectedCylVariantDetails.name || item.name })}
@@ -466,4 +552,3 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
 };
 
 export default ShopSection;
-

@@ -449,39 +449,45 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                             </div>
                             
                             {uniqueColors.length > 0 && (
-                              <div className="space-y-2">
+                              <div className="space-y-3">
                                 <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
-                                <div className="flex space-x-2 overflow-x-auto pb-2 -mb-2">
-                                  {uniqueColors.map(color => (
-                                    <button
-                                      key={color}
-                                      type="button"
-                                      onClick={() => {
-                                        setTempSelectedColorName(color);
-                                        if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
-                                      }}
-                                      className={cn(
-                                        "rounded border p-0.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
-                                        tempSelectedColorName === color ? "border-foreground border-2" : "border-muted hover:border-muted-foreground"
-                                      )}
-                                      aria-label={color}
-                                    >
-                                      <Image
-                                        src={item.availableVariants?.find(v => parseVariantName(v.name).color === color)?.imageUrl || `https://placehold.co/56x56.png`}
-                                        alt={color}
-                                        width={56}
-                                        height={56}
-                                        className="rounded-sm object-cover"
-                                        data-ai-hint={color.toLowerCase()}
-                                      />
-                                    </button>
-                                  ))}
+                                <div className="space-y-2">
+                                  {uniqueColors.map(color => {
+                                    const variantForColor = item.availableVariants?.find(v => parseVariantName(v.name).color === color);
+                                    const isSelected = tempSelectedColorName === color;
+                                    return (
+                                      <button
+                                        key={color}
+                                        type="button"
+                                        onClick={() => {
+                                          setTempSelectedColorName(color);
+                                          if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
+                                        }}
+                                        className={cn(
+                                          "w-full flex items-center gap-3 text-left p-2 rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
+                                          isSelected ? "bg-muted border-foreground" : "bg-card border-input hover:bg-muted/50"
+                                        )}
+                                        aria-label={color}
+                                      >
+                                        <Image
+                                          src={variantForColor?.imageUrl || `https://placehold.co/40x40.png`}
+                                          alt={color}
+                                          width={40}
+                                          height={40}
+                                          className="rounded-md object-cover border"
+                                          data-ai-hint={color.toLowerCase()}
+                                        />
+                                        <span className="flex-grow text-sm font-medium">{color}</span>
+                                        {isSelected && <Check className="w-5 h-5 text-foreground" />}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}
 
                             {allPossibleSizes.length > 0 && (
-                               <div className="space-y-2">
+                               <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                   <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
                                   <Dialog open={isSizeGuideDialogOpen} onOpenChange={setIsSizeGuideDialogOpen}>
@@ -509,7 +515,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                     </DialogContent>
                                   </Dialog>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="space-y-2">
                                   {allPossibleSizes.map(size => {
                                     const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
                                     const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
@@ -527,7 +533,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                         }}
                                         disabled={isSizeDisabled}
                                         className={cn(
-                                          "px-4 py-2 h-auto text-sm rounded",
+                                          "w-full justify-start text-left py-2 h-auto text-sm rounded-md",
                                           tempSelectedSizeValue === size && !isSizeDisabled ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
                                           isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50"
                                         )}
