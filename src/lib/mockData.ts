@@ -78,7 +78,7 @@ export const mockShops: Shop[] = [
           { id: 'puma2-wb-36', name: 'White/Black, 36', stock: 2, price: 2029000, imageUrl: 'https://product.hstatic.net/1000284478/product/01_381983_1_3c4e2d98f965469684fff0015d8220b4_large.jpg', dataAiHint: 'sneakers white' },
           { id: 'puma2-wb-37', name: 'White/Black, 37', stock: 0, price: 2029000, imageUrl: 'https://product.hstatic.net/1000284478/product/01_381983_1_3c4e2d98f965469684fff0015d8220b4_large.jpg', dataAiHint: 'sneakers white' },
           { id: 'puma2-wb-38', name: 'White/Black, 38', stock: 3, price: 2029000, imageUrl: 'https://product.hstatic.net/1000284478/product/01_381983_1_3c4e2d98f965469684fff0015d8220b4_large.jpg', dataAiHint: 'sneakers white' },
-          { id: 'puma2-pink-37', name: 'Pink, 37', stock: 11, price: 2129000, imageUrl: 'https://placehold.co/80x80.png', dataAiHint: 'sneakers pink' },
+          { id: 'puma2-pink-37', name: 'Pink, 37', stock: 11, price: 2129000, imageUrl: 'https://placehold.co/250x250/F8C8DC/333333.png', dataAiHint: 'sneakers pink' },
         ],
       },
       {
@@ -94,9 +94,9 @@ export const mockShops: Shop[] = [
         discountDescription: '-50%',
         stock: 0,
         availableVariants: [
-            {id: 'puma3-og', name: 'Olive Green (+14)', stock: 0, price: 299000},
-            {id: 'puma3-bk', name: 'Black', stock: 18, price: 299000},
-            {id: 'puma3-wh', name: 'White', stock: 6, price: 299000},
+            {id: 'puma3-og', name: 'Olive Green (+14)', stock: 0, price: 299000, imageUrl: 'https://product.hstatic.net/1000284478/product/11_021269_1_096b4a3c4511424abd1f10b5bcf1c550_large.jpg', dataAiHint: 'cap olivegreen'},
+            {id: 'puma3-bk', name: 'Black', stock: 18, price: 299000, imageUrl: 'https://placehold.co/250x250/333333/FFFFFF.png', dataAiHint: 'cap black'},
+            {id: 'puma3-wh', name: 'White', stock: 6, price: 299000, imageUrl: 'https://placehold.co/250x250/FFFFFF/333333.png', dataAiHint: 'cap white'},
         ]
       },
     ],
@@ -118,9 +118,9 @@ export const mockShops: Shop[] = [
         variant: 'Disney print (+12)',
         stock: 30,
         availableVariants: [
-            {id: 'havaianas1-disney-38', name: 'Disney print, 38 (+12)', stock: 10, price: 599000},
-            {id: 'havaianas1-disney-39', name: 'Disney print, 39 (+12)', stock: 12, price: 599000},
-            {id: 'havaianas1-blue-38', name: 'Blue, 38', stock: 0, price: 550000},
+            {id: 'havaianas1-disney-38', name: 'Disney print, 38 (+12)', stock: 10, price: 599000, imageUrl: 'https://product.hstatic.net/1000284478/product/1056_4139412_1_ca507b2857b441dd90324dd1f97bc876_large.jpg', dataAiHint: 'flipflops white red'},
+            {id: 'havaianas1-disney-39', name: 'Disney print, 39 (+12)', stock: 12, price: 599000, imageUrl: 'https://product.hstatic.net/1000284478/product/1056_4139412_1_ca507b2857b441dd90324dd1f97bc876_large.jpg', dataAiHint: 'flipflops white red'},
+            {id: 'havaianas1-blue-38', name: 'Blue, 38', stock: 0, price: 550000, imageUrl: 'https://placehold.co/250x250/ADD8E6/333333.png', dataAiHint: 'flipflops blue'},
         ]
       },
       {
@@ -200,8 +200,8 @@ export const mockRelevantProducts: Product[] = [
     stock: 15,
     variant: 'Red',
     availableVariants: [
-        {id: 'bottle-red', name: 'Red', stock: 8, price: 320000},
-        {id: 'bottle-blue', name: 'Blue', stock: 7, price: 320000},
+        {id: 'bottle-red', name: 'Red', stock: 8, price: 320000, imageUrl: 'https://placehold.co/250x250/FF0000/FFFFFF.png', dataAiHint: 'bottle red'},
+        {id: 'bottle-blue', name: 'Blue', stock: 7, price: 320000, imageUrl: 'https://placehold.co/250x250/0000FF/FFFFFF.png', dataAiHint: 'bottle blue'},
     ]
   },
    {
