@@ -32,6 +32,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 const CHECKOUT_ITEMS_STORAGE_KEY = 'checkoutItems';
 const SELECTED_VOUCHER_COUNT_KEY = 'selectedVoucherUserCount';
 const SELECTED_VOUCHERS_DETAILS_KEY = 'selectedVouchersDetails';
+const FINAL_ORDER_DETAILS_KEY = 'finalOrderDetailsForPayment';
 
 
 interface VoucherInterface {
@@ -398,6 +399,7 @@ const BrandCartPage = () => {
     const selectedCartItems = cartItems.filter(item => item.selected && item.stock !== 0);
     if (selectedCartItems.length > 0) {
       if (typeof window !== 'undefined') {
+        localStorage.removeItem(FINAL_ORDER_DETAILS_KEY); // Clear previous successful order
         localStorage.setItem(CHECKOUT_ITEMS_STORAGE_KEY, JSON.stringify(selectedCartItems));
       }
       router.push('/checkout');

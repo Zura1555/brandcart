@@ -103,9 +103,9 @@ const PaymentSuccessPage = () => {
             date: dateFormatted,
           });
           
-          localStorage.removeItem(FINAL_ORDER_DETAILS_KEY);
-          localStorage.removeItem(CHECKOUT_ITEMS_STORAGE_KEY);
-          localStorage.removeItem(SELECTED_VOUCHERS_DETAILS_KEY);
+          // NOTE: Do not remove localStorage items here.
+          // This allows the page to be refreshed without losing state.
+          // Cleanup is now handled when starting a new checkout.
 
         } else {
           throw new Error("Parsed order details are invalid or items are missing.");
@@ -117,7 +117,7 @@ const PaymentSuccessPage = () => {
       }
     } else {
       console.warn("No final order details found in localStorage.");
-      toast({ title: t('paymentSuccess.toast.errorProcessingOrder.title'), description: t('paymentSuccess.toast.missingOrderData.description'), variant: 'destructive' });
+      toast({ title: t('paymentSuccess.toast.missingOrderData.title'), description: t('paymentSuccess.toast.missingOrderData.description'), variant: 'destructive' });
       if (router.pathname === '/payment') router.replace('/');
     }
     setIsLoading(false);
