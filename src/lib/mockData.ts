@@ -259,15 +259,15 @@ export const newRecentlyViewedProducts: Product[] = [
     name: 'Giày sandals cao gót nữ Lock Yourself',
     price: 29000000,
     brand: 'DSQUARED2',
-    imageUrl: 'https://placehold.co/250x250/FFD700/333333.png', // Main image
-    thumbnailImageUrl: 'https://placehold.co/150x150/FFD700/333333.png', // Thumbnail
-    dataAiHint: 'heels gold',
+    imageUrl: 'https://product.hstatic.net/1000284478/product/2124_hsw0257_1_19d5071d605342399ef37a6178a75438_medium.jpg', // Main image
+    thumbnailImageUrl: 'https://product.hstatic.net/1000284478/product/2124_hsw0257_1_19d5071d605342399ef37a6178a75438_medium.jpg', // Thumbnail
+    dataAiHint: 'heels silver',
     productCode: 'DSQ001',
     variant: 'Gold, 38',
     stock: 3,
     availableVariants: [
-      { id: 'dsquared1-gd-37', name: 'Gold, 37', stock: 2, price: 29000000, imageUrl: 'https://placehold.co/250x250/FFD700/333333.png', dataAiHint: 'heels gold' },
-      { id: 'dsquared1-gd-38', name: 'Gold, 38', stock: 3, price: 29000000, imageUrl: 'https://placehold.co/250x250/FFD700/333333.png', dataAiHint: 'heels gold' },
+      { id: 'dsquared1-gd-37', name: 'Gold, 37', stock: 2, price: 29000000, imageUrl: 'https://product.hstatic.net/1000284478/product/2124_hsw0257_1_19d5071d605342399ef37a6178a75438_medium.jpg', dataAiHint: 'heels silver' },
+      { id: 'dsquared1-gd-38', name: 'Gold, 38', stock: 3, price: 29000000, imageUrl: 'https://product.hstatic.net/1000284478/product/2124_hsw0257_1_19d5071d605342399ef37a6178a75438_medium.jpg', dataAiHint: 'heels silver' },
       { id: 'dsquared1-sl-38', name: 'Silver, 38', stock: 0, price: 29000000, imageUrl: 'https://placehold.co/250x250/C0C0C0/333333.png', dataAiHint: 'heels silver' },
     ],
     discountDescription: 'Limited Edition',
