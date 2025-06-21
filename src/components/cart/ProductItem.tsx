@@ -10,15 +10,7 @@ import type { CartItem, SimpleVariant, Product } from '@/interfaces';
 import QuantitySelector from './QuantitySelector';
 import { Check, Trash2, ChevronDown, Minus, Plus, X, Ruler } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -54,7 +46,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const initialTranslateXRef = useRef(0);
   const swipeableContentRef = useRef<HTMLDivElement>(null);
 
-  const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
+  const [isVariantPopoverOpen, setIsVariantPopoverOpen] = useState(false);
   const [isSizeGuideDialogOpen, setIsSizeGuideDialogOpen] = useState(false);
   
 
@@ -81,12 +73,12 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   const [tempSelectedSizeValue, setTempSelectedSizeValue] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isVariantSheetOpen) {
+    if (isVariantPopoverOpen) {
       const currentParsed = parseVariantName(item.variant);
       setTempSelectedColorName(currentParsed.color);
       setTempSelectedSizeValue(currentParsed.size);
     }
-  }, [isVariantSheetOpen, item.variant, parseVariantName]);
+  }, [isVariantPopoverOpen, item.variant, parseVariantName]);
 
   const uniqueColors = useMemo(() => {
     if (!item.availableVariants) return [];
@@ -158,37 +150,28 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
   
   const allImageUrls = useMemo(() => {
     const urls = new Set<string>();
-
-    if (!item.availableVariants || item.availableVariants.length === 0) {
-        if (item.imageUrl) urls.add(item.imageUrl);
-        return Array.from(urls);
-    }
     
-    const { color: currentItemColor } = parseVariantName(item.variant);
-    if (tempSelectedColorName && tempSelectedColorName === currentItemColor && item.imageUrl) {
-      urls.add(item.imageUrl);
-    }
-
-    if (selectedVariantInSheet?.imageUrl) {
-        urls.add(selectedVariantInSheet.imageUrl);
-    }
-
-    const variantsToScan = tempSelectedColorName
-        ? item.availableVariants.filter(v => parseVariantName(v.name).color === tempSelectedColorName)
-        : item.availableVariants;
-        
-    variantsToScan.forEach(v => {
-        if (v.imageUrl) {
-            urls.add(v.imageUrl);
-        }
+    const variantsForSelectedColor = item.availableVariants?.filter(v => {
+        if (!tempSelectedColorName) return true; // Show all if no color selected yet
+        const parsed = parseVariantName(v.name);
+        return parsed.color === tempSelectedColorName;
     });
+
+    // Add the specific variant's image first if it exists
+    if (item.variant && parseVariantName(item.variant).color === tempSelectedColorName && item.imageUrl) {
+        urls.add(item.imageUrl);
+    }
     
+    variantsForSelectedColor?.forEach(v => {
+        if (v.imageUrl) urls.add(v.imageUrl);
+    });
+
     if (urls.size === 0 && item.imageUrl) {
         urls.add(item.imageUrl);
     }
 
     return Array.from(urls);
-  }, [item.availableVariants, item.imageUrl, item.variant, tempSelectedColorName, parseVariantName, selectedVariantInSheet]);
+  }, [item.availableVariants, item.imageUrl, item.variant, tempSelectedColorName, parseVariantName]);
   
   const availableSizesForSelectedColor = useMemo(() => {
     if (!item.availableVariants) return new Set<string>();
@@ -269,7 +252,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     if (selectedVariantInSheet) {
       onVariantChange(item.cartItemId, selectedVariantInSheet);
     }
-    setIsVariantSheetOpen(false);
+    setIsVariantPopoverOpen(false);
   };
 
   const hasAvailableVariants = item.availableVariants && item.availableVariants.length > 0;
@@ -390,8 +373,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
             
             <div className="flex items-center space-x-2 mt-1">
                 {hasAvailableVariants ? ( 
-                    <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
-                      <SheetTrigger asChild disabled={isOutOfStock || !canOpenVariantSheet}>
+                    <Popover open={isVariantPopoverOpen} onOpenChange={setIsVariantPopoverOpen}>
+                      <PopoverTrigger asChild disabled={isOutOfStock || !canOpenVariantSheet}>
                         <button 
                           type="button" 
                           className={cn(
@@ -415,168 +398,170 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                             <ChevronDown className="w-3 h-3 ml-1 opacity-80 flex-shrink-0" />
                           </Badge>
                         </button>
-                      </SheetTrigger>
-                      <SheetContent side="bottom" className="rounded-t-lg p-0 flex flex-col max-h-[85vh] sm:max-h-[80vh]">
-                        <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10">
-                           <SheetTitle className="text-lg text-center font-semibold">{t('cart.sheet.productInfoTitle')}</SheetTitle>
-                            <SheetClose className="absolute right-2 top-1/2 -translate-y-1/2 p-2">
-                                <X className="h-5 w-5" />
-                                <span className="sr-only">Close</span>
-                            </SheetClose>
-                        </SheetHeader>
-
-                        <div className="flex-1 overflow-y-auto min-h-0">
-                          <div className="p-4 space-y-5">
-                             <div>
-                              <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrls.length > 1 }}>
-                                <CarouselContent>
-                                  {allImageUrls.map((url, index) => (
-                                    <CarouselItem key={index}>
-                                      <div className="aspect-square relative bg-muted rounded-md">
-                                        <Image
-                                          src={url}
-                                          alt={`${item.name} image ${index + 1}`}
-                                          fill
-                                          className="rounded-md object-cover border"
-                                          sizes="(max-width: 640px) 90vw, 384px"
-                                        />
-                                      </div>
-                                    </CarouselItem>
-                                  ))}
-                                </CarouselContent>
-                                {allImageUrls.length > 1 && (
-                                  <>
-                                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
-                                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
-                                  </>
-                                )}
-                              </Carousel>
-                              <div className="mt-4">
-                                <div className="flex items-baseline justify-between">
-                                    <p className="text-xl font-bold text-foreground">{currentDisplayDetailsInSheet.price.toLocaleString('vi-VN')}₫</p>
-                                    {currentDisplayDetailsInSheet.originalPrice && (
-                                        <p className="text-sm text-muted-foreground line-through">{currentDisplayDetailsInSheet.originalPrice.toLocaleString('vi-VN')}₫</p>
-                                    )}
-                                </div>
-                                 {stockStatusTextInSheet && (
-                                  <p className={cn(stockStatusClassesInSheet, "mt-1")}>{stockStatusTextInSheet}</p>
-                                 )}
-                                <p className="text-base text-foreground mt-2 font-medium line-clamp-3">{item.name}</p>
-                              </div>
+                      </PopoverTrigger>
+                      <PopoverContent side="bottom" align="start" className="w-[380px] p-0">
+                        <div className="flex flex-col max-h-[80vh]">
+                            <div className="p-4 border-b sticky top-0 bg-card z-10 flex items-center justify-center relative">
+                                <h3 className="text-lg font-semibold">{t('cart.sheet.productInfoTitle')}</h3>
+                                <Button variant="ghost" size="icon" onClick={() => setIsVariantPopoverOpen(false)} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8">
+                                    <X className="h-5 w-5" />
+                                    <span className="sr-only">Close</span>
+                                </Button>
                             </div>
                             
-                            {uniqueColors.length > 0 && (
-                              <div className="space-y-3">
-                                <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {uniqueColors.map(color => {
-                                    const variantForColor = item.availableVariants?.find(v => parseVariantName(v.name).color === color);
-                                    const isSelected = tempSelectedColorName === color;
-                                    return (
-                                      <button
-                                        key={color}
-                                        type="button"
-                                        onClick={() => {
-                                          setTempSelectedColorName(color);
-                                          if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
-                                        }}
-                                        className={cn(
-                                          "flex items-center gap-2 text-left p-1 rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
-                                          isSelected ? "bg-muted border-foreground" : "bg-card border-input hover:bg-muted/50"
+                            <div className="flex-1 overflow-y-auto min-h-0">
+                              <div className="p-4 space-y-5">
+                                 <div>
+                                  <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrls.length > 1 }}>
+                                    <CarouselContent>
+                                      {allImageUrls.map((url, index) => (
+                                        <CarouselItem key={index}>
+                                          <div className="aspect-square relative bg-muted rounded-md">
+                                            <Image
+                                              src={url}
+                                              alt={`${item.name} image ${index + 1}`}
+                                              fill
+                                              className="rounded-md object-cover border"
+                                              sizes="(max-width: 640px) 90vw, 384px"
+                                            />
+                                          </div>
+                                        </CarouselItem>
+                                      ))}
+                                    </CarouselContent>
+                                    {allImageUrls.length > 1 && (
+                                      <>
+                                        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                                        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                                      </>
+                                    )}
+                                  </Carousel>
+                                  <div className="mt-4">
+                                    <div className="flex items-baseline justify-between">
+                                        <p className="text-xl font-bold text-foreground">{currentDisplayDetailsInSheet.price.toLocaleString('vi-VN')}₫</p>
+                                        {currentDisplayDetailsInSheet.originalPrice && (
+                                            <p className="text-sm text-muted-foreground line-through">{currentDisplayDetailsInSheet.originalPrice.toLocaleString('vi-VN')}₫</p>
                                         )}
-                                        aria-label={color}
-                                      >
-                                        <Image
-                                          src={variantForColor?.imageUrl || `https://placehold.co/40x40.png`}
-                                          alt={color}
-                                          width={24}
-                                          height={24}
-                                          className="rounded-sm object-cover border"
-                                          data-ai-hint={color.toLowerCase()}
-                                        />
-                                        <span className="text-sm font-medium pr-2">{color}</span>
-                                      </button>
-                                    );
-                                  })}
+                                    </div>
+                                     {stockStatusTextInSheet && (
+                                      <p className={cn(stockStatusClassesInSheet, "mt-1")}>{stockStatusTextInSheet}</p>
+                                     )}
+                                    <p className="text-base text-foreground mt-2 font-medium line-clamp-3">{item.name}</p>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                                
+                                {uniqueColors.length > 0 && (
+                                  <div className="space-y-3">
+                                    <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {uniqueColors.map(color => {
+                                        const variantForColor = item.availableVariants?.find(v => parseVariantName(v.name).color === color);
+                                        const isSelected = tempSelectedColorName === color;
+                                        return (
+                                          <button
+                                            key={color}
+                                            type="button"
+                                            onClick={() => {
+                                              setTempSelectedColorName(color);
+                                              if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
+                                            }}
+                                            className={cn(
+                                              "flex items-center gap-2 text-left p-1 rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
+                                              isSelected ? "bg-muted border-foreground" : "bg-card border-input hover:bg-muted/50"
+                                            )}
+                                            aria-label={color}
+                                          >
+                                            <Image
+                                              src={variantForColor?.imageUrl || `https://placehold.co/40x40.png`}
+                                              alt={color}
+                                              width={24}
+                                              height={24}
+                                              className="rounded-sm object-cover border"
+                                              data-ai-hint={color.toLowerCase()}
+                                            />
+                                            <span className="text-sm font-medium pr-2">{color}</span>
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
 
-                            {allPossibleSizes.length > 0 && (
-                               <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
-                                  <Dialog open={isSizeGuideDialogOpen} onOpenChange={setIsSizeGuideDialogOpen}>
-                                    <DialogTrigger asChild>
-                                      <Button variant="link" className="text-sm p-0 h-auto flex items-center gap-1 text-muted-foreground hover:text-foreground">
-                                        <Ruler className="w-3.5 h-3.5" />
-                                        {t('cart.sheet.findMySize.trigger')}
-                                      </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-md p-0">
-                                      <DialogHeader className="p-4 border-b">
-                                        <DialogTitle>{t('cart.sheet.findMySize.tableTitle')}</DialogTitle>
-                                      </DialogHeader>
-                                      <ScrollArea className="max-h-[70vh]">
-                                        <div className="p-4">
-                                          <Image 
-                                            src="https://file.hstatic.net/1000284478/file/mlb_new_ao_unisex_-_desktop_9701027a890a4e1d885ae36d5ce8ece7.jpg" 
-                                            alt="Size guide chart" 
-                                            width={700} 
-                                            height={1000}
-                                            className="w-full h-auto rounded-md" 
-                                            data-ai-hint="size guide" />
-                                        </div>
-                                      </ScrollArea>
-                                    </DialogContent>
-                                  </Dialog>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                  {allPossibleSizes.map(size => {
-                                    const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
-                                    const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
-                                    const isSizeInStock = variantForThisSize ? (variantForThisSize.stock === undefined || variantForThisSize.stock > 0) : true;
-                                    const isSizeDisabled = !isSizeAvailableForColor || !isSizeInStock;
-                                    const isSelected = tempSelectedSizeValue === size && !isSizeDisabled;
-                                    
-                                    return (
-                                      <Button
-                                        key={size}
-                                        type="button"
-                                        variant={isSelected ? "default" : "outline"}
-                                        size="sm"
-                                        onClick={() => {
-                                          if (!isSizeDisabled) setTempSelectedSizeValue(size);
-                                        }}
-                                        disabled={isSizeDisabled}
-                                        className={cn(
-                                          isSelected ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
-                                          isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50"
-                                        )}
-                                      >
-                                        {size}
-                                      </Button>
-                                    );
-                                  })}
-                                </div>
+                                {allPossibleSizes.length > 0 && (
+                                   <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                      <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectSize')}</p>
+                                      <Dialog open={isSizeGuideDialogOpen} onOpenChange={setIsSizeGuideDialogOpen}>
+                                        <DialogTrigger asChild>
+                                          <Button variant="link" className="text-sm p-0 h-auto flex items-center gap-1 text-muted-foreground hover:text-foreground">
+                                            <Ruler className="w-3.5 h-3.5" />
+                                            {t('cart.sheet.findMySize.trigger')}
+                                          </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-md p-0">
+                                          <DialogHeader className="p-4 border-b">
+                                            <DialogTitle>{t('cart.sheet.findMySize.tableTitle')}</DialogTitle>
+                                          </DialogHeader>
+                                          <ScrollArea className="max-h-[70vh]">
+                                            <div className="p-4">
+                                              <Image 
+                                                src="https://file.hstatic.net/1000284478/file/mlb_new_ao_unisex_-_desktop_9701027a890a4e1d885ae36d5ce8ece7.jpg" 
+                                                alt="Size guide chart" 
+                                                width={700} 
+                                                height={1000}
+                                                className="w-full h-auto rounded-md" 
+                                                data-ai-hint="size guide" />
+                                            </div>
+                                          </ScrollArea>
+                                        </DialogContent>
+                                      </Dialog>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {allPossibleSizes.map(size => {
+                                        const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
+                                        const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
+                                        const isSizeInStock = variantForThisSize ? (variantForThisSize.stock === undefined || variantForThisSize.stock > 0) : true;
+                                        const isSizeDisabled = !isSizeAvailableForColor || !isSizeInStock;
+                                        const isSelected = tempSelectedSizeValue === size && !isSizeDisabled;
+                                        
+                                        return (
+                                          <Button
+                                            key={size}
+                                            type="button"
+                                            variant={isSelected ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => {
+                                              if (!isSizeDisabled) setTempSelectedSizeValue(size);
+                                            }}
+                                            disabled={isSizeDisabled}
+                                            className={cn(
+                                              isSelected ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
+                                              isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50"
+                                            )}
+                                          >
+                                            {size}
+                                          </Button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                                 {(uniqueColors.length === 0 && allPossibleSizes.length === 0 && item.availableVariants && item.availableVariants.length > 1) && (
+                                    <p className="text-sm text-muted-foreground">{t('cart.sheet.complexVariants')}</p>
+                                 )}
+                                 {(!item.availableVariants || item.availableVariants.length === 0 || (item.availableVariants.length === 1 && !uniqueColors.length && !allPossibleSizes.length)) && (
+                                    <p className="text-sm text-muted-foreground">{t('cart.sheet.noOtherVariants')}</p>
+                                 )}
                               </div>
-                            )}
-                             {(uniqueColors.length === 0 && allPossibleSizes.length === 0 && item.availableVariants && item.availableVariants.length > 1) && (
-                                <p className="text-sm text-muted-foreground">{t('cart.sheet.complexVariants')}</p>
-                             )}
-                             {(!item.availableVariants || item.availableVariants.length === 0 || (item.availableVariants.length === 1 && !uniqueColors.length && !allPossibleSizes.length)) && (
-                                <p className="text-sm text-muted-foreground">{t('cart.sheet.noOtherVariants')}</p>
-                             )}
-                          </div>
+                            </div>
+
+                            <div className="p-4 border-t sticky bottom-0 bg-card z-10">
+                              <Button onClick={handleConfirmVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
+                                {t('cart.sheet.updateButton')}
+                              </Button>
+                            </div>
                         </div>
-
-                        <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
-                          <Button onClick={handleConfirmVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
-                            {t('cart.sheet.updateButton')}
-                          </Button>
-                        </SheetFooter>
-                      </SheetContent>
-                    </Sheet>
+                      </PopoverContent>
+                    </Popover>
                   ) : (
                     badgeDisplayString && !hasAvailableVariants && (
                       <Badge
