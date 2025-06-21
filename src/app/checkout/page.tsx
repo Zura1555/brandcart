@@ -726,39 +726,39 @@ const CheckoutPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm">
+            <Card className="shadow-lg border">
               <CardHeader className="pb-2 pt-4 px-4">
                 <CardTitle className="text-sm font-medium text-foreground">{t('checkout.summaryCard.title')}</CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-foreground">{t('checkout.summaryCard.subtotal')}</span>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(merchandiseSubtotal)}</span>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">{t('checkout.summaryCard.subtotal')}</span>
+                  <span className="text-foreground font-medium">{formatCurrency(merchandiseSubtotal)}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-foreground">{t('checkout.summaryCard.shippingFee')}</span>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(shippingMethod.price)}</span>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">{t('checkout.summaryCard.shippingFee')}</span>
+                  <span className="text-foreground font-medium">{formatCurrency(shippingMethod.price)}</span>
                 </div>
                 {totalVoucherDiscount > 0 && (
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-foreground">{t('checkout.summaryCard.voucherDiscount')}</span>
-                        <span className="text-sm font-semibold text-destructive">-{formatCurrency(totalVoucherDiscount)}</span>
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">{t('checkout.summaryCard.voucherDiscount')}</span>
+                        <span className="font-medium text-destructive">-{formatCurrency(totalVoucherDiscount)}</span>
                     </div>
                 )}
                 {loyaltyDiscountValue > 0 && (
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-foreground">{t('checkout.summaryCard.coinUsed')}</span>
-                        <span className="text-sm font-semibold text-destructive">-{formatCurrency(loyaltyDiscountValue)}</span>
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">{t('checkout.summaryCard.coinUsed')}</span>
+                        <span className="font-medium text-destructive">-{formatCurrency(loyaltyDiscountValue)}</span>
                     </div>
                 )}
                 {estimatedVatValue > 0 && (
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-foreground">{t('checkout.summaryCard.estimatedVat', { rate: VAT_RATE * 100 })}</span>
-                        <span className="text-sm font-semibold text-foreground">{formatCurrency(estimatedVatValue)}</span>
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">{t('checkout.summaryCard.estimatedVat', { rate: VAT_RATE * 100 })}</span>
+                        <span className="text-foreground font-medium">{formatCurrency(estimatedVatValue)}</span>
                     </div>
                 )}
                 <Separator className="my-2" />
-                <div className="flex justify-between items-center text-base font-semibold">
+                <div className="flex justify-between items-center text-lg font-bold">
                   <span className="text-foreground">{t('checkout.summaryCard.totalLabel')}</span>
                   <span className="text-foreground">{formatCurrency(displayTotalAmount)}</span>
                 </div>
@@ -815,3 +815,6 @@ const CheckoutPage = () => {
 
 export default CheckoutPage;
 
+
+
+    
