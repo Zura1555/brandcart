@@ -155,7 +155,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
       dataAiHint: selectedVariantInSheet?.dataAiHint ?? item.dataAiHint,
     };
   }, [selectedVariantInSheet, item.price, item.imageUrl, item.originalPrice, item.dataAiHint, item.stock]);
-
+  
   const allImageUrls = useMemo(() => {
     const urls = new Set<string>();
 
@@ -163,15 +163,20 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
         if (item.imageUrl) urls.add(item.imageUrl);
         return Array.from(urls);
     }
+    
+    const { color: currentItemColor } = parseVariantName(item.variant);
+    if (tempSelectedColorName && tempSelectedColorName === currentItemColor && item.imageUrl) {
+      urls.add(item.imageUrl);
+    }
+
+    if (selectedVariantInSheet?.imageUrl) {
+        urls.add(selectedVariantInSheet.imageUrl);
+    }
 
     const variantsToScan = tempSelectedColorName
         ? item.availableVariants.filter(v => parseVariantName(v.name).color === tempSelectedColorName)
         : item.availableVariants;
         
-    if (selectedVariantInSheet?.imageUrl) {
-        urls.add(selectedVariantInSheet.imageUrl);
-    }
-
     variantsToScan.forEach(v => {
         if (v.imageUrl) {
             urls.add(v.imageUrl);
@@ -183,7 +188,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
     }
 
     return Array.from(urls);
-  }, [item.availableVariants, item.imageUrl, tempSelectedColorName, parseVariantName, selectedVariantInSheet]);
+  }, [item.availableVariants, item.imageUrl, item.variant, tempSelectedColorName, parseVariantName, selectedVariantInSheet]);
   
   const availableSizesForSelectedColor = useMemo(() => {
     if (!item.availableVariants) return new Set<string>();

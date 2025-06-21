@@ -145,14 +145,19 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
         return Array.from(urls);
     }
 
-    const variantsToScan = tempSelectedColorName
-        ? item.availableVariants.filter(v => parseVariantName(v.name).color === tempSelectedColorName)
-        : item.availableVariants;
-        
+    const { color: currentItemColor } = parseVariantName(item.variant);
+    if (tempSelectedColorName && tempSelectedColorName === currentItemColor && item.imageUrl) {
+      urls.add(item.imageUrl);
+    }
+    
     if (selectedVariantInSheet?.imageUrl) {
         urls.add(selectedVariantInSheet.imageUrl);
     }
 
+    const variantsToScan = tempSelectedColorName
+        ? item.availableVariants.filter(v => parseVariantName(v.name).color === tempSelectedColorName)
+        : item.availableVariants;
+        
     variantsToScan.forEach(v => {
         if (v.imageUrl) {
             urls.add(v.imageUrl);
@@ -164,7 +169,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
     }
 
     return Array.from(urls);
-  }, [item.availableVariants, item.imageUrl, tempSelectedColorName, parseVariantName, selectedVariantInSheet]);
+  }, [item.availableVariants, item.imageUrl, item.variant, tempSelectedColorName, parseVariantName, selectedVariantInSheet]);
 
   const availableSizesForSelectedColor = useMemo(() => {
     if (!item.availableVariants) return new Set<string>();
