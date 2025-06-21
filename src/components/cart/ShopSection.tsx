@@ -12,7 +12,14 @@ import type { CartItem, Shop, SimpleVariant, Product } from '@/interfaces';
 import ProductItem from './ProductItem';
 import BrandOfferBanner from './BrandOfferBanner'; 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronRight, Gift, PlusCircle, MinusCircle, ShoppingBag, ChevronDown, Minus, Plus as PlusIcon, X, Check, Ruler } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -39,7 +46,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   const { t } = useLanguage();
   const formatCurrency = (amount: number) => `${amount.toLocaleString('vi-VN')}₫`;
   
-  const [isVariantPopoverOpen, setIsVariantPopoverOpen] = useState(false);
+  const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
   const [isSizeGuideDialogOpen, setIsSizeGuideDialogOpen] = useState(false);
 
 
@@ -73,7 +80,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   const [tempSelectedSizeValue, setTempSelectedSizeValue] = useState<string | null>(parseVariantName(item.variant).size);
 
   useEffect(() => {
-    if (isVariantPopoverOpen) {
+    if (isVariantSheetOpen) {
       const currentParsed = parseVariantName(selectedCylVariantDetails.variant);
       setTempSelectedColorName(currentParsed.color);
       setTempSelectedSizeValue(currentParsed.size);
@@ -82,7 +89,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
       const variantToDisplay = item.availableVariants?.find(v => v.name === selectedCylVariantDetails.variant) || item;
       setSelectedCylVariantDetails(prev => ({...prev, ...variantToDisplay}));
     }
-  }, [isVariantPopoverOpen, selectedCylVariantDetails.variant, parseVariantName, item]);
+  }, [isVariantSheetOpen, selectedCylVariantDetails.variant, parseVariantName, item]);
 
   const uniqueColors = useMemo(() => {
     if (!item.availableVariants) return [];
@@ -140,15 +147,16 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   const allImageUrlsInSheet = useMemo(() => {
     const urls = new Set<string>();
 
+    // Always add the current item's image first if its color matches the selected color, or if no color is selected yet.
+    if (item.imageUrl && (!tempSelectedColorName || parseVariantName(item.variant).color === tempSelectedColorName)) {
+      urls.add(item.imageUrl);
+    }
+    
     const variantsForSelectedColor = item.availableVariants?.filter(v => {
         if (!tempSelectedColorName) return true;
         const parsed = parseVariantName(v.name);
         return parsed.color === tempSelectedColorName;
     });
-    
-    if (item.variant && parseVariantName(item.variant).color === tempSelectedColorName && item.imageUrl) {
-        urls.add(item.imageUrl);
-    }
     
     variantsForSelectedColor?.forEach(v => {
         if (v.imageUrl) urls.add(v.imageUrl);
@@ -180,7 +188,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
         variant: selectedVariantInSheet.name, 
       }));
     }
-    setIsVariantPopoverOpen(false);
+    setIsVariantSheetOpen(false);
   };
 
   const { color: parsedColorFromItem, size: parsedSizeFromItem } = parseVariantName(selectedCylVariantDetails.variant);
@@ -238,8 +246,8 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
         <p className="text-sm font-medium text-foreground line-clamp-2">{selectedCylVariantDetails.name || item.name}</p>
         
         {hasCylVariants ? (
-          <Popover open={isVariantPopoverOpen} onOpenChange={setIsVariantPopoverOpen}>
-            <PopoverTrigger asChild disabled={isCylItemOutOfStock}>
+          <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
+            <SheetTrigger asChild disabled={isCylItemOutOfStock}>
               <button
                 type="button"
                 className={cn(
@@ -262,16 +270,15 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
                   <ChevronDown className="w-3 h-3 ml-1 text-white/80 flex-shrink-0" />
                 </Badge>
               </button>
-            </PopoverTrigger>
-            <PopoverContent side="bottom" align="start" className="w-[380px] p-0">
-              <div className="flex flex-col max-h-[80vh]">
-                <div className="p-4 border-b sticky top-0 bg-card z-10 flex items-center justify-center relative">
-                    <h3 className="text-lg font-semibold">{t('cart.sheet.productInfoTitle')}</h3>
-                    <Button variant="ghost" size="icon" onClick={() => setIsVariantPopoverOpen(false)} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8">
+            </SheetTrigger>
+            <SheetContent side="bottom" className="max-h-[85vh] sm:max-h-[80vh] flex flex-col p-0 rounded-t-lg">
+                <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10 flex flex-row items-center justify-between">
+                    <h3 className="text-lg font-semibold text-center flex-grow">{t('cart.sheet.productInfoTitle')}</h3>
+                    <Button variant="ghost" size="icon" onClick={() => setIsVariantSheetOpen(false)} className="h-8 w-8">
                         <X className="h-5 w-5" />
                         <span className="sr-only">Close</span>
                     </Button>
-                </div>
+                </SheetHeader>
                 <div className="flex-1 overflow-y-auto min-h-0">
                   <div className="p-4 space-y-5">
                       <div>
@@ -390,12 +397,11 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
                     {(!item.availableVariants || item.availableVariants.length === 0 || (item.availableVariants.length === 1 && !uniqueColors.length && !allPossibleSizes.length)) && (<p className="text-sm text-muted-foreground">{t('cart.sheet.noOtherVariants')}</p>)}
                   </div>
                 </div>
-                <div className="p-4 border-t sticky bottom-0 bg-card z-10">
+                <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
                   <Button onClick={handleConfirmCylVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmCylSelection}>{t('cart.sheet.updateButton')}</Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+                </SheetFooter>
+            </SheetContent>
+          </Sheet>
         ) : (
           selectedCylVariantDetails.variant && <Badge className="bg-black text-white text-xs mt-1 px-1.5 py-0.5 inline-flex items-center"><span className="truncate">{selectedCylVariantDetails.variant}</span></Badge>
         )}

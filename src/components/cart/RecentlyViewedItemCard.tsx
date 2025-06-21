@@ -9,7 +9,14 @@ import { Button } from '@/components/ui/button';
 import { ShoppingBag, ChevronDown, X, Ruler, Check } from 'lucide-react';
 import type { Product, SimpleVariant } from '@/interfaces';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from "@/lib/utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -28,7 +35,7 @@ interface RecentlyViewedItemCardProps {
 
 const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, onAddToCart }) => {
   const { t } = useLanguage();
-  const [isVariantPopoverOpen, setIsVariantPopoverOpen] = useState(false);
+  const [isVariantSheetOpen, setIsVariantSheetOpen] = useState(false);
   const [isSizeGuideDialogOpen, setIsSizeGuideDialogOpen] = useState(false);
 
 
@@ -55,12 +62,12 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
   const [tempSelectedSizeValue, setTempSelectedSizeValue] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isVariantPopoverOpen) {
+    if (isVariantSheetOpen) {
       const currentParsed = parseVariantName(item.variant);
       setTempSelectedColorName(currentParsed.color);
       setTempSelectedSizeValue(currentParsed.size);
     }
-  }, [isVariantPopoverOpen, item.variant, parseVariantName]);
+  }, [isVariantSheetOpen, item.variant, parseVariantName]);
 
   const uniqueColors = useMemo(() => {
     if (!item.availableVariants) return [];
@@ -132,16 +139,17 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
   
   const allImageUrls = useMemo(() => {
     const urls = new Set<string>();
+    
+    // Always add the current item's image first if its color matches the selected color, or if no color is selected yet.
+    if (item.imageUrl && (!tempSelectedColorName || parseVariantName(item.variant).color === tempSelectedColorName)) {
+      urls.add(item.imageUrl);
+    }
 
     const variantsForSelectedColor = item.availableVariants?.filter(v => {
         if (!tempSelectedColorName) return true;
         const parsed = parseVariantName(v.name);
         return parsed.color === tempSelectedColorName;
     });
-    
-    if (item.variant && parseVariantName(item.variant).color === tempSelectedColorName && item.imageUrl) {
-        urls.add(item.imageUrl);
-    }
     
     variantsForSelectedColor?.forEach(v => {
         if (v.imageUrl) urls.add(v.imageUrl);
@@ -181,7 +189,7 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
   const handleAddToCartButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasVariants) {
-      setIsVariantPopoverOpen(true);
+      setIsVariantSheetOpen(true);
     } else {
       onAddToCart(item);
     }
@@ -207,7 +215,7 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
     };
     
     onAddToCart(productToAdd);
-    setIsVariantPopoverOpen(false);
+    setIsVariantSheetOpen(false);
   };
   
   const formatCurrency = (amount: number) => {
@@ -232,7 +240,7 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
 
   return (
     <Card className="w-[150px] sm:w-[170px] flex-shrink-0 shadow-sm rounded-lg overflow-hidden bg-card hover:shadow-md transition-shadow">
-      <Popover open={isVariantPopoverOpen} onOpenChange={setIsVariantPopoverOpen}>
+      <Sheet open={isVariantSheetOpen} onOpenChange={setIsVariantSheetOpen}>
         <div className="relative aspect-[3/4] w-full bg-muted/20 group">
           <Image
             src={item.thumbnailImageUrl || item.imageUrl}
@@ -242,32 +250,26 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
             data-ai-hint={item.dataAiHint || 'product image'}
             sizes="(max-width: 640px) 150px, 170px"
           />
-          <PopoverTrigger asChild>
+          <SheetTrigger asChild>
             <Button
               variant="outline"
               size="icon"
               className="absolute top-2 right-2 h-9 w-9 bg-background/70 backdrop-blur-sm hover:bg-background border-muted-foreground/30 hover:border-foreground text-foreground rounded-full shadow"
-              onClick={(e) => {
-                if (!hasVariants) {
-                  e.preventDefault();
-                  onAddToCart(item);
-                }
-              }}
+              onClick={handleAddToCartButtonClick}
               aria-label={t('cart.addToCartLabel', { itemName: item.name })}
             >
               <ShoppingBag className="h-5 w-5" />
             </Button>
-          </PopoverTrigger>
+          </SheetTrigger>
         </div>
-        <PopoverContent side="bottom" align="start" className="w-[380px] p-0">
-          <div className="flex flex-col max-h-[80vh]">
-              <div className="p-4 border-b sticky top-0 bg-card z-10 flex items-center justify-center relative">
-                  <h3 className="text-lg font-semibold">{t('cart.sheet.productInfoTitle')}</h3>
-                  <Button variant="ghost" size="icon" onClick={() => setIsVariantPopoverOpen(false)} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8">
-                      <X className="h-5 w-5" />
-                      <span className="sr-only">Close</span>
-                  </Button>
-              </div>
+        <SheetContent side="bottom" className="max-h-[85vh] sm:max-h-[80vh] flex flex-col p-0 rounded-t-lg">
+          <SheetHeader className="p-4 border-b sticky top-0 bg-card z-10 flex flex-row items-center justify-between">
+              <h3 className="text-lg font-semibold text-center flex-grow">{t('cart.sheet.productInfoTitle')}</h3>
+              <Button variant="ghost" size="icon" onClick={() => setIsVariantSheetOpen(false)} className="h-8 w-8">
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Close</span>
+              </Button>
+          </SheetHeader>
 
               <div className="flex-1 overflow-y-auto min-h-0">
                 <div className="p-4 space-y-5">
@@ -414,14 +416,13 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
                 </div>
               </div>
               
-              <div className="p-4 border-t sticky bottom-0 bg-card z-10">
+              <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
                 <Button onClick={handleConfirmAndAddToCart} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
                   {t('cart.addToCartButton')}
                 </Button>
-              </div>
-            </div>
-        </PopoverContent>
-      </Popover>
+              </SheetFooter>
+        </SheetContent>
+      </Sheet>
       <CardContent className="p-2.5 space-y-1">
         {item.brand && <p className="text-[11px] font-semibold text-foreground uppercase truncate">{item.brand}</p>}
         <p className="text-xs text-foreground leading-tight line-clamp-2 h-8" title={item.name}>{item.name}</p>
