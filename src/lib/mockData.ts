@@ -68,16 +68,16 @@ export const mockShops: Shop[] = [
         price: 2029000,
         originalPrice: 2899000,
         brand: 'PUMA',
-        imageUrl: 'https://product.hstatic.net/1000284478/product/01_380784_1_f2c2ec6dc2e54db1a6bf5c071f476ffc_large.jpg',
+        imageUrl: 'https://product.hstatic.net/1000284478/product/owh_fw2psh11012x_1_aa8e7706f283432b8646d02fb7f621b3_large.jpg',
         dataAiHint: 'sneakers white',
         productCode: 'PUMAS02',
         variant: 'White/Black',
         discountDescription: '-30%',
         stock: 5,
         availableVariants: [
-          { id: 'puma2-wb-36', name: 'White/Black, 36', stock: 2, price: 2029000 },
-          { id: 'puma2-wb-37', name: 'White/Black, 37', stock: 0, price: 2029000 },
-          { id: 'puma2-wb-38', name: 'White/Black, 38', stock: 3, price: 2029000 },
+          { id: 'puma2-wb-36', name: 'White/Black, 36', stock: 2, price: 2029000, imageUrl: 'https://product.hstatic.net/1000284478/product/owh_fw2psh11012x_1_aa8e7706f283432b8646d02fb7f621b3_large.jpg', dataAiHint: 'sneakers white' },
+          { id: 'puma2-wb-37', name: 'White/Black, 37', stock: 0, price: 2029000, imageUrl: 'https://product.hstatic.net/1000284478/product/owh_fw2psh11012x_1_aa8e7706f283432b8646d02fb7f621b3_large.jpg', dataAiHint: 'sneakers white' },
+          { id: 'puma2-wb-38', name: 'White/Black, 38', stock: 3, price: 2029000, imageUrl: 'https://product.hstatic.net/1000284478/product/owh_fw2psh11012x_1_aa8e7706f283432b8646d02fb7f621b3_large.jpg', dataAiHint: 'sneakers white' },
           { id: 'puma2-pink-37', name: 'Pink, 37', stock: 11, price: 2129000, imageUrl: 'https://placehold.co/80x80.png', dataAiHint: 'sneakers pink' },
         ],
       },
@@ -224,15 +224,15 @@ export const newRecentlyViewedProducts: Product[] = [
     name: 'Áo thun nữ cổ tròn tay ngắn Sanmauro',
     price: 4590000,
     brand: 'MAX&Co.',
-    imageUrl: 'https://placehold.co/250x250/EFEFEF/333333.png', // Main image for cart/details
-    thumbnailImageUrl: 'https://placehold.co/150x200/EFEFEF/333333.png', // Thumbnail for recently viewed card
+    imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_large.jpg', // Main image for cart/details
+    thumbnailImageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_large.jpg', // Thumbnail for recently viewed card
     dataAiHint: 'tshirt white',
     productCode: 'MAXCO001',
     variant: 'White, M',
     stock: 15,
     availableVariants: [
-      { id: 'maxco1-wh-s', name: 'White, S', stock: 10, price: 4590000, imageUrl: 'https://placehold.co/250x250/EFEFEF/333333.png', dataAiHint: 'tshirt white' },
-      { id: 'maxco1-wh-m', name: 'White, M', stock: 15, price: 4590000, imageUrl: 'https://placehold.co/250x250/EFEFEF/333333.png', dataAiHint: 'tshirt white' },
+      { id: 'maxco1-wh-s', name: 'White, S', stock: 10, price: 4590000, imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_large.jpg', dataAiHint: 'tshirt white' },
+      { id: 'maxco1-wh-m', name: 'White, M', stock: 15, price: 4590000, imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_large.jpg', dataAiHint: 'tshirt white' },
       { id: 'maxco1-bk-m', name: 'Black, M', stock: 5, price: 4590000, imageUrl: 'https://placehold.co/250x250/333333/EFEFEF.png', dataAiHint: 'tshirt black' },
     ],
     discountDescription: 'New Arrival',
@@ -322,4 +322,4 @@ export const newRecentlyViewedProducts: Product[] = [
   },
 ];
 
-
+    
