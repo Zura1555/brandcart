@@ -507,27 +507,13 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                       </DialogHeader>
                                       <ScrollArea className="max-h-[70vh]">
                                         <div className="p-4">
-                                          <Table>
-                                            <TableHeader>
-                                              <TableRow>
-                                                <TableHead>{t('cart.sheet.findMySize.size')}</TableHead>
-                                                <TableHead>{t('cart.sheet.findMySize.chest')}</TableHead>
-                                                <TableHead>{t('cart.sheet.findMySize.waist')}</TableHead>
-                                                <TableHead>{t('cart.sheet.findMySize.hips')}</TableHead>
-                                              </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                              <TableRow><TableCell>{t('cart.sheet.findMySize.xs')}</TableCell><TableCell>32-34</TableCell><TableCell>24-26</TableCell><TableCell>34-36</TableCell></TableRow>
-                                              <TableRow><TableCell>{t('cart.sheet.findMySize.s')}</TableCell><TableCell>34-36</TableCell><TableCell>26-28</TableCell><TableCell>36-38</TableCell></TableRow>
-                                              <TableRow><TableCell>{t('cart.sheet.findMySize.m')}</TableCell><TableCell>36-38</TableCell><TableCell>28-30</TableCell><TableCell>38-40</TableCell></TableRow>
-                                              <TableRow><TableCell>{t('cart.sheet.findMySize.l')}</TableCell><TableCell>38-40</TableCell><TableCell>30-32</TableCell><TableCell>40-42</TableCell></TableRow>
-                                              <TableRow><TableCell>{t('cart.sheet.findMySize.xl')}</TableCell><TableCell>40-42</TableCell><TableCell>32-34</TableCell><TableCell>42-44</TableCell></TableRow>
-                                            </TableBody>
-                                          </Table>
-                                          <div className='mt-4'>
-                                            <h3 className="font-semibold text-sm mb-2">{t('cart.sheet.findMySize.howToMeasure')}</h3>
-                                            <Image src="https://placehold.co/300x200.png" alt="How to measure" width={300} height={200} className="w-full h-auto rounded-md" data-ai-hint="fashion measurement guide" />
-                                          </div>
+                                          <Image 
+                                            src="https://file.hstatic.net/1000284478/file/mlb_new_ao_unisex_-_desktop_9701027a890a4e1d885ae36d5ce8ece7.jpg" 
+                                            alt="Size guide chart" 
+                                            width={700} 
+                                            height={1000}
+                                            className="w-full h-auto rounded-md" 
+                                            data-ai-hint="size guide" />
                                         </div>
                                       </ScrollArea>
                                     </DialogContent>
@@ -625,6 +611,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
+
 
 
 
