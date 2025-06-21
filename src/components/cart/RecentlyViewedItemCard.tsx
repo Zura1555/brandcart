@@ -258,7 +258,7 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
             </SheetClose>
           </SheetHeader>
 
-          <ScrollArea className="flex-grow">
+          <ScrollArea className="flex-grow min-h-0">
             <div className="p-4 space-y-5">
               <div>
                 <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrls.length > 1 }}>
