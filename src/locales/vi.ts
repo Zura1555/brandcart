@@ -12,6 +12,7 @@ const viTranslations = {
     emptyCartMessage: "Thêm sản phẩm để bắt đầu mua sắm!",
     recentlyViewedTitle: "Xem Gần Đây",
     addToCartLabel: "Thêm {itemName} vào giỏ",
+    addToCartButton: "Thêm vào giỏ",
     brandOffer: {
       shopNowButton: "Mua ngay"
     },
@@ -307,4 +308,3 @@ const viTranslations = {
 };
 
 export default viTranslations;
-

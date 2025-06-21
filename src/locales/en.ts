@@ -12,6 +12,7 @@ const enTranslations = {
     emptyCartMessage: "Add some products to get started!",
     recentlyViewedTitle: "Recently Viewed",
     addToCartLabel: "Add {itemName} to cart",
+    addToCartButton: "Add to Cart",
     brandOffer: {
       shopNowButton: "Shop Now"
     },
@@ -307,4 +308,3 @@ const enTranslations = {
 };
 
 export default enTranslations;
-
