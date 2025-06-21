@@ -258,7 +258,7 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
             </SheetClose>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto min-h-0">
             <div className="p-4 space-y-5">
               <div>
                 <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrls.length > 1 }}>
@@ -301,7 +301,7 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
               {uniqueColors.length > 0 && (
                 <div className="space-y-3">
                   <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
-                  <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
                     {uniqueColors.map(color => {
                        const variantForColor = item.availableVariants?.find(v => parseVariantName(v.name).color === color);
                        const isSelected = tempSelectedColorName === color;
@@ -314,21 +314,20 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
                             if (allPossibleSizes.length > 0) setTempSelectedSizeValue(null);
                             }}
                             className={cn(
-                                "w-full flex items-center gap-3 text-left p-2 rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
-                                isSelected ? "bg-muted border-foreground" : "bg-card border-input hover:bg-muted/50"
+                              "flex items-center gap-2 text-left p-1 rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background",
+                              isSelected ? "bg-muted border-foreground" : "bg-card border-input hover:bg-muted/50"
                             )}
                             aria-label={color}
                         >
                             <Image
                                 src={variantForColor?.imageUrl || `https://placehold.co/40x40.png`}
                                 alt={color}
-                                width={40}
-                                height={40}
-                                className="rounded-md object-cover border"
+                                width={24}
+                                height={24}
+                                className="rounded-sm object-cover border"
                                 data-ai-hint={color.toLowerCase()}
                             />
-                            <span className="flex-grow text-sm font-medium">{color}</span>
-                            {isSelected && <Check className="w-5 h-5 text-foreground" />}
+                            <span className="text-sm font-medium pr-2">{color}</span>
                         </button>
                        );
                     })}
@@ -365,26 +364,26 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
                         </DialogContent>
                     </Dialog>
                   </div>
-                  <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
                     {allPossibleSizes.map(size => {
                       const variantForThisSize = getVariantFromSelection(tempSelectedColorName, size);
                       const isSizeAvailableForColor = availableSizesForSelectedColor.has(size);
                       const isSizeInStock = variantForThisSize ? (variantForThisSize.stock === undefined || variantForThisSize.stock > 0) : true;
                       const isSizeDisabled = !isSizeAvailableForColor || !isSizeInStock;
+                      const isSelected = tempSelectedSizeValue === size && !isSizeDisabled;
                       
                       return (
                         <Button
                           key={size}
                           type="button"
-                          variant={tempSelectedSizeValue === size && !isSizeDisabled ? "default" : "outline"}
+                          variant={isSelected ? "default" : "outline"}
                           size="sm"
                           onClick={() => {
                             if (!isSizeDisabled) setTempSelectedSizeValue(size);
                           }}
                           disabled={isSizeDisabled}
                           className={cn(
-                            "w-full justify-start text-left py-2 h-auto text-sm rounded-md",
-                            tempSelectedSizeValue === size && !isSizeDisabled ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
+                            isSelected ? "bg-foreground text-accent-foreground hover:bg-foreground/90" : "border-input text-foreground hover:bg-muted",
                             isSizeDisabled && "bg-muted/50 text-muted-foreground opacity-70 cursor-not-allowed hover:bg-muted/50"
                           )}
                         >
