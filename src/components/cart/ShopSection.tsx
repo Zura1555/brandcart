@@ -257,7 +257,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
                     <span className="sr-only">Close</span>
                 </SheetClose>
               </SheetHeader>
-              <ScrollArea className="flex-grow min-h-0">
+              <div className="flex-1 overflow-y-auto">
                 <div className="p-4 space-y-5">
                     <div>
                         <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrlsInSheet.length > 1 }}>
@@ -371,7 +371,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
                   )}
                   {(!item.availableVariants || item.availableVariants.length === 0 || (item.availableVariants.length === 1 && !uniqueColors.length && !allPossibleSizes.length)) && (<p className="text-sm text-muted-foreground">{t('cart.sheet.noOtherVariants')}</p>)}
                 </div>
-              </ScrollArea>
+              </div>
               <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
                 <Button onClick={handleConfirmCylVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmCylSelection}>{t('cart.sheet.updateButton')}</Button>
               </SheetFooter>

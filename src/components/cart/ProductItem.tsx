@@ -408,7 +408,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                             </SheetClose>
                         </SheetHeader>
 
-                        <ScrollArea className="flex-grow min-h-0">
+                        <div className="flex-1 overflow-y-auto">
                           <div className="p-4 space-y-5">
                              <div>
                               <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrls.length > 1 }}>
@@ -552,7 +552,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                                 <p className="text-sm text-muted-foreground">{t('cart.sheet.noOtherVariants')}</p>
                              )}
                           </div>
-                        </ScrollArea>
+                        </div>
 
                         <SheetFooter className="p-4 border-t sticky bottom-0 bg-card z-10">
                           <Button onClick={handleConfirmVariant} className="w-full bg-foreground hover:bg-foreground/90 text-accent-foreground text-base py-3 h-auto" disabled={!canConfirmSelection}>
