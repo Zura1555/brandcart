@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from "@/lib/utils";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface RecentlyViewedItemCardProps {
   item: Product;
@@ -122,10 +123,24 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
       price: selectedVariantInSheet?.price ?? item.price,
       imageUrl: selectedVariantInSheet?.imageUrl ?? item.imageUrl,
       stock: selectedVariantInSheet?.stock,
-      originalPrice: selectedVariantInSheet?.originalPrice ?? item.originalPrice,
+      originalPrice: selectedVariantInSheet?.originalPrice,
       dataAiHint: selectedVariantInSheet?.dataAiHint ?? item.dataAiHint,
     };
   }, [selectedVariantInSheet, item]);
+  
+  const allImageUrls = useMemo(() => {
+      if (!item.availableVariants || item.availableVariants.length === 0) {
+          return [currentDisplayDetailsInSheet.imageUrl].filter(Boolean) as string[];
+      }
+      const urls = new Set<string>();
+      if (currentDisplayDetailsInSheet.imageUrl) {
+          urls.add(currentDisplayDetailsInSheet.imageUrl);
+      }
+      item.availableVariants.forEach(v => {
+          if (v.imageUrl) urls.add(v.imageUrl);
+      });
+      return Array.from(urls);
+  }, [item.availableVariants, currentDisplayDetailsInSheet.imageUrl]);
 
   const availableSizesForSelectedColor = useMemo(() => {
     if (!item.availableVariants) return new Set<string>();
@@ -235,29 +250,42 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
           </SheetHeader>
 
           <ScrollArea className="flex-grow">
-            <div className="p-4 space-y-4">
-              <div className="flex items-start space-x-3">
-                <Image
-                  src={currentDisplayDetailsInSheet.imageUrl}
-                  alt={item.name}
-                  width={112}
-                  height={112}
-                  className="rounded-md object-cover w-28 h-28 sm:w-32 sm:h-32 border flex-shrink-0"
-                  data-ai-hint={currentDisplayDetailsInSheet.dataAiHint || "product image"}
-                  sizes="(max-width: 640px) 112px, 128px"
-                />
-                <div className="flex-grow min-w-0">
-                  {item.brand && <p className="text-xs font-medium text-foreground">{item.brand}</p>}
-                  <p className="text-sm text-foreground mt-0.5 line-clamp-3">{item.name}</p>
-                  <div className="flex items-baseline space-x-2 mt-1">
-                      <p className="text-base font-bold text-foreground">{formatCurrency(currentDisplayDetailsInSheet.price)}</p>
-                      {stockStatusTextInSheet && (
-                        <>
-                          <span className="text-xs text-muted-foreground">|</span>
-                          <span className={stockStatusClassesInSheet}>{stockStatusTextInSheet}</span>
-                        </>
+            <div className="p-4 space-y-5">
+              <div>
+                <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrls.length > 1 }}>
+                  <CarouselContent>
+                    {allImageUrls.map((url, index) => (
+                      <CarouselItem key={index}>
+                        <div className="aspect-square relative bg-muted rounded-md">
+                          <Image
+                            src={url}
+                            alt={`${item.name} image ${index + 1}`}
+                            fill
+                            className="rounded-md object-cover border"
+                            sizes="(max-width: 640px) 90vw, 384px"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {allImageUrls.length > 1 && (
+                    <>
+                      <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                      <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                    </>
+                  )}
+                </Carousel>
+                <div className="mt-4">
+                  <div className="flex items-baseline justify-between">
+                      <p className="text-xl font-bold text-foreground">{formatCurrency(currentDisplayDetailsInSheet.price)}</p>
+                      {currentDisplayDetailsInSheet.originalPrice && (
+                          <p className="text-sm text-muted-foreground line-through">{formatCurrency(currentDisplayDetailsInSheet.originalPrice)}</p>
                       )}
                   </div>
+                  {stockStatusTextInSheet && (
+                      <p className={cn(stockStatusClassesInSheet, "mt-1")}>{stockStatusTextInSheet}</p>
+                  )}
+                  <p className="text-base text-foreground mt-2 font-medium line-clamp-3">{item.name}</p>
                 </div>
               </div>
 

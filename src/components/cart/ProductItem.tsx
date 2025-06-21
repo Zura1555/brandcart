@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import type { CartItem, SimpleVariant, Product } from '@/interfaces';
 import QuantitySelector from './QuantitySelector';
-import { Check, Trash2, ChevronDown, Minus, Plus, X, Ruler, ChevronLeft, Shirt } from 'lucide-react';
+import { Check, Trash2, ChevronDown, Minus, Plus, X, Ruler } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import {
   Sheet,
@@ -25,13 +25,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogDescription,
-  DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
@@ -412,52 +409,45 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
                         </SheetHeader>
 
                         <ScrollArea className="flex-grow">
-                          <div className="p-4 space-y-4">
-                            <div className="flex items-start space-x-3">
-                                <Carousel className="w-28 sm:w-32 flex-shrink-0" opts={{ loop: true }}>
-                                  <CarouselContent>
-                                    {allImageUrls.map((url, index) => (
-                                      <CarouselItem key={index}>
-                                        <div className="aspect-square relative bg-muted rounded-md">
-                                          <Image
-                                            src={url}
-                                            alt={`${item.name} image ${index + 1}`}
-                                            fill
-                                            className="rounded-md object-cover border"
-                                            sizes="(max-width: 640px) 112px, 128px"
-                                          />
-                                        </div>
-                                      </CarouselItem>
-                                    ))}
-                                  </CarouselContent>
-                                  {allImageUrls.length > 1 && (
-                                    <>
-                                      <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2 h-6 w-6 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
-                                      <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
-                                    </>
-                                  )}
-                                </Carousel>
-
-                              <div className="flex-grow min-w-0">
-                                {item.brand && <p className="text-xs font-medium text-foreground">{item.brand}</p>}
-                                <p className="text-sm text-foreground mt-0.5 line-clamp-3">{item.name}</p>
-                                <div className="flex items-baseline space-x-2 mt-1">
-                                    <p className="text-base font-bold text-foreground">{currentDisplayDetailsInSheet.price.toLocaleString('vi-VN')}₫</p>
-                                    {stockStatusTextInSheet && (
-                                      <>
-                                        <span className="text-xs text-muted-foreground">|</span>
-                                        <span className={stockStatusClassesInSheet}>{stockStatusTextInSheet}</span>
-                                      </>
+                          <div className="p-4 space-y-5">
+                             <div>
+                              <Carousel className="w-full max-w-sm mx-auto" opts={{ loop: allImageUrls.length > 1 }}>
+                                <CarouselContent>
+                                  {allImageUrls.map((url, index) => (
+                                    <CarouselItem key={index}>
+                                      <div className="aspect-square relative bg-muted rounded-md">
+                                        <Image
+                                          src={url}
+                                          alt={`${item.name} image ${index + 1}`}
+                                          fill
+                                          className="rounded-md object-cover border"
+                                          sizes="(max-width: 640px) 90vw, 384px"
+                                        />
+                                      </div>
+                                    </CarouselItem>
+                                  ))}
+                                </CarouselContent>
+                                {allImageUrls.length > 1 && (
+                                  <>
+                                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-white bg-black/30 hover:bg-black/50 hover:text-white border-none" />
+                                  </>
+                                )}
+                              </Carousel>
+                              <div className="mt-4">
+                                <div className="flex items-baseline justify-between">
+                                    <p className="text-xl font-bold text-foreground">{currentDisplayDetailsInSheet.price.toLocaleString('vi-VN')}₫</p>
+                                    {currentDisplayDetailsInSheet.originalPrice && (
+                                        <p className="text-sm text-muted-foreground line-through">{currentDisplayDetailsInSheet.originalPrice.toLocaleString('vi-VN')}₫</p>
                                     )}
                                 </div>
-                                <div className="flex items-center space-x-2 text-foreground mt-2">
-                                  <Button variant="outline" size="icon" className="h-7 w-7 opacity-50 cursor-not-allowed" disabled><Minus className="h-4 w-4" /></Button>
-                                  <span className="text-sm font-semibold tabular-nums">{item.quantity}</span>
-                                  <Button variant="outline" size="icon" className="h-7 w-7 opacity-50 cursor-not-allowed" disabled><Plus className="h-4 w-4" /></Button>
-                                </div>
+                                 {stockStatusTextInSheet && (
+                                  <p className={cn(stockStatusClassesInSheet, "mt-1")}>{stockStatusTextInSheet}</p>
+                                 )}
+                                <p className="text-base text-foreground mt-2 font-medium line-clamp-3">{item.name}</p>
                               </div>
                             </div>
-
+                            
                             {uniqueColors.length > 0 && (
                               <div className="space-y-2">
                                 <p className="text-sm font-semibold text-foreground">{t('cart.sheet.selectColor')}</p>
@@ -611,8 +601,3 @@ const ProductItem: React.FC<ProductItemProps> = ({ item, onSelectToggle, onQuant
 };
 
 export default ProductItem;
-
-
-
-
-
