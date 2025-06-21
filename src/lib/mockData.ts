@@ -242,15 +242,15 @@ export const newRecentlyViewedProducts: Product[] = [
     name: 'Áo polo unisex tay ngắn Origin',
     price: 1495000,
     brand: 'FILA',
-    imageUrl: 'https://placehold.co/250x250/DDEEFF/333333.png', // Main image
-    thumbnailImageUrl: 'https://placehold.co/150x200/DDEEFF/333333.png', // Thumbnail
-    dataAiHint: 'polo shirt blue',
+    imageUrl: 'https://product.hstatic.net/1000284478/product/owh_fw2psh11012x_1_aa8e7706f283432b8646d02fb7f621b3_large.jpg', // Main image
+    thumbnailImageUrl: 'https://product.hstatic.net/1000284478/product/owh_fw2psh11012x_1_aa8e7706f283432b8646d02fb7f621b3_large.jpg', // Thumbnail
+    dataAiHint: 'sneakers white',
     productCode: 'FILA001',
     variant: 'Blue, L',
     stock: 20,
     availableVariants: [
-      { id: 'fila1-bl-l', name: 'Blue, L', stock: 10, price: 1495000, imageUrl: 'https://placehold.co/250x250/DDEEFF/333333.png', dataAiHint: 'polo shirt blue' },
-      { id: 'fila1-bl-xl', name: 'Blue, XL', stock: 10, price: 1495000, imageUrl: 'https://placehold.co/250x250/DDEEFF/333333.png', dataAiHint: 'polo shirt blue' },
+      { id: 'fila1-bl-l', name: 'Blue, L', stock: 10, price: 1495000, imageUrl: 'https://product.hstatic.net/1000284478/product/owh_fw2psh11012x_1_aa8e7706f283432b8646d02fb7f621b3_large.jpg', dataAiHint: 'sneakers white' },
+      { id: 'fila1-bl-xl', name: 'Blue, XL', stock: 10, price: 1495000, imageUrl: 'https://product.hstatic.net/1000284478/product/owh_fw2psh11012x_1_aa8e7706f283432b8646d02fb7f621b3_large.jpg', dataAiHint: 'sneakers white' },
       { id: 'fila1-rd-l', name: 'Red, L', stock: 10, price: 1495000, imageUrl: 'https://placehold.co/250x250/FFDDDD/333333.png', dataAiHint: 'polo shirt red' },
     ],
   },
