@@ -196,7 +196,6 @@ const BrandCartPage = () => {
 
   const [itemPendingDeletion, setItemPendingDeletion] = useState<CartItem | null>(null);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
-  const [lastAddedBrand, setLastAddedBrand] = useState<string | null>(null);
   
   const [actualTotalVoucherDiscount, setActualTotalVoucherDiscount] = useState(0);
 
@@ -434,59 +433,56 @@ const BrandCartPage = () => {
   };
 
   const itemsByShop = useMemo(() => {
-    const allBrandsInCartSet = new Set(cartItems.map(item => item.brand));
-    const shopOrderFromMocks = mockShops.map(s => s.name);
-
-    const allShopDataObjects = Array.from(allBrandsInCartSet).map(brandName => {
-        const productsInThisBrand = cartItems.filter(item => item.brand === brandName);
-        const mockShopData = mockShops.find(s => s.name === brandName);
-        const inStockProductsInShop = productsInThisBrand.filter(item => item.stock !== 0);
-
-        let shopDataForSection: Omit<Shop, 'products'> & { products: CartItem[], isShopSelected: boolean } = {
-            name: brandName,
-            logoUrl: 'https://placehold.co/60x24.png', 
-            logoDataAiHint: `${brandName.toLowerCase()} logo`,
-            products: productsInThisBrand,
-            isFavorite: false,
-            promotionText: undefined,
-            specialOfferText: undefined,
-            editLinkText: undefined,
-            isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
-        };
-
-        if (mockShopData) {
-            shopDataForSection = {
-                ...mockShopData,
-                name: brandName, 
-                products: productsInThisBrand, 
-                isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
-                logoUrl: mockShopData.logoUrl || shopDataForSection.logoUrl,
-                logoDataAiHint: mockShopData.logoDataAiHint || shopDataForSection.logoDataAiHint,
-            };
+    // Group items by brand, preserving the reverse chronological order of items within each group.
+    const groupedByBrand: Record<string, CartItem[]> = cartItems.reduce((acc, item) => {
+        const brand = item.brand;
+        if (!acc[brand]) {
+            acc[brand] = [];
         }
-        return shopDataForSection;
-    }).filter(shopGroup => shopGroup && shopGroup.products.length > 0) as (Shop & { products: CartItem[], isShopSelected: boolean })[];
+        acc[brand].push(item);
+        return acc;
+    }, {} as Record<string, CartItem[]>);
 
-    allShopDataObjects.sort((shopA, shopB) => {
-       const brandA = shopA.name;
-       const brandB = shopB.name;
-
-       if (lastAddedBrand) {
-           if (brandA === lastAddedBrand && brandB !== lastAddedBrand) return -1;
-           if (brandB === lastAddedBrand && brandA !== lastAddedBrand) return 1;
-       }
-
-       const indexA = shopOrderFromMocks.indexOf(brandA);
-       const indexB = shopOrderFromMocks.indexOf(brandB);
-
-       if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-       if (indexA !== -1) return -1; 
-       if (indexB !== -1) return 1;  
-       return brandA.localeCompare(brandB); 
+    // Establish a stable, consistent order for the shop sections based on mockData.
+    const shopOrderFromMocks = mockShops.map(s => s.name);
+    const brandsInCart = Object.keys(groupedByBrand);
+    
+    const allBrandsInOrder = [...shopOrderFromMocks];
+    brandsInCart.forEach(brand => {
+        if (!allBrandsInOrder.includes(brand)) {
+            allBrandsInOrder.push(brand);
+        }
     });
+    
+    // Build the final list of shop sections in the stable order.
+    const allShopDataObjects = allBrandsInOrder
+        .map(brandName => {
+            const productsInThisBrand = groupedByBrand[brandName];
+            
+            if (!productsInThisBrand || productsInThisBrand.length === 0) {
+                return null;
+            }
+
+            const mockShopData = mockShops.find(s => s.name === brandName);
+            const inStockProductsInShop = productsInThisBrand.filter(item => item.stock !== 0);
+
+            const shopDataForSection: Shop & { products: CartItem[], isShopSelected: boolean } = {
+                name: brandName,
+                logoUrl: mockShopData?.logoUrl || 'https://placehold.co/60x24.png',
+                logoDataAiHint: mockShopData?.logoDataAiHint || `${brandName.toLowerCase()} logo`,
+                products: productsInThisBrand,
+                isFavorite: mockShopData?.isFavorite || false,
+                promotionText: mockShopData?.promotionText,
+                specialOfferText: mockShopData?.specialOfferText,
+                editLinkText: mockShopData?.editLinkText,
+                isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
+            };
+            return shopDataForSection;
+        })
+        .filter(Boolean) as (Shop & { products: CartItem[], isShopSelected: boolean })[];
 
     return allShopDataObjects;
-  }, [cartItems, lastAddedBrand]);
+  }, [cartItems]);
 
 
   const formatCurrency = (amount: number) => {
@@ -635,20 +631,7 @@ const BrandCartPage = () => {
         selected: false,
       };
 
-      setCartItems(prevItems => {
-        const updatedItems = [...prevItems];
-        const brandOfNewItem = newCartItem.brand;
-        const firstItemIndexOfBrand = prevItems.findIndex(item => item.brand === brandOfNewItem);
-
-        if (firstItemIndexOfBrand !== -1) {
-          updatedItems.splice(firstItemIndexOfBrand, 0, newCartItem);
-        } else {
-          updatedItems.unshift(newCartItem);
-        }
-        return updatedItems;
-      });
-
-      setLastAddedBrand(itemToAdd.brand);
+      setCartItems(prevItems => [newCartItem, ...prevItems]);
 
       toast({
         title: t('toast.itemAddedToCart.title', { itemName: itemToAdd.name }),
@@ -929,11 +912,3 @@ const BrandCartPage = () => {
 };
 
 export default BrandCartPage;
-
-    
-
-    
-
-
-
-
