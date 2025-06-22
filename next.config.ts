@@ -52,6 +52,12 @@ const nextConfig: NextConfig = {
         hostname: 'bizweb.dktcdn.net',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.seeklogo.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },

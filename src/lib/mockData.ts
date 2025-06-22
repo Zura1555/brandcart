@@ -146,6 +146,32 @@ export const mockShops: Shop[] = [
         // No availableVariants, so badge will only display variant, not open sheet.
       },
     ],
+  },
+  {
+    name: 'MAX&Co.',
+    logoUrl: 'https://images.seeklogo.com/logo-png/42/2/maxco-logo-png_seeklogo-426774.png',
+    logoDataAiHint: 'MAX&Co. logo',
+    specialOfferText: "Discover the new collection.",
+    products: [
+      {
+        id: 'maxco1',
+        name: 'Áo thun nữ cổ tròn tay ngắn Sanmauro',
+        price: 4590000,
+        brand: 'MAX&Co.',
+        imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_large.jpg',
+        dataAiHint: 'tshirt white',
+        productCode: 'MAXCO001',
+        variant: 'White, M',
+        stock: 15,
+        availableVariants: [
+          { id: 'maxco1-wh-s', name: 'White, S', stock: 10, price: 4590000, imageUrl: 'https://product.hstatic.net/1000284478/product/1_7114173003_1_62e692c5f196408f9eacab84ac1c91fb_large.jpg', dataAiHint: 'tshirt white' },
+          { id: 'maxco1-wh-m', name: 'White, M', stock: 15, price: 4590000, imageUrl: 'https://placehold.co/400x400/f5f5f5/333333.png', dataAiHint: 'tshirt white detail' },
+          { id: 'maxco1-bk-m', name: 'Black, M', stock: 5, price: 4590000, imageUrl: 'https://placehold.co/400x400/333333/EFEFEF.png', dataAiHint: 'tshirt black front' },
+          { id: 'maxco1-bk-m-img2', name: 'Black, M', stock: 5, price: 4590000, imageUrl: 'https://placehold.co/400x400/333333/dddddd.png', dataAiHint: 'tshirt black back' },
+        ],
+        discountDescription: 'New Arrival',
+      }
+    ],
   }
 ];
 
