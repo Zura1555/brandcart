@@ -203,7 +203,7 @@ const BrandCartPage = () => {
   useEffect(() => {
     const initialCartItems = mockShops.flatMap(shop =>
       shop.products.map(p => ({ ...p, cartItemId: `${p.id}-${Date.now()}-${Math.random().toString(36).substring(2,7)}`, quantity: 1, selected: false }))
-    );
+    ).reverse(); // Reverse to get desired initial order
     setCartItems(initialCartItems);
     
     setRecentlyViewedItems(newRecentlyViewedProducts.slice(0, 6));
@@ -592,49 +592,98 @@ const BrandCartPage = () => {
     const getBaseProductId = (id: string) => id.split('-')[0];
     const itemToAddProductId = getBaseProductId(itemToAdd.id);
 
-    const existingCartItem = cartItems.find(
-      (ci) => getBaseProductId(ci.id) === itemToAddProductId
-    );
+    setCartItems(prevItems => {
+      const existingCartItemIndex = prevItems.findIndex(
+        (ci) => getBaseProductId(ci.id) === itemToAddProductId
+      );
 
-    if (existingCartItem) {
-      if (existingCartItem.variant === itemToAdd.variant) {
-        handleQuantityChange(existingCartItem.cartItemId, existingCartItem.quantity + 1);
-        toast({
-          title: t('toast.itemQuantityIncreased.title', { itemName: itemToAdd.name }),
-          description: t('toast.itemQuantityIncreased.description')
-        });
+      let newItems = [...prevItems];
+
+      if (existingCartItemIndex !== -1) {
+        // Item exists, update it and move to top
+        const existingCartItem = newItems[existingCartItemIndex];
+        let updatedItem;
+
+        if (existingCartItem.variant === itemToAdd.variant) {
+          // Same variant, increase quantity
+          const newQuantity = existingCartItem.quantity + 1;
+          const stock = existingCartItem.stock;
+          const maxQuantity = stock !== undefined ? Math.min(stock, 99) : 99;
+
+          if (newQuantity > maxQuantity) {
+            if (stock !== undefined && newQuantity > stock) {
+              toast({
+                title: t('toast.stockLimitReached.title', { itemName: existingCartItem.name }),
+                description: t('toast.stockLimitReached.description', { stock: stock }),
+                variant: "destructive",
+              });
+            } else {
+              toast({
+                title: t('toast.limitReachedTitle'),
+                description: t('toast.limitReachedDescription'),
+                variant: "destructive",
+              });
+            }
+            return prevItems; // Return original state, no change
+          }
+          
+          updatedItem = { ...existingCartItem, quantity: newQuantity };
+          toast({
+            title: t('toast.itemQuantityIncreased.title', { itemName: itemToAdd.name }),
+            description: t('toast.itemQuantityIncreased.description')
+          });
+        } else {
+          // Different variant, update details
+          const newVariantData: SimpleVariant = {
+            id: itemToAdd.id,
+            name: itemToAdd.variant || '',
+            price: itemToAdd.price,
+            originalPrice: itemToAdd.originalPrice,
+            imageUrl: itemToAdd.imageUrl,
+            stock: itemToAdd.stock,
+            dataAiHint: itemToAdd.dataAiHint,
+          };
+          const newSelectedState = newVariantData.stock === 0 ? false : existingCartItem.selected;
+          const newQuantity = (newVariantData.stock !== undefined && existingCartItem.quantity > newVariantData.stock) ? Math.max(1, newVariantData.stock) : existingCartItem.quantity;
+          
+          updatedItem = {
+            ...existingCartItem,
+            variant: newVariantData.name,
+            price: newVariantData.price !== undefined ? newVariantData.price : existingCartItem.price,
+            originalPrice: newVariantData.originalPrice !== undefined ? newVariantData.originalPrice : existingCartItem.originalPrice,
+            imageUrl: newVariantData.imageUrl !== undefined ? newVariantData.imageUrl : existingCartItem.imageUrl,
+            stock: newVariantData.stock !== undefined ? newVariantData.stock : existingCartItem.stock,
+            dataAiHint: newVariantData.dataAiHint !== undefined ? newVariantData.dataAiHint : existingCartItem.dataAiHint,
+            selected: newSelectedState,
+            quantity: newQuantity,
+          };
+          toast({
+            title: t('toast.itemVariantUpdated.title', { itemName: itemToAdd.name }),
+            description: t('toast.itemVariantUpdated.description'),
+          });
+        }
+        
+        // Remove from old position and add to the front
+        newItems.splice(existingCartItemIndex, 1);
+        return [updatedItem, ...newItems];
+
       } else {
-        handleVariantChange(existingCartItem.cartItemId, {
-          id: itemToAdd.id,
-          name: itemToAdd.variant || '',
-          price: itemToAdd.price,
-          originalPrice: itemToAdd.originalPrice,
-          imageUrl: itemToAdd.imageUrl,
-          stock: itemToAdd.stock,
-          dataAiHint: itemToAdd.dataAiHint,
-        });
+        // Item is new, add to the front
+        const newCartItem: CartItem = {
+          ...itemToAdd,
+          id: itemToAddProductId,
+          cartItemId: `${itemToAdd.id}-${itemToAdd.variant || 'base'}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          quantity: 1,
+          selected: false,
+        };
         toast({
-          title: t('toast.itemVariantUpdated.title', { itemName: itemToAdd.name }),
-          description: t('toast.itemVariantUpdated.description'),
+          title: t('toast.itemAddedToCart.title', { itemName: itemToAdd.name }),
+          description: t('toast.itemAddedToCart.description')
         });
+        return [newCartItem, ...newItems];
       }
-    } else {
-      const newCartItem: CartItem = {
-        ...itemToAdd,
-        id: itemToAddProductId, // Store the BASE product ID
-        cartItemId: `${itemToAdd.id}-${itemToAdd.variant || 'base'}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        quantity: 1,
-        selected: false,
-      };
-
-      setCartItems(prevItems => [newCartItem, ...prevItems]);
-
-      toast({
-        title: t('toast.itemAddedToCart.title', { itemName: itemToAdd.name }),
-        description: t('toast.itemAddedToCart.description')
-      });
-    }
-  }, [cartItems, t, toast, handleQuantityChange, handleVariantChange]);
+    });
+  }, [t, toast]);
 
   const handleRecentlyViewedItemAddToCart = (itemToAdd: Product) => {
     handleAddToCart(itemToAdd);
