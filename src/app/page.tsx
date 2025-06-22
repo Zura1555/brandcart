@@ -433,55 +433,51 @@ const BrandCartPage = () => {
   };
 
   const itemsByShop = useMemo(() => {
-    // Group items by brand, preserving the reverse chronological order of items within each group.
-    const groupedByBrand: Record<string, CartItem[]> = cartItems.reduce((acc, item) => {
-        const brand = item.brand;
-        if (!acc[brand]) {
-            acc[brand] = [];
-        }
-        acc[brand].push(item);
-        return acc;
+    // `cartItems` is already kept in reverse chronological order by `handleAddToCart`.
+    // The most recently added item is always at the beginning of the `cartItems` array.
+
+    // 1. Determine the order of shops based on the most recently added item.
+    // We create an array of unique brand names, and their order is determined
+    // by the order of their most recent appearance in the `cartItems` array.
+    const brandsInOrder = cartItems
+      .map(item => item.brand)
+      .filter((brand, index, self) => self.indexOf(brand) === index);
+
+    // 2. Group all cart items by their brand.
+    const itemsGroupedByBrand: Record<string, CartItem[]> = cartItems.reduce((acc, item) => {
+      const brand = item.brand;
+      if (!acc[brand]) {
+        acc[brand] = [];
+      }
+      // This preserves the newest-first order within each group.
+      acc[brand].push(item);
+      return acc;
     }, {} as Record<string, CartItem[]>);
 
-    // Establish a stable, consistent order for the shop sections based on mockData.
-    const shopOrderFromMocks = mockShops.map(s => s.name);
-    const brandsInCart = Object.keys(groupedByBrand);
-    
-    const allBrandsInOrder = [...shopOrderFromMocks];
-    brandsInCart.forEach(brand => {
-        if (!allBrandsInOrder.includes(brand)) {
-            allBrandsInOrder.push(brand);
+    // 3. Create the shop sections in the determined dynamic order.
+    return brandsInOrder
+      .map(brandName => {
+        const productsInThisBrand = itemsGroupedByBrand[brandName];
+        if (!productsInThisBrand || productsInThisBrand.length === 0) {
+            return null;
         }
-    });
-    
-    // Build the final list of shop sections in the stable order.
-    const allShopDataObjects = allBrandsInOrder
-        .map(brandName => {
-            const productsInThisBrand = groupedByBrand[brandName];
-            
-            if (!productsInThisBrand || productsInThisBrand.length === 0) {
-                return null;
-            }
 
-            const mockShopData = mockShops.find(s => s.name === brandName);
-            const inStockProductsInShop = productsInThisBrand.filter(item => item.stock !== 0);
+        const mockShopData = mockShops.find(s => s.name === brandName);
+        const inStockProductsInShop = productsInThisBrand.filter(item => item.stock !== 0);
 
-            const shopDataForSection: Shop & { products: CartItem[], isShopSelected: boolean } = {
-                name: brandName,
-                logoUrl: mockShopData?.logoUrl || 'https://placehold.co/60x24.png',
-                logoDataAiHint: mockShopData?.logoDataAiHint || `${brandName.toLowerCase()} logo`,
-                products: productsInThisBrand,
-                isFavorite: mockShopData?.isFavorite || false,
-                promotionText: mockShopData?.promotionText,
-                specialOfferText: mockShopData?.specialOfferText,
-                editLinkText: mockShopData?.editLinkText,
-                isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
-            };
-            return shopDataForSection;
-        })
-        .filter(Boolean) as (Shop & { products: CartItem[], isShopSelected: boolean })[];
-
-    return allShopDataObjects;
+        return {
+          name: brandName,
+          logoUrl: mockShopData?.logoUrl || 'https://placehold.co/60x24.png',
+          logoDataAiHint: mockShopData?.logoDataAiHint || `${brandName.toLowerCase()} logo`,
+          products: productsInThisBrand, // Already newest-first
+          isFavorite: mockShopData?.isFavorite || false,
+          promotionText: mockShopData?.promotionText,
+          specialOfferText: mockShopData?.specialOfferText,
+          editLinkText: mockShopData?.editLinkText,
+          isShopSelected: inStockProductsInShop.length > 0 && inStockProductsInShop.every(item => item.selected),
+        };
+      })
+      .filter(Boolean) as (Shop & { products: CartItem[], isShopSelected: boolean })[];
   }, [cartItems]);
 
 
