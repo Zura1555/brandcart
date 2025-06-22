@@ -21,7 +21,7 @@ export const mockShops: Shop[] = [
         stock: 15, // Base product stock
         availableVariants: [
           { id: 'mlb1-lb-s', name: 'Light Blue, S', stock: 5, price: 1890000, imageUrl: 'https://placehold.co/400x400/cae9f5/333333.png', dataAiHint: 'tshirt lightblue side'},
-          { id: 'mlb1-lb-m', name: 'Light Blue, M (+2)', stock: 12, price: 1890000, imageUrl: 'https://placehold.co/400x400/cae9f5/444444.png', dataAiHint: 'tshirt lightblue front'},
+          { id: 'mlb1-lb-m', name: 'Light Blue, M (+2)', stock: 12, price: 1890000, imageUrl: 'https://product.hstatic.net/200000642007/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_bc7c5e6f4e9d477faa67dc48a8d55aef_master.jpg', dataAiHint: 'tshirt lightblue detail'},
           { id: 'mlb1-lb-l', name: 'Light Blue, L (+5)', stock: 0, price: 1890000, imageUrl: 'https://placehold.co/400x400/cae9f5/555555.png', dataAiHint: 'tshirt lightblue back'},
           { id: 'mlb1-bk-m', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/2_8976025102_5_c3f7db76d0cf41a2a33ed75ae1da67e2_large.jpg', dataAiHint: 'tshirt black'},
           { id: 'mlb1-bk-m-img2', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://placehold.co/400x400/333333/cccccc.png', dataAiHint: 'tshirt black back' },
