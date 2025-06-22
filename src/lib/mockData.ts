@@ -149,7 +149,7 @@ export const mockShops: Shop[] = [
   },
   {
     name: 'MAX&Co.',
-    logoUrl: 'https://images.seeklogo.com/logo-png/42/2/maxco-logo-png_seeklogo-426774.png',
+    logoUrl: 'https://file.hstatic.net/1000284478/collection/max_co_431293b09f334b47886398c326dae43c.jpg',
     logoDataAiHint: 'MAX&Co. logo',
     specialOfferText: "Discover the new collection.",
     products: [
@@ -368,5 +368,7 @@ export const newRecentlyViewedProducts: Product[] = [
     ]
   },
 ];
+
+    
 
     
