@@ -80,6 +80,10 @@ const enTranslations = {
         title: "{itemName} quantity updated",
         description: "Item quantity increased in your cart."
     },
+    itemVariantUpdated: {
+      title: "Variant Updated for {itemName}",
+      description: "The variant has been updated in your cart."
+    },
     address: {
         saved: {
             title: "Address Saved",

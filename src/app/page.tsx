@@ -596,27 +596,48 @@ const BrandCartPage = () => {
     setIsVoucherSheetOpen(false);
   };
 
-  const handleAddToCart = (itemToAdd: Product) => {
-    const existingCartItem = cartItems.find(ci => ci.id === itemToAdd.id && ci.variant === itemToAdd.variant);
+  const handleAddToCart = useCallback((itemToAdd: Product) => {
+    const getBaseProductId = (id: string) => id.split('-')[0];
+    const itemToAddProductId = getBaseProductId(itemToAdd.id);
+
+    const existingCartItem = cartItems.find(
+      (ci) => getBaseProductId(ci.id) === itemToAddProductId
+    );
 
     if (existingCartItem) {
-      handleQuantityChange(existingCartItem.cartItemId, existingCartItem.quantity + 1);
-      toast({
-        title: t('toast.itemQuantityIncreased.title', { itemName: itemToAdd.name }),
-        description: t('toast.itemQuantityIncreased.description')
-      });
+      if (existingCartItem.variant === itemToAdd.variant) {
+        handleQuantityChange(existingCartItem.cartItemId, existingCartItem.quantity + 1);
+        toast({
+          title: t('toast.itemQuantityIncreased.title', { itemName: itemToAdd.name }),
+          description: t('toast.itemQuantityIncreased.description')
+        });
+      } else {
+        handleVariantChange(existingCartItem.cartItemId, {
+          id: itemToAdd.id,
+          name: itemToAdd.variant || '',
+          price: itemToAdd.price,
+          originalPrice: itemToAdd.originalPrice,
+          imageUrl: itemToAdd.imageUrl,
+          stock: itemToAdd.stock,
+          dataAiHint: itemToAdd.dataAiHint,
+        });
+        toast({
+          title: t('toast.itemVariantUpdated.title', { itemName: itemToAdd.name }),
+          description: t('toast.itemVariantUpdated.description'),
+        });
+      }
     } else {
       const newCartItem: CartItem = {
         ...itemToAdd,
+        id: itemToAddProductId, // Store the BASE product ID
         cartItemId: `${itemToAdd.id}-${itemToAdd.variant || 'base'}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         quantity: 1,
-        selected: false, 
+        selected: false,
       };
 
       setCartItems(prevItems => {
-        let updatedItems = [...prevItems];
+        const updatedItems = [...prevItems];
         const brandOfNewItem = newCartItem.brand;
-        
         const firstItemIndexOfBrand = prevItems.findIndex(item => item.brand === brandOfNewItem);
 
         if (firstItemIndexOfBrand !== -1) {
@@ -626,7 +647,7 @@ const BrandCartPage = () => {
         }
         return updatedItems;
       });
-      
+
       setLastAddedBrand(itemToAdd.brand);
 
       toast({
@@ -634,19 +655,16 @@ const BrandCartPage = () => {
         description: t('toast.itemAddedToCart.description')
       });
     }
-  };
+  }, [cartItems, t, toast, handleQuantityChange, handleVariantChange]);
 
   const handleRecentlyViewedItemAddToCart = (itemToAdd: Product) => {
     handleAddToCart(itemToAdd);
+    // The itemToAdd may have a variant ID (e.g., 'mlb1-lb-s'), so we get the base ID to remove it.
+    const baseProductId = itemToAdd.id.split('-')[0];
     setRecentlyViewedItems(prev =>
       prev.filter(item => {
-        // Do not remove the item if either the item in the list or the item being added
-        // lacks a productCode, as we can't be sure it's the same product.
-        if (!item.productCode || !itemToAdd.productCode) {
-          return true;
-        }
-        // Remove the item from the list only if the product codes match.
-        return item.productCode !== itemToAdd.productCode;
+        const recentItemBaseId = item.id.split('-')[0];
+        return recentItemBaseId !== baseProductId;
       })
     );
   };
@@ -915,5 +933,7 @@ export default BrandCartPage;
     
 
     
+
+
 
 

@@ -80,6 +80,10 @@ const viTranslations = {
         title: "Đã cập nhật số lượng {itemName}",
         description: "Đã tăng số lượng sản phẩm trong giỏ hàng."
     },
+    itemVariantUpdated: {
+      title: "Đã cập nhật phân loại cho {itemName}",
+      description: "Phân loại sản phẩm đã được cập nhật trong giỏ hàng."
+    },
     address: {
         saved: {
             title: "Địa chỉ đã được lưu",

@@ -67,6 +67,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
 
   const [selectedCylVariantDetails, setSelectedCylVariantDetails] = useState<Partial<Product>>({
     ...item, 
+    id: item.id,
     name: item.name, 
     variant: item.variant,
     price: item.price,
@@ -87,7 +88,8 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
     } else {
        // When sheet closes, update the main card display based on final selection
       const variantToDisplay = item.availableVariants?.find(v => v.name === selectedCylVariantDetails.variant) || item;
-      setSelectedCylVariantDetails(prev => ({...prev, ...variantToDisplay}));
+      const variantWithId = { ...variantToDisplay, id: selectedCylVariantDetails.id || item.id };
+      setSelectedCylVariantDetails(prev => ({...prev, ...variantWithId}));
     }
   }, [isVariantSheetOpen, selectedCylVariantDetails.variant, parseVariantName, item]);
 
@@ -190,6 +192,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
       setSelectedCylVariantDetails(prev => ({
         ...prev, 
         ...selectedVariantInSheet, 
+        id: selectedVariantInSheet.id,
         name: item.name, 
         variant: selectedVariantInSheet.name, 
       }));
@@ -221,12 +224,13 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
   }
 
   const handleRelevantItemAddToCart = () => {
-    const itemToAdd: Product = {
-      id: selectedCylVariantDetails.id || item.id, 
+    const productToAdd: Product = {
+      ...item,
+      id: selectedCylVariantDetails.id || item.id,
       name: selectedCylVariantDetails.name || item.name, 
       price: selectedCylVariantDetails.price || item.price,
       originalPrice: selectedCylVariantDetails.originalPrice, 
-      brand: parentShopBrand, // Use parentShopBrand here
+      brand: parentShopBrand,
       imageUrl: selectedCylVariantDetails.imageUrl || item.imageUrl,
       dataAiHint: selectedCylVariantDetails.dataAiHint || item.dataAiHint,
       productCode: selectedCylVariantDetails.productCode || item.productCode,
@@ -235,7 +239,7 @@ const RelevantProductCard: React.FC<RelevantProductCardProps> = ({ item, onAddTo
       availableVariants: item.availableVariants, 
       discountDescription: item.discountDescription, 
     };
-    onAddToCartParent(itemToAdd);
+    onAddToCartParent(productToAdd);
   };
 
   return (
@@ -462,7 +466,8 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
 
   const handleCompleteLookItemAddToCart = (itemAdded: Product) => {
     onAddToCart(itemAdded); 
-    setDisplayedRelevantProducts(prev => prev.filter(p => !(p.id === itemAdded.id && p.variant === itemAdded.variant)));
+    const baseProductId = itemAdded.id.split('-')[0];
+    setDisplayedRelevantProducts(prev => prev.filter(p => p.id !== baseProductId));
   };
 
   return (
@@ -583,3 +588,4 @@ const ShopSection: React.FC<ShopSectionProps> = ({ shop, items, isShopSelected, 
 };
 
 export default ShopSection;
+
