@@ -318,16 +318,16 @@ export const newRecentlyViewedProducts: Product[] = [
     name: 'Túi xách nữ thời trang Borsa Gilda',
     price: 25700000,
     brand: 'LE SILLA',
-    imageUrl: 'https://placehold.co/250x250/FFC0CB/333333.png', // Main image
-    thumbnailImageUrl: 'https://placehold.co/150x150/FFC0CB/333333.png', // Thumbnail
-    dataAiHint: 'handbag pink',
+    imageUrl: 'https://product.hstatic.net/1000284478/product/908_9979ubagxxxxcaz_1_55a4ac87ae2a468797a0f4a6ea4401ae_large.jpg',
+    thumbnailImageUrl: 'https://product.hstatic.net/1000284478/product/908_9979ubagxxxxcaz_1_55a4ac87ae2a468797a0f4a6ea4401ae_large.jpg',
+    dataAiHint: 'handbag black',
     productCode: 'LESI001',
-    variant: 'Pink',
-    stock: 5,
+    variant: 'Black',
+    stock: 3,
     availableVariants: [
       { id: 'lesilla1-pk', name: 'Pink', stock: 5, price: 25700000, imageUrl: 'https://placehold.co/400x400/FFC0CB/333333.png', dataAiHint: 'handbag pink front' },
       { id: 'lesilla1-pk-img2', name: 'Pink', stock: 5, price: 25700000, imageUrl: 'https://placehold.co/400x400/FFC0CB/555555.png', dataAiHint: 'handbag pink side' },
-      { id: 'lesilla1-bk', name: 'Black', stock: 3, price: 25700000, imageUrl: 'https://placehold.co/400x400/333333/EFEFEF.png', dataAiHint: 'handbag black front' },
+      { id: 'lesilla1-bk', name: 'Black', stock: 3, price: 25700000, imageUrl: 'https://product.hstatic.net/1000284478/product/908_9979ubagxxxxcaz_1_55a4ac87ae2a468797a0f4a6ea4401ae_large.jpg', dataAiHint: 'handbag black front' },
       { id: 'lesilla1-bk-img2', name: 'Black', stock: 3, price: 25700000, imageUrl: 'https://placehold.co/400x400/333333/dddddd.png', dataAiHint: 'handbag black side' },
     ],
   },
