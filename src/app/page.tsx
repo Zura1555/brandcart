@@ -715,7 +715,7 @@ const BrandCartPage = () => {
                   isShopSelected={shopGroup.isShopSelected}
                   onShopSelectToggle={(checked) => handleToggleShopSelect(shopGroup.name, checked)}
                   onItemSelectToggle={handleToggleItemSelect}
-                  onQuantityChange={onQuantityChange}
+                  onQuantityChange={handleQuantityChange}
                   onDeleteItem={handleDeleteItem}
                   onVariantChange={handleVariantChange}
                   onAddToCart={handleAddToCart} 
@@ -915,4 +915,5 @@ export default BrandCartPage;
     
 
     
+
 
