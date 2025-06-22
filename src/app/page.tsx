@@ -637,8 +637,18 @@ const BrandCartPage = () => {
   };
 
   const handleRecentlyViewedItemAddToCart = (itemToAdd: Product) => {
-    handleAddToCart(itemToAdd); 
-    setRecentlyViewedItems(prev => prev.filter(item => item.id !== itemToAdd.id || item.variant !== itemToAdd.variant));
+    handleAddToCart(itemToAdd);
+    setRecentlyViewedItems(prev =>
+      prev.filter(item => {
+        // Do not remove the item if either the item in the list or the item being added
+        // lacks a productCode, as we can't be sure it's the same product.
+        if (!item.productCode || !itemToAdd.productCode) {
+          return true;
+        }
+        // Remove the item from the list only if the product codes match.
+        return item.productCode !== itemToAdd.productCode;
+      })
+    );
   };
 
   const shippingDiscount = useMemo(() => {
@@ -705,7 +715,7 @@ const BrandCartPage = () => {
                   isShopSelected={shopGroup.isShopSelected}
                   onShopSelectToggle={(checked) => handleToggleShopSelect(shopGroup.name, checked)}
                   onItemSelectToggle={handleToggleItemSelect}
-                  onQuantityChange={handleQuantityChange}
+                  onQuantityChange={onQuantityChange}
                   onDeleteItem={handleDeleteItem}
                   onVariantChange={handleVariantChange}
                   onAddToCart={handleAddToCart} 
@@ -905,3 +915,4 @@ export default BrandCartPage;
     
 
     
+
