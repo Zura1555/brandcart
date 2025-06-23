@@ -317,14 +317,14 @@ export const newRecentlyViewedProducts: Product[] = [
     name: 'Classic Watch Silver',
     price: 7800000,
     brand: 'TIMEPIECE Co.',
-    imageUrl: 'https://placehold.co/250x250/C0C0C0/333333.png', // Main image
-    thumbnailImageUrl: 'https://placehold.co/150x150/C0C0C0/333333.png', // Thumbnail
-    dataAiHint: 'watch classic silver',
+    imageUrl: 'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3YXRjaHxlbnwwfHx8fDE3NTA2NTkwNjJ8MA&ixlib=rb-4.1.0&q=80&w=1080', // Main image
+    thumbnailImageUrl: 'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3YXRjaHxlbnwwfHx8fDE3NTA2NTkwNjJ8MA&ixlib=rb-4.1.0&q=80&w=1080', // Thumbnail
+    dataAiHint: 'watch silver',
     productCode: 'TW001',
     variant: 'Silver Mesh',
     stock: 10,
     availableVariants: [
-        { id: 'tw001-sm', name: 'Silver Mesh', stock: 5, price: 7800000, imageUrl: 'https://placehold.co/400x400/C0C0C0/333333.png', dataAiHint: 'watch silver front'},
+        { id: 'tw001-sm', name: 'Silver Mesh', stock: 5, price: 7800000, imageUrl: 'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3YXRjaHxlbnwwfHx8fDE3NTA2NTkwNjJ8MA&ixlib=rb-4.1.0&q=80&w=1080', dataAiHint: 'watch silver front'},
         { id: 'tw001-sm-img2', name: 'Silver Mesh', stock: 5, price: 7800000, imageUrl: 'https://placehold.co/400x400/C0C0C0/555555.png', dataAiHint: 'watch silver side'},
         { id: 'tw001-gl', name: 'Gold Leather', stock: 5, price: 8200000, imageUrl: 'https://placehold.co/400x400/FFD700/333333.png', dataAiHint: 'watch gold front'},
         { id: 'tw001-gl-img2', name: 'Gold Leather', stock: 5, price: 8200000, imageUrl: 'https://placehold.co/400x400/FFD700/555555.png', dataAiHint: 'watch gold side'},

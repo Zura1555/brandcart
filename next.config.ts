@@ -58,6 +58,12 @@ const nextConfig: NextConfig = {
         hostname: 'images.seeklogo.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
