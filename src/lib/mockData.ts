@@ -335,15 +335,15 @@ export const newRecentlyViewedProducts: Product[] = [
     name: 'Silk Scarf Floral',
     price: 1200000,
     brand: 'LUXURY SILKS',
-    imageUrl: 'https://placehold.co/250x250/E6E6FA/333333.png', // Main image
-    thumbnailImageUrl: 'https://placehold.co/150x150/E6E6FA/333333.png', // Thumbnail
-    dataAiHint: 'scarf silk floral',
+    imageUrl: 'https://images.unsplash.com/photo-1601244005535-a48d21d951ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMnx8U2NhcmZ8ZW58MHx8fHwxNzUwNjY0MjA5fDA&ixlib=rb-4.1.0&q=80&w=1080', // Main image
+    thumbnailImageUrl: 'https://images.unsplash.com/photo-1601244005535-a48d21d951ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMnx8U2NhcmZ8ZW58MHx8fHwxNzUwNjY0MjA5fDA&ixlib=rb-4.1.0&q=80&w=1080', // Thumbnail
+    dataAiHint: 'silk scarf',
     productCode: 'LS001',
     variant: 'Floral Print',
     stock: 15,
     availableVariants: [
-      { id: 'ls001-floral', name: 'Floral Print', stock: 10, price: 1200000, imageUrl: 'https://placehold.co/400x400/E6E6FA/333333.png', dataAiHint: 'scarf floral'},
-      { id: 'ls001-floral-img2', name: 'Floral Print', stock: 10, price: 1200000, imageUrl: 'https://placehold.co/400x400/E6E6FA/555555.png', dataAiHint: 'scarf floral detail'},
+      { id: 'ls001-floral', name: 'Floral Print', stock: 10, price: 1200000, imageUrl: 'https://images.unsplash.com/photo-1601244005535-a48d21d951ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMnx8U2NhcmZ8ZW58MHx8fHwxNzUwNjY0MjA5fDA&ixlib=rb-4.1.0&q=80&w=1080', dataAiHint: 'scarf floral'},
+      { id: 'ls001-floral-img2', name: 'Floral Print', stock: 10, price: 1200000, imageUrl: 'https://images.unsplash.com/photo-1601244005535-a48d21d951ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMnx8U2NhcmZ8ZW58MHx8fHwxNzUwNjY0MjA5fDA&ixlib=rb-4.1.0&q=80&w=1080', dataAiHint: 'scarf floral detail'},
       { id: 'ls001-plain', name: 'Plain Red', stock: 5, price: 1100000, imageUrl: 'https://placehold.co/400x400/FFDDDD/333333.png', dataAiHint: 'scarf red'},
       { id: 'ls001-plain-img2', name: 'Plain Red', stock: 5, price: 1100000, imageUrl: 'https://placehold.co/400x400/FFDDDD/555555.png', dataAiHint: 'scarf red detail'},
     ]
@@ -357,4 +357,5 @@ export const newRecentlyViewedProducts: Product[] = [
 
 
     
+
 
