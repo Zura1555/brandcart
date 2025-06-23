@@ -86,6 +86,7 @@ const CheckoutPage = () => {
   const [shopMessage, setShopMessage] = useState<string>('');
   const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(true);
   const [voucherTriggerText, setVoucherTriggerText] = useState<string>('');
+  const [totalVoucherDiscount, setTotalVoucherDiscount] = useState(0);
 
 
   const [wantEInvoice, setWantEInvoice] = useState<boolean>(false); 
@@ -193,14 +194,17 @@ const CheckoutPage = () => {
 
     const storedVoucherDetailsRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
     let count = 0;
+    let discount = 0;
     if (storedVoucherDetailsRaw) {
         try {
             const storedVoucherDetails: SelectedVoucherInfo[] = JSON.parse(storedVoucherDetailsRaw);
             count = storedVoucherDetails.length;
+            discount = storedVoucherDetails.reduce((sum, v) => sum + (v.discountValue || 0), 0);
         } catch (e) {
             console.error("Error parsing selected voucher details:", e);
         }
     }
+    setTotalVoucherDiscount(discount);
 
     if (count > 0) {
       setVoucherTriggerText(t('checkout.yourVoucherSelected', { count: count }));
@@ -225,20 +229,6 @@ const CheckoutPage = () => {
   const merchandiseSubtotal = useMemo(() => {
     return checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }, [checkoutItems]);
-
-  const totalVoucherDiscount = useMemo(() => {
-    const storedVouchersRaw = localStorage.getItem(SELECTED_VOUCHERS_DETAILS_KEY);
-    if (storedVouchersRaw) {
-      try {
-        const selectedVouchers: SelectedVoucherInfo[] = JSON.parse(storedVouchersRaw);
-        return selectedVouchers.reduce((sum, v) => sum + (v.discountValue || 0), 0);
-      } catch (e) {
-        console.error("Error parsing selectedVouchersData from localStorage on checkout page", e);
-        return 0;
-      }
-    }
-    return 0;
-  }, [voucherTriggerText]); 
 
   const loyaltyDiscountValue = useMemo(() => {
     return useLoyaltyPoints ? LOYALTY_POINTS_DISCOUNT_VALUE : 0;
@@ -814,7 +804,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-
-
-
-    
