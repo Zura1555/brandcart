@@ -219,11 +219,14 @@ const CheckoutPage = () => {
     return `${amount.toLocaleString('vi-VN')}₫`;
   };
 
-  const shippingMethod = useMemo(() => ({
-    mainLabel: t(staticShippingMethod.mainLabelKey),
-    price: staticShippingMethod.price,
-    subLabel: t(staticShippingMethod.subLabelKey),
-  }), [t]);
+  const shippingMethod = useMemo(() => {
+    // This function now runs only when 't' changes, avoiding direct localStorage access on render.
+    return {
+      mainLabel: t(staticShippingMethod.mainLabelKey),
+      price: staticShippingMethod.price,
+      subLabel: t(staticShippingMethod.subLabelKey),
+    }
+  }, [t]);
 
 
   const merchandiseSubtotal = useMemo(() => {
@@ -258,17 +261,17 @@ const CheckoutPage = () => {
 
   const shopsToRender = dynamicDisplayShops.length > 0 ? dynamicDisplayShops : [];
 
-  const paymentMethods = [
-    { id: 'cod', name: 'COD', iconUrl: 'https://file.hstatic.net/1000284478/file/cod_icon-47_a8768752c1a445da90d600ca0a94675c.svg', iconAiHint: 'cash on delivery icon', details: null },
-    { id: 'payoo', name: 'Payoo (Napas, Visa, Mastercard, etc.)', iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
-    { id: 'vnpay', name: 'VNPay', iconUrl: 'https://file.hstatic.net/1000284478/file/vnpay-40_5dbcecd2b4eb4245a4527d357a0459fc.svg', iconAiHint: 'VNPay QR logo', details: null },
-    { id: 'momo', name: 'Momo (QR, Napas, Visa, Mastercard, etc.)', iconUrl: 'https://file.hstatic.net/1000284478/file/momo-45_eee48d6f0f9e41f1bd2c5f06ab4214a2.svg', iconAiHint: 'Momo logo', details: null },
-    { id: 'applepay', name: 'Apple Pay', iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg', iconAiHint: 'Apple Pay logo', details: null },
+  const paymentMethods = useMemo(() => [
+    { id: 'cod', name: t('paymentMethods.cod'), iconUrl: 'https://file.hstatic.net/1000284478/file/cod_icon-47_a8768752c1a445da90d600ca0a94675c.svg', iconAiHint: 'cash on delivery icon', details: null },
+    { id: 'payoo', name: t('paymentMethods.payoo'), iconUrl: 'https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-Payoo.png', iconAiHint: 'Payoo logo', details: null },
+    { id: 'vnpay', name: t('paymentMethods.vnpay'), iconUrl: 'https://file.hstatic.net/1000284478/file/vnpay-40_5dbcecd2b4eb4245a4527d357a0459fc.svg', iconAiHint: 'VNPay QR logo', details: null },
+    { id: 'momo', name: t('paymentMethods.momo'), iconUrl: 'https://file.hstatic.net/1000284478/file/momo-45_eee48d6f0f9e41f1bd2c5f06ab4214a2.svg', iconAiHint: 'Momo logo', details: null },
+    { id: 'applepay', name: t('paymentMethods.applepay'), iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg', iconAiHint: 'Apple Pay logo', details: null },
   ].sort((a, b) => {
     if (a.id === 'cod') return -1;
     if (b.id === 'cod') return 1;
     return 0;
-  });
+  }), [t]);
 
 
   const currentAddressNamePhone = currentShippingAddress ? t('checkout.address.namePhone', { name: currentShippingAddress.name, phone: currentShippingAddress.phone }) : '';

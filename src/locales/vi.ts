@@ -192,6 +192,13 @@ const viTranslations = {
       toggleUsePointsAriaLabel: "Bật/tắt sử dụng điểm thưởng"
     },
   },
+  paymentMethods: {
+    cod: "COD",
+    payoo: "Payoo (Napas, Visa, Mastercard, v.v.)",
+    vnpay: "VNPay (QR, Napas, Visa, Mastercard, v.v.)",
+    momo: "Momo (QR, Napas, Visa, Mastercard, v.v.)",
+    applepay: "Apple Pay",
+  },
   addAddress: {
     title: {
       new: "THÊM ĐỊA CHỈ",

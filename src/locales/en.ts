@@ -192,6 +192,13 @@ const enTranslations = {
       toggleUsePointsAriaLabel: "Toggle to use loyalty points"
     },
   },
+  paymentMethods: {
+    cod: "COD",
+    payoo: "Payoo (Napas, Visa, Mastercard, etc.)",
+    vnpay: "VNPay (QR, Napas, Visa, Mastercard, etc.)",
+    momo: "Momo (QR, Napas, Visa, Mastercard, etc.)",
+    applepay: "Apple Pay",
+  },
   addAddress: {
     title: {
       new: "New Address",
