@@ -2,7 +2,7 @@
 "use client";
 
 import type React from 'react';
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import enTranslations from '@/locales/en';
 import viTranslations from '@/locales/vi';
 
@@ -31,12 +31,12 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
-  const setLocale = (newLocale: Locale) => {
+  const setLocale = useCallback((newLocale: Locale) => {
     localStorage.setItem('locale', newLocale);
     setLocaleState(newLocale);
-  };
+  }, []);
 
-  const t = (key: string, params?: Record<string, string | number>): string => {
+  const t = useCallback((key: string, params?: Record<string, string | number>): string => {
     const keys = key.split('.');
     let result = translations[locale];
     for (const k of keys) {
@@ -68,10 +68,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return result;
     }
     return key; // Fallback for non-string results (should not happen with proper keys)
-  };
+  }, [locale]);
   
 
-  const contextValue = useMemo(() => ({ locale, setLocale, t }), [locale, t]);
+  const contextValue = useMemo(() => ({ locale, setLocale, t }), [locale, setLocale, t]);
 
   return (
     <LanguageContext.Provider value={contextValue}>
