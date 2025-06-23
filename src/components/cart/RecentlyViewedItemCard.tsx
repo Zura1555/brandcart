@@ -198,7 +198,11 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
     if (hasVariants) {
       setIsVariantSheetOpen(true);
     } else {
-      onAddToCart(item);
+      const productToAdd: Product = {
+        ...item,
+        imageUrl: item.thumbnailImageUrl ?? item.imageUrl,
+      };
+      onAddToCart(productToAdd);
     }
   };
 
@@ -212,7 +216,7 @@ const RecentlyViewedItemCard: React.FC<RecentlyViewedItemCardProps> = ({ item, o
       price: selectedVariantInSheet.price ?? item.price,
       originalPrice: selectedVariantInSheet.originalPrice,
       brand: item.brand,
-      imageUrl: selectedVariantInSheet.imageUrl ?? item.imageUrl,
+      imageUrl: selectedVariantInSheet.imageUrl ?? item.thumbnailImageUrl ?? item.imageUrl,
       dataAiHint: selectedVariantInSheet.dataAiHint ?? item.dataAiHint,
       productCode: item.productCode,
       variant: selectedVariantInSheet.name,
