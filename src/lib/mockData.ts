@@ -3,51 +3,6 @@ import type { Shop, ShippingAddress, SimpleVariant, Product } from '@/interfaces
 
 export const mockShops: Shop[] = [
   {
-    name: 'MLB',
-    isFavorite: true,
-    logoUrl: 'https://bizweb.dktcdn.net/100/294/644/themes/737628/assets/logo.png?1727591678269',
-    logoDataAiHint: 'MLB logo',
-    specialOfferText: "Mua 2 sản phẩm MLB, nhận ngay giảm giá 30% cho sản phẩm thứ 3.",
-    products: [
-      {
-        id: 'mlb1',
-        name: 'Áo thun unisex tay ngắn Summer Monotive',
-        price: 1890000,
-        brand: 'MLB',
-        imageUrl: 'https://product.hstatic.net/200000642007/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_bc7c5e6f4e9d477faa67dc48a8d55aef_master.jpg',
-        dataAiHint: 'tshirt white',
-        productCode: 'MLB001X',
-        variant: 'Light Blue, M (+2)', // This is the name of the currently selected variant.
-        stock: 15, // Base product stock
-        availableVariants: [
-          { id: 'mlb1-lb-s', name: 'Light Blue, S', stock: 5, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_1_974abdeabd9641a3b8ceb06b2ce9bc32_large.jpg', dataAiHint: 'tshirt lightblue side'},
-          { id: 'mlb1-lb-m', name: 'Light Blue, M (+2)', stock: 12, price: 1890000, imageUrl: 'https://product.hstatic.net/200000642007/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_bc7c5e6f4e9d477faa67dc48a8d55aef_master.jpg', dataAiHint: 'tshirt lightblue detail'},
-          { id: 'mlb1-lb-m-img2', name: 'Light Blue, M (+2)', stock: 12, price: 1890000, imageUrl: 'https://product.hstatic.net/200000642007/product/50whs_3atsx0153_5_ba04aecb46c24f6a9bfbd9680fa33433_c7710c9ff7854ea093a00b886d16ccaf_master.jpg', dataAiHint: 'tshirt lightblue back'},
-          { id: 'mlb1-lb-l', name: 'Light Blue, L (+5)', stock: 0, price: 1890000, imageUrl: 'https://product.hstatic.net/200000642007/product/50whs_3atsx0153_5_ba04aecb46c24f6a9bfbd9680fa33433_c7710c9ff7854ea093a00b886d16ccaf_master.jpg', dataAiHint: 'tshirt lightblue other'},
-          { id: 'mlb1-bk-m', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/2_8976025102_5_c3f7db76d0cf41a2a33ed75ae1da67e2_large.jpg', dataAiHint: 'tshirt black'},
-          { id: 'mlb1-bk-m-img2', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/2_8976025102_5_c3f7db76d0cf41a2a33ed75ae1da67e2_large.jpg', dataAiHint: 'tshirt black back' },
-          { id: 'mlb1-bk-m-img3', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/2_8976025102_5_c3f7db76d0cf41a2a33ed75ae1da67e2_large.jpg', dataAiHint: 'tshirt black side' },
-        ],
-      },
-      {
-        id: 'mlb2',
-        name: 'Quần short ngắn nữ lưng thun Basic Dolphin',
-        price: 1690000,
-        brand: 'MLB',
-        imageUrl: 'https://product.hstatic.net/200000642007/product/50bks_3fspb0553_8_bcdbcdccae8a4f5ba6fc7c09d4b56140_a8ee276c518c4c198e002da20ad42b5e_master.jpg',
-        dataAiHint: 'shorts black',
-        productCode: 'MLB002Y',
-        variant: 'Black',
-        stock: 30,
-        availableVariants: [
-          { id: 'mlb2-bk-xs', name: 'Black, XS', stock: 8, price: 1690000 },
-          { id: 'mlb2-bk-s', name: 'Black, S', stock: 15, price: 1690000 },
-          { id: 'mlb2-bk-m', name: 'Black, M', stock: 3, price: 1690000 },
-        ],
-      },
-    ],
-  },
-  {
     name: 'PUMA',
     logoUrl: 'https://file.hstatic.net/1000284478/collection/puma_125ef36b81284505982470da1add1363.jpg',
     logoDataAiHint: 'PUMA logo',
@@ -171,6 +126,51 @@ export const mockShops: Shop[] = [
         ],
         discountDescription: 'New Arrival',
       }
+    ],
+  },
+  {
+    name: 'MLB',
+    isFavorite: true,
+    logoUrl: 'https://bizweb.dktcdn.net/100/294/644/themes/737628/assets/logo.png?1727591678269',
+    logoDataAiHint: 'MLB logo',
+    specialOfferText: "Mua 2 sản phẩm MLB, nhận ngay giảm giá 30% cho sản phẩm thứ 3.",
+    products: [
+      {
+        id: 'mlb1',
+        name: 'Áo thun unisex tay ngắn Summer Monotive',
+        price: 1890000,
+        brand: 'MLB',
+        imageUrl: 'https://product.hstatic.net/200000642007/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_bc7c5e6f4e9d477faa67dc48a8d55aef_master.jpg',
+        dataAiHint: 'tshirt white',
+        productCode: 'MLB001X',
+        variant: 'Light Blue, M (+2)', // This is the name of the currently selected variant.
+        stock: 15, // Base product stock
+        availableVariants: [
+          { id: 'mlb1-lb-s', name: 'Light Blue, S', stock: 5, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/50whs_3atsx0153_1_974abdeabd9641a3b8ceb06b2ce9bc32_large.jpg', dataAiHint: 'tshirt lightblue side'},
+          { id: 'mlb1-lb-m', name: 'Light Blue, M (+2)', stock: 12, price: 1890000, imageUrl: 'https://product.hstatic.net/200000642007/product/50whs_3atsx0153_2_07b177648b9b4656a3da12f08dba6dce_bc7c5e6f4e9d477faa67dc48a8d55aef_master.jpg', dataAiHint: 'tshirt lightblue detail'},
+          { id: 'mlb1-lb-m-img2', name: 'Light Blue, M (+2)', stock: 12, price: 1890000, imageUrl: 'https://product.hstatic.net/200000642007/product/50whs_3atsx0153_5_ba04aecb46c24f6a9bfbd9680fa33433_c7710c9ff7854ea093a00b886d16ccaf_master.jpg', dataAiHint: 'tshirt lightblue back'},
+          { id: 'mlb1-lb-l', name: 'Light Blue, L (+5)', stock: 0, price: 1890000, imageUrl: 'https://product.hstatic.net/200000642007/product/50whs_3atsx0153_5_ba04aecb46c24f6a9bfbd9680fa33433_c7710c9ff7854ea093a00b886d16ccaf_master.jpg', dataAiHint: 'tshirt lightblue other'},
+          { id: 'mlb1-bk-m', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/2_8976025102_5_c3f7db76d0cf41a2a33ed75ae1da67e2_large.jpg', dataAiHint: 'tshirt black'},
+          { id: 'mlb1-bk-m-img2', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/2_8976025102_5_c3f7db76d0cf41a2a33ed75ae1da67e2_large.jpg', dataAiHint: 'tshirt black back' },
+          { id: 'mlb1-bk-m-img3', name: 'Black, M', stock: 20, price: 1890000, imageUrl: 'https://product.hstatic.net/1000284478/product/2_8976025102_5_c3f7db76d0cf41a2a33ed75ae1da67e2_large.jpg', dataAiHint: 'tshirt black side' },
+        ],
+      },
+      {
+        id: 'mlb2',
+        name: 'Quần short ngắn nữ lưng thun Basic Dolphin',
+        price: 1690000,
+        brand: 'MLB',
+        imageUrl: 'https://product.hstatic.net/200000642007/product/50bks_3fspb0553_8_bcdbcdccae8a4f5ba6fc7c09d4b56140_a8ee276c518c4c198e002da20ad42b5e_master.jpg',
+        dataAiHint: 'shorts black',
+        productCode: 'MLB002Y',
+        variant: 'Black',
+        stock: 30,
+        availableVariants: [
+          { id: 'mlb2-bk-xs', name: 'Black, XS', stock: 8, price: 1690000 },
+          { id: 'mlb2-bk-s', name: 'Black, S', stock: 15, price: 1690000 },
+          { id: 'mlb2-bk-m', name: 'Black, M', stock: 3, price: 1690000 },
+        ],
+      },
     ],
   }
 ];
@@ -357,3 +357,4 @@ export const newRecentlyViewedProducts: Product[] = [
 
 
     
+
